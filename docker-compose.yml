@@ -2,7 +2,7 @@ services:
   postgres:
     image: postgres:17-alpine
     ports:
-      - "5437:5432"
+      - "5432:5432"
     environment:
       POSTGRES_USER: buckt
       POSTGRES_PASSWORD: buckt
