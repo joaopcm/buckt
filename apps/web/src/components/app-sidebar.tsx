@@ -52,11 +52,12 @@ export function AppSidebar({ orgId }: { orgId: string }) {
             <SidebarMenu>
               {navigation.map((item) => (
                 <SidebarMenuItem key={item.name}>
-                  <SidebarMenuButton asChild isActive={isActive(item.href)}>
-                    <Link href={`/org/${orgId}${item.href}`}>
-                      <item.icon className="size-4" />
-                      <span>{item.name}</span>
-                    </Link>
+                  <SidebarMenuButton
+                    render={<Link href={`/org/${orgId}${item.href}`} />}
+                    isActive={isActive(item.href)}
+                  >
+                    <item.icon className="size-4" />
+                    <span>{item.name}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
