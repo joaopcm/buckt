@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeEach } from "vitest"
+import { eq } from "drizzle-orm"
+import { apiKeys } from "@buckt/db"
 import app from "../app"
-import { createTestApiKey, cleanDb } from "./helpers"
+import { createTestApiKey, cleanDb } from "../lib/test-helpers"
+import { db } from "../lib/db"
 
 describe("auth middleware", () => {
   beforeEach(async () => {
@@ -48,16 +51,12 @@ describe("auth middleware", () => {
   })
 
   it("rejects expired keys", async () => {
-    const { rawKey } = await createTestApiKey()
-    const { apiKeys } = await import("@buckt/db")
-    const { eq } = await import("drizzle-orm")
-    const { db } = await import("../lib/db")
+    const { rawKey, apiKey } = await createTestApiKey()
 
-    const [key] = await db.select().from(apiKeys).limit(1)
     await db
       .update(apiKeys)
       .set({ expiresAt: new Date("2020-01-01") })
-      .where(eq(apiKeys.id, key.id))
+      .where(eq(apiKeys.id, apiKey.id))
 
     const res = await app.request("/api/buckets", {
       headers: { Authorization: `Bearer ${rawKey}` },
