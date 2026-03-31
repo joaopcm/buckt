@@ -12,10 +12,10 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { UserNav } from "@/components/user-nav"
+import { cn } from "@/lib/utils"
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -52,13 +52,16 @@ export function AppSidebar({ orgId }: { orgId: string }) {
             <SidebarMenu>
               {navigation.map((item) => (
                 <SidebarMenuItem key={item.name}>
-                  <SidebarMenuButton
-                    render={<Link href={`/org/${orgId}${item.href}`} />}
-                    isActive={isActive(item.href)}
+                  <Link
+                    href={`/org/${orgId}${item.href}`}
+                    className={cn(
+                      "flex w-full items-center gap-2 rounded-md p-2 text-xs transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                      isActive(item.href) && "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
+                    )}
                   >
-                    <item.icon className="size-4" />
+                    <item.icon className="size-4 shrink-0" />
                     <span>{item.name}</span>
-                  </SidebarMenuButton>
+                  </Link>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
