@@ -11,8 +11,10 @@
   },
   "dependencies": {
     "@buckt/shared": "workspace:*",
+    "@t3-oss/env-core": "^0.13.11",
     "drizzle-orm": "^0.45.2",
-    "postgres": "^3"
+    "postgres": "^3",
+    "uuidv7": "^1.2.1"
   },
   "devDependencies": {
     "drizzle-kit": "^0.31.10",
