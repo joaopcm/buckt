@@ -15,6 +15,13 @@
       "when": 1774987298852,
       "tag": "0001_silly_cable",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774991843335,
+      "tag": "0002_deep_steve_rogers",
+      "breakpoints": true
     }
   ]
 }

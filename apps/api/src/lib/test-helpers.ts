@@ -10,16 +10,14 @@ export const TEST_ORG_ID = "test-org-001"
 export async function createTestApiKey(opts?: {
   orgId?: string
   permissions?: Permission[]
-  system?: boolean
 }) {
   const orgId = opts?.orgId ?? TEST_ORG_ID
   const permissions = opts?.permissions ?? [...PERMISSIONS]
-  const system = opts?.system ?? true
   const { key, prefix, hashedKey } = generateApiKey()
 
   const [apiKey] = await db
     .insert(apiKeys)
-    .values({ orgId, name: "test-key", hashedKey, prefix, permissions, system })
+    .values({ orgId, name: "test-key", hashedKey, prefix, permissions })
     .returning()
 
   return { apiKey, rawKey: key }

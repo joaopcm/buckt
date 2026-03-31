@@ -1,18 +1,14 @@
 import { Hono } from "hono"
 import { eq, and } from "drizzle-orm"
 import { apiKeys } from "@buckt/db"
+import { PERMISSIONS } from "@buckt/shared"
 import { requireAuth } from "../../middleware/auth"
 import { db } from "../../lib/db"
 import { success, error } from "../../lib/response"
 
 const app = new Hono()
 
-app.delete("/:id", requireAuth(), async (c) => {
-  const isSystem = c.get("isSystemKey")
-  if (!isSystem) {
-    return error(c, 403, "Only system keys can revoke API keys")
-  }
-
+app.delete("/:id", requireAuth(...PERMISSIONS), async (c) => {
   const orgId = c.get("orgId")
   const id = c.req.param("id")
 
@@ -24,10 +20,6 @@ app.delete("/:id", requireAuth(), async (c) => {
 
   if (!key) {
     return error(c, 404, "API key not found")
-  }
-
-  if (key.system) {
-    return error(c, 403, "Cannot delete system API key")
   }
 
   await db.delete(apiKeys).where(eq(apiKeys.id, id))

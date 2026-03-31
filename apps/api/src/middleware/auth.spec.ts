@@ -69,7 +69,6 @@ describe("auth middleware", () => {
   it("enforces permission checks", async () => {
     const { rawKey } = await createTestApiKey({
       permissions: ["files:read"],
-      system: false,
     })
     const res = await app.request("/api/buckets", {
       headers: { Authorization: `Bearer ${rawKey}` },

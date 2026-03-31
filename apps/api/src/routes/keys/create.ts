@@ -1,6 +1,6 @@
 import { Hono } from "hono"
 import { apiKeys } from "@buckt/db"
-import { createKeySchema } from "@buckt/shared"
+import { createKeySchema, PERMISSIONS } from "@buckt/shared"
 import { requireAuth } from "../../middleware/auth"
 import { db } from "../../lib/db"
 import { generateApiKey } from "../../lib/hash"
@@ -8,12 +8,7 @@ import { error } from "../../lib/response"
 
 const app = new Hono()
 
-app.post("/", requireAuth(), async (c) => {
-  const isSystem = c.get("isSystemKey")
-  if (!isSystem) {
-    return error(c, 403, "Only system keys can create new API keys")
-  }
-
+app.post("/", requireAuth(...PERMISSIONS), async (c) => {
   const body = await c.req.json()
   const parsed = createKeySchema.safeParse(body)
   if (!parsed.success) {
@@ -32,7 +27,6 @@ app.post("/", requireAuth(), async (c) => {
       hashedKey,
       prefix,
       permissions,
-      system: false,
       expiresAt: expiresAt ?? null,
     })
     .returning()

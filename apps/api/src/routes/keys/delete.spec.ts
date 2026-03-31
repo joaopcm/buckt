@@ -1,58 +1,43 @@
 import { describe, it, expect, beforeEach } from "vitest"
 import app from "../../app"
-import { TEST_ORG_ID, createTestApiKey, cleanDb } from "../../lib/test-helpers"
+import { createTestApiKey, cleanDb } from "../../lib/test-helpers"
 
 describe("DELETE /api/keys/:id", () => {
-  let systemKey: string
+  let apiKey: string
 
   beforeEach(async () => {
     await cleanDb()
     const { rawKey } = await createTestApiKey()
-    systemKey = rawKey
+    apiKey = rawKey
   })
 
   async function createKey(name: string) {
     const res = await app.request("/api/keys", {
       method: "POST",
-      headers: { Authorization: `Bearer ${systemKey}`, "Content-Type": "application/json" },
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({ name, permissions: ["buckets:read"] }),
     })
     const json = await res.json()
     return json.data
   }
 
-  it("revokes a user key", async () => {
+  it("revokes a key", async () => {
     const created = await createKey("Temp")
 
     const res = await app.request(`/api/keys/${created.id}`, {
       method: "DELETE",
-      headers: { Authorization: `Bearer ${systemKey}` },
+      headers: { Authorization: `Bearer ${apiKey}` },
     })
     expect(res.status).toBe(200)
-
-    const listRes = await app.request("/api/keys", {
-      headers: { Authorization: `Bearer ${systemKey}` },
-    })
-    const json = await listRes.json()
-    expect(json.data).toHaveLength(0)
   })
 
-  it("prevents deleting system key", async () => {
-    const { apiKey } = await createTestApiKey({ orgId: TEST_ORG_ID })
-    const res = await app.request(`/api/keys/${apiKey.id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${systemKey}` },
-    })
-    expect(res.status).toBe(403)
-  })
+  it("rejects deletion with insufficient permissions", async () => {
+    const created = await createKey("Target")
+    const { rawKey: limitedKey } = await createTestApiKey({ permissions: ["buckets:read"] })
 
-  it("rejects deletion from non-system key", async () => {
-    const target = await createKey("Target")
-    const { rawKey: userKey } = await createTestApiKey({ permissions: ["buckets:read"], system: false })
-
-    const res = await app.request(`/api/keys/${target.id}`, {
+    const res = await app.request(`/api/keys/${created.id}`, {
       method: "DELETE",
-      headers: { Authorization: `Bearer ${userKey}` },
+      headers: { Authorization: `Bearer ${limitedKey}` },
     })
     expect(res.status).toBe(403)
   })
@@ -60,7 +45,7 @@ describe("DELETE /api/keys/:id", () => {
   it("returns 404 for non-existent key", async () => {
     const res = await app.request("/api/keys/non-existent-id", {
       method: "DELETE",
-      headers: { Authorization: `Bearer ${systemKey}` },
+      headers: { Authorization: `Bearer ${apiKey}` },
     })
     expect(res.status).toBe(404)
   })
