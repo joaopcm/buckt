@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 
 const loginSchema = z.object({
-  email: z.string().email("Enter a valid email"),
+  email: z.email("Enter a valid email"),
   password: z.string().min(1, "Password is required"),
 })
 
