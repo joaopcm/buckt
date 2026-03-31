@@ -10,7 +10,9 @@
       "persistent": true
     },
     "lint": {},
-    "test": {},
+    "test": {
+      "env": ["DATABASE_URL", "NODE_ENV"]
+    },
     "db:generate": {
       "cache": false
     },
