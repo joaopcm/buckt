@@ -12,17 +12,13 @@ Branded S3 buckets on demand. Provision S3 buckets with custom domains (e.g., `a
 
 ## Architecture
 
-```
-┌─────────────┐     ┌──────────────┐     ┌─────────────────┐
-│  Dashboard   │────▶│   Hono API   │────▶│  Trigger.dev    │
-│  (Next.js)   │     │  (REST)      │     │  (Terraform)    │
-└─────────────┘     └──────────────┘     └─────────────────┘
-       │                   │                      │
-       │                   │                      ▼
-       ▼                   ▼              ┌───────────────┐
-  Better Auth         PostgreSQL          │  AWS           │
-  (auth, orgs,        (Drizzle)           │  S3 + CF + ACM│
-   Stripe)                                └───────────────┘
+```mermaid
+graph LR
+  Dashboard["Dashboard<br/>(Next.js)"] -->|tRPC + SDK| API["Hono API<br/>(REST)"]
+  API -->|triggers jobs| Trigger["Trigger.dev<br/>(Terraform)"]
+  Dashboard --> Auth["Better Auth<br/>(auth, orgs, Stripe)"]
+  API --> DB["PostgreSQL<br/>(Drizzle)"]
+  Trigger --> AWS["AWS<br/>S3 + CloudFront + ACM"]
 ```
 
 - **Dashboard** — Next.js app with Shadcn UI. Handles auth, org management, and billing via Better Auth. Uses an internal tRPC router that calls the API through the SDK.
