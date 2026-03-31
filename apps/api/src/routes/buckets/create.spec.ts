@@ -1,0 +1,61 @@
+import { describe, it, expect, beforeEach } from "vitest"
+import app from "../../app"
+import { TEST_ORG_ID, createTestApiKey, cleanDb } from "../../lib/test-helpers"
+
+describe("POST /api/buckets", () => {
+  let systemKey: string
+
+  beforeEach(async () => {
+    await cleanDb()
+    const { rawKey } = await createTestApiKey()
+    systemKey = rawKey
+  })
+
+  function req(body: unknown, key?: string) {
+    return app.request("/api/buckets", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${key ?? systemKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    })
+  }
+
+  it("creates a bucket", async () => {
+    const res = await req({ name: "Test Bucket", customDomain: "assets.test.com" })
+    expect(res.status).toBe(201)
+    const json = await res.json()
+    expect(json.data.name).toBe("Test Bucket")
+    expect(json.data.customDomain).toBe("assets.test.com")
+    expect(json.data.status).toBe("pending")
+    expect(json.data.orgId).toBe(TEST_ORG_ID)
+  })
+
+  it("rejects duplicate domains", async () => {
+    await req({ name: "First", customDomain: "assets.test.com" })
+    const res = await req({ name: "Second", customDomain: "assets.test.com" })
+    expect(res.status).toBe(409)
+  })
+
+  it("rejects invalid domain format", async () => {
+    const res = await req({ name: "Bad", customDomain: "not a domain" })
+    expect(res.status).toBe(400)
+  })
+
+  it("rejects missing name", async () => {
+    const res = await req({ customDomain: "assets.test.com" })
+    expect(res.status).toBe(400)
+  })
+
+  it("rejects without auth", async () => {
+    const res = await app.request("/api/buckets", { method: "POST" })
+    expect(res.status).toBe(401)
+  })
+
+  it("rejects with insufficient permissions", async () => {
+    const { rawKey } = await createTestApiKey({ permissions: ["buckets:read"], system: false })
+    const res = await req({ name: "Test", customDomain: "assets.test.com" }, rawKey)
+    expect(res.status).toBe(403)
+  })
+})

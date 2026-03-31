@@ -1,0 +1,60 @@
+import { createMiddleware } from "hono/factory"
+import { eq } from "drizzle-orm"
+import { apiKeys } from "@buckt/db"
+import type { Permission } from "@buckt/shared"
+import { db } from "../lib/db"
+import { hashApiKey } from "../lib/hash"
+
+type AuthEnv = {
+  Variables: {
+    orgId: string
+    apiKeyId: string
+    permissions: Permission[]
+    isSystemKey: boolean
+  }
+}
+
+export function requireAuth(...requiredPermissions: Permission[]) {
+  return createMiddleware<AuthEnv>(async (c, next) => {
+    const header = c.req.header("Authorization")
+    if (!header?.startsWith("Bearer ")) {
+      return c.json({ data: null, error: { message: "Missing API key" }, meta: null }, 401)
+    }
+
+    const rawKey = header.slice(7)
+    if (!rawKey.startsWith("bkt_")) {
+      return c.json({ data: null, error: { message: "Invalid API key format" }, meta: null }, 401)
+    }
+
+    const hashedKey = hashApiKey(rawKey)
+    const [apiKey] = await db.select().from(apiKeys).where(eq(apiKeys.hashedKey, hashedKey)).limit(1)
+
+    if (!apiKey) {
+      return c.json({ data: null, error: { message: "Invalid API key" }, meta: null }, 401)
+    }
+
+    if (apiKey.expiresAt && apiKey.expiresAt < new Date()) {
+      return c.json({ data: null, error: { message: "API key expired" }, meta: null }, 401)
+    }
+
+    const keyPermissions = apiKey.permissions as Permission[]
+    if (requiredPermissions.length > 0) {
+      const hasPermission = requiredPermissions.every((p) => keyPermissions.includes(p))
+      if (!hasPermission) {
+        return c.json({ data: null, error: { message: "Insufficient permissions" }, meta: null }, 403)
+      }
+    }
+
+    db.update(apiKeys)
+      .set({ lastUsedAt: new Date() })
+      .where(eq(apiKeys.id, apiKey.id))
+      .then(() => {})
+
+    c.set("orgId", apiKey.orgId)
+    c.set("apiKeyId", apiKey.id)
+    c.set("permissions", keyPermissions)
+    c.set("isSystemKey", apiKey.system)
+
+    await next()
+  })
+}
