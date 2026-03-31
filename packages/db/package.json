@@ -10,12 +10,12 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "drizzle-orm": "^0.40",
-    "postgres": "^3",
-    "@buckt/shared": "workspace:*"
+    "@buckt/shared": "workspace:*",
+    "drizzle-orm": "^0.45.2",
+    "postgres": "^3"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.30",
+    "drizzle-kit": "^0.31.10",
     "typescript": "^5.7"
   }
 }
