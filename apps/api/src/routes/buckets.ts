@@ -1,5 +1,5 @@
 import { Hono } from "hono"
-import { eq, and, gt } from "drizzle-orm"
+import { eq, and, gt, asc } from "drizzle-orm"
 import { buckets } from "@buckt/db"
 import { createBucketSchema, listBucketsSchema } from "@buckt/shared"
 import { requireAuth } from "../middleware/auth"
@@ -68,6 +68,7 @@ app.get("/", requireAuth("buckets:read"), async (c) => {
     .select()
     .from(buckets)
     .where(and(...conditions))
+    .orderBy(asc(buckets.id))
     .limit(limit + 1)
 
   const hasMore = items.length > limit

@@ -1,5 +1,5 @@
 import { Hono } from "hono"
-import { eq, and, gt } from "drizzle-orm"
+import { eq, and, gt, asc } from "drizzle-orm"
 import { apiKeys } from "@buckt/db"
 import { createKeySchema } from "@buckt/shared"
 import { requireAuth } from "../middleware/auth"
@@ -67,6 +67,7 @@ app.get("/", requireAuth(), async (c) => {
     })
     .from(apiKeys)
     .where(and(...conditions))
+    .orderBy(asc(apiKeys.id))
     .limit(limit + 1)
 
   const hasMore = keys.length > limit
