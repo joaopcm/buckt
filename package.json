@@ -1,18 +1,21 @@
 {
   "name": "buckt",
   "private": true,
-
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
     "lint": "turbo lint",
     "test": "turbo test",
     "db:generate": "turbo db:generate",
-    "db:migrate": "turbo db:migrate"
+    "db:migrate": "turbo db:migrate",
+    "check": "ultracite check",
+    "fix": "ultracite fix"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.9",
     "turbo": "^2",
-    "typescript": "^5.7"
+    "typescript": "^5.7",
+    "ultracite": "^7.4.2"
   },
   "packageManager": "pnpm@9.15.0"
 }
