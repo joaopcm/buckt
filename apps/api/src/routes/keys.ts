@@ -1,5 +1,5 @@
 import { Hono } from "hono"
-import { eq, and } from "drizzle-orm"
+import { eq, and, gt } from "drizzle-orm"
 import { apiKeys } from "@buckt/db"
 import { createKeySchema } from "@buckt/shared"
 import { requireAuth } from "../middleware/auth"
@@ -47,6 +47,13 @@ app.post("/", requireAuth(), async (c) => {
 
 app.get("/", requireAuth(), async (c) => {
   const orgId = c.get("orgId")
+  const cursor = c.req.query("cursor")
+  const limit = Math.min(Number(c.req.query("limit")) || 20, 100)
+
+  const conditions = [eq(apiKeys.orgId, orgId), eq(apiKeys.system, false)]
+  if (cursor) {
+    conditions.push(gt(apiKeys.id, cursor))
+  }
 
   const keys = await db
     .select({
@@ -59,9 +66,15 @@ app.get("/", requireAuth(), async (c) => {
       createdAt: apiKeys.createdAt,
     })
     .from(apiKeys)
-    .where(and(eq(apiKeys.orgId, orgId), eq(apiKeys.system, false)))
+    .where(and(...conditions))
+    .limit(limit + 1)
 
-  return success(c, keys)
+  const hasMore = keys.length > limit
+  if (hasMore) keys.pop()
+
+  const nextCursor = hasMore ? keys[keys.length - 1].id : null
+
+  return success(c, keys, { nextCursor, limit })
 })
 
 app.delete("/:id", requireAuth(), async (c) => {
