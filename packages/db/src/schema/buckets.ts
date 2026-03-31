@@ -1,4 +1,5 @@
 import { pgTable, pgEnum, text, bigint, timestamp, jsonb, uniqueIndex, index } from "drizzle-orm/pg-core"
+import { uuidv7 } from "uuidv7"
 
 export const bucketStatusEnum = pgEnum("bucket_status", [
   "pending",
@@ -11,7 +12,7 @@ export const bucketStatusEnum = pgEnum("bucket_status", [
 export const buckets = pgTable(
   "buckets",
   {
-    id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+    id: text("id").primaryKey().$defaultFn(() => uuidv7()),
     orgId: text("org_id").notNull(),
     name: text("name").notNull(),
     slug: text("slug").notNull(),

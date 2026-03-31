@@ -179,6 +179,9 @@ importers:
       postgres:
         specifier: ^3
         version: 3.4.8
+      uuidv7:
+        specifier: ^1.2.1
+        version: 1.2.1
     devDependencies:
       drizzle-kit:
         specifier: ^0.31.10
@@ -4239,6 +4242,10 @@ packages:
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
+
+  uuidv7@1.2.1:
+    resolution: {integrity: sha512-4kPkK3/XTQW9Hbm4CaqfICn+kY9LJtDVEOfgsRRra/+n2Ofg4NqzRFceAkxvQ/Ud/6BpHOPzj8cirqM7TzTN5Q==}
+    hasBin: true
 
   validate-npm-package-name@7.0.2:
     resolution: {integrity: sha512-hVDIBwsRruT73PbK7uP5ebUt+ezEtCmzZz3F59BSr2F6OVFnJ/6h8liuvdLrQ88Xmnk6/+xGGuq+pG9WwTuy3A==}
@@ -8322,6 +8329,8 @@ snapshots:
       react: 19.2.4
 
   util-deprecate@1.0.2: {}
+
+  uuidv7@1.2.1: {}
 
   validate-npm-package-name@7.0.2: {}
 
