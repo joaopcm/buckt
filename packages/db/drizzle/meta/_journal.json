@@ -8,6 +8,13 @@
       "when": 1774986905645,
       "tag": "0000_conscious_eddie_brock",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1774987298852,
+      "tag": "0001_silly_cable",
+      "breakpoints": true
     }
   ]
 }
