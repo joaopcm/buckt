@@ -1,5 +1,5 @@
 import { Hono } from "hono"
-import { eq, and, count } from "drizzle-orm"
+import { eq, and, gt } from "drizzle-orm"
 import { buckets } from "@buckt/db"
 import { createBucketSchema, listBucketsSchema } from "@buckt/shared"
 import { requireAuth } from "../middleware/auth"
@@ -54,27 +54,28 @@ app.get("/", requireAuth("buckets:read"), async (c) => {
     return error(c, 400, query.error.issues[0].message)
   }
 
-  const { status, page, limit } = query.data
-  const offset = (page - 1) * limit
+  const { status, cursor, limit } = query.data
 
   const conditions = [eq(buckets.orgId, orgId)]
   if (status) {
     conditions.push(eq(buckets.status, status))
   }
+  if (cursor) {
+    conditions.push(gt(buckets.id, cursor))
+  }
 
-  const where = conditions.length === 1 ? conditions[0] : and(...conditions)
+  const items = await db
+    .select()
+    .from(buckets)
+    .where(and(...conditions))
+    .limit(limit + 1)
 
-  const [items, [total]] = await Promise.all([
-    db.select().from(buckets).where(where).limit(limit).offset(offset),
-    db.select({ count: count() }).from(buckets).where(where),
-  ])
+  const hasMore = items.length > limit
+  if (hasMore) items.pop()
 
-  return success(c, items, {
-    page,
-    limit,
-    total: total.count,
-    totalPages: Math.ceil(total.count / limit),
-  })
+  const nextCursor = hasMore ? items[items.length - 1].id : null
+
+  return success(c, items, { nextCursor, limit })
 })
 
 app.get("/:id", requireAuth("buckets:read"), async (c) => {

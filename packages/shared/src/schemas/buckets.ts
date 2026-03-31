@@ -10,6 +10,6 @@ export const createBucketSchema = z.object({
 
 export const listBucketsSchema = z.object({
   status: z.enum(["pending", "provisioning", "active", "failed", "deleting"]).optional(),
-  page: z.coerce.number().int().positive().default(1),
+  cursor: z.string().optional(),
   limit: z.coerce.number().int().positive().max(100).default(20),
 })
