@@ -3,19 +3,19 @@ import app from "../../app"
 import { TEST_ORG_ID, createTestApiKey, cleanDb } from "../../lib/test-helpers"
 
 describe("POST /api/buckets", () => {
-  let systemKey: string
+  let apiKey: string
 
   beforeEach(async () => {
     await cleanDb()
     const { rawKey } = await createTestApiKey()
-    systemKey = rawKey
+    apiKey = rawKey
   })
 
   function req(body: unknown, key?: string) {
     return app.request("/api/buckets", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${key ?? systemKey}`,
+        Authorization: `Bearer ${key ?? apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(body),
@@ -54,7 +54,7 @@ describe("POST /api/buckets", () => {
   })
 
   it("rejects with insufficient permissions", async () => {
-    const { rawKey } = await createTestApiKey({ permissions: ["buckets:read"], system: false })
+    const { rawKey } = await createTestApiKey({ permissions: ["buckets:read"] })
     const res = await req({ name: "Test", customDomain: "assets.test.com" }, rawKey)
     expect(res.status).toBe(403)
   })

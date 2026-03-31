@@ -1,4 +1,4 @@
-import { pgTable, text, boolean, timestamp, jsonb, uniqueIndex, index } from "drizzle-orm/pg-core"
+import { pgTable, text, timestamp, jsonb, uniqueIndex, index } from "drizzle-orm/pg-core"
 import { uuidv7 } from "uuidv7"
 
 export const apiKeys = pgTable(
@@ -10,7 +10,6 @@ export const apiKeys = pgTable(
     hashedKey: text("hashed_key").notNull(),
     prefix: text("prefix").notNull(),
     permissions: jsonb("permissions").$type<string[]>().notNull(),
-    system: boolean("system").default(false).notNull(),
     lastUsedAt: timestamp("last_used_at"),
     expiresAt: timestamp("expires_at"),
     createdAt: timestamp("created_at").defaultNow().notNull(),

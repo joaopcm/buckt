@@ -3,18 +3,18 @@ import app from "../../app"
 import { createTestApiKey, cleanDb } from "../../lib/test-helpers"
 
 describe("GET /api/buckets/:id", () => {
-  let systemKey: string
+  let apiKey: string
 
   beforeEach(async () => {
     await cleanDb()
     const { rawKey } = await createTestApiKey()
-    systemKey = rawKey
+    apiKey = rawKey
   })
 
   async function createBucket(name: string, domain: string) {
     const res = await app.request("/api/buckets", {
       method: "POST",
-      headers: { Authorization: `Bearer ${systemKey}`, "Content-Type": "application/json" },
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({ name, customDomain: domain }),
     })
     const json = await res.json()
@@ -25,7 +25,7 @@ describe("GET /api/buckets/:id", () => {
     const bucket = await createBucket("Detail", "detail.test.com")
 
     const res = await app.request(`/api/buckets/${bucket.id}`, {
-      headers: { Authorization: `Bearer ${systemKey}` },
+      headers: { Authorization: `Bearer ${apiKey}` },
     })
     expect(res.status).toBe(200)
     const json = await res.json()
@@ -34,7 +34,7 @@ describe("GET /api/buckets/:id", () => {
 
   it("returns 404 for non-existent bucket", async () => {
     const res = await app.request("/api/buckets/non-existent-id", {
-      headers: { Authorization: `Bearer ${systemKey}` },
+      headers: { Authorization: `Bearer ${apiKey}` },
     })
     expect(res.status).toBe(404)
   })

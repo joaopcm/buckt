@@ -41,7 +41,6 @@ export interface ApiKeyWithSecret extends ApiKey {
   key: string
   orgId: string
   hashedKey: string
-  system: boolean
 }
 
 export interface FileInfo {

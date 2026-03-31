@@ -12,7 +12,7 @@ app.get("/", requireAuth(), async (c) => {
   const cursor = c.req.query("cursor")
   const limit = Math.min(Number(c.req.query("limit")) || 20, 100)
 
-  const conditions = [eq(apiKeys.orgId, orgId), eq(apiKeys.system, false)]
+  const conditions = [eq(apiKeys.orgId, orgId)]
   if (cursor) {
     conditions.push(gt(apiKeys.id, cursor))
   }

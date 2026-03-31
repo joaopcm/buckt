@@ -3,42 +3,36 @@ import app from "../../app"
 import { createTestApiKey, cleanDb } from "../../lib/test-helpers"
 
 describe("GET /api/keys", () => {
-  let systemKey: string
+  let apiKey: string
 
   beforeEach(async () => {
     await cleanDb()
     const { rawKey } = await createTestApiKey()
-    systemKey = rawKey
+    apiKey = rawKey
   })
 
   function createKey(name: string) {
     return app.request("/api/keys", {
       method: "POST",
-      headers: { Authorization: `Bearer ${systemKey}`, "Content-Type": "application/json" },
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({ name, permissions: ["buckets:read"] }),
     })
   }
 
   function list(query = "") {
     return app.request(`/api/keys${query ? `?${query}` : ""}`, {
-      headers: { Authorization: `Bearer ${systemKey}` },
+      headers: { Authorization: `Bearer ${apiKey}` },
     })
   }
 
-  it("lists non-system keys", async () => {
+  it("lists keys for the org", async () => {
     await createKey("Key 1")
     await createKey("Key 2")
 
     const res = await list()
     expect(res.status).toBe(200)
     const json = await res.json()
-    expect(json.data).toHaveLength(2)
-  })
-
-  it("excludes system keys from listing", async () => {
-    const res = await list()
-    const json = await res.json()
-    expect(json.data).toHaveLength(0)
+    expect(json.data).toHaveLength(3)
   })
 
   it("supports cursor-based pagination", async () => {
@@ -53,7 +47,6 @@ describe("GET /api/keys", () => {
 
     const page2 = await list(`limit=2&cursor=${json1.meta.nextCursor}`)
     const json2 = await page2.json()
-    expect(json2.data).toHaveLength(1)
-    expect(json2.meta.nextCursor).toBeNull()
+    expect(json2.data).toHaveLength(2)
   })
 })

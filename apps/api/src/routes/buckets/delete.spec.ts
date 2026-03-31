@@ -3,18 +3,18 @@ import app from "../../app"
 import { createTestApiKey, cleanDb } from "../../lib/test-helpers"
 
 describe("DELETE /api/buckets/:id", () => {
-  let systemKey: string
+  let apiKey: string
 
   beforeEach(async () => {
     await cleanDb()
     const { rawKey } = await createTestApiKey()
-    systemKey = rawKey
+    apiKey = rawKey
   })
 
   async function createBucket(name: string, domain: string) {
     const res = await app.request("/api/buckets", {
       method: "POST",
-      headers: { Authorization: `Bearer ${systemKey}`, "Content-Type": "application/json" },
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({ name, customDomain: domain }),
     })
     const json = await res.json()
@@ -24,7 +24,7 @@ describe("DELETE /api/buckets/:id", () => {
   function deleteBucket(id: string) {
     return app.request(`/api/buckets/${id}`, {
       method: "DELETE",
-      headers: { Authorization: `Bearer ${systemKey}` },
+      headers: { Authorization: `Bearer ${apiKey}` },
     })
   }
 

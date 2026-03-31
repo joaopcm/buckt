@@ -10,7 +10,6 @@ type AuthEnv = {
     orgId: string
     apiKeyId: string
     permissions: Permission[]
-    isSystemKey: boolean
   }
 }
 
@@ -53,7 +52,6 @@ export function requireAuth(...requiredPermissions: Permission[]) {
     c.set("orgId", apiKey.orgId)
     c.set("apiKeyId", apiKey.id)
     c.set("permissions", keyPermissions)
-    c.set("isSystemKey", apiKey.system)
 
     await next()
   })
