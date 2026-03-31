@@ -11,7 +11,7 @@
     },
     "lint": {},
     "test": {
-      "env": ["DATABASE_URL", "NODE_ENV"]
+      "env": ["DATABASE_URL", "NODE_ENV", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION", "TRIGGER_SECRET_KEY"]
     },
     "db:generate": {
       "cache": false
