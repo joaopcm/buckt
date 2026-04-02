@@ -19,7 +19,7 @@ beforeEach(() => {
 describe("createBucketResources", () => {
   it("creates bucket with website hosting and public access", async () => {
     mockSend.mockResolvedValue({})
-    const result = await createBucketResources("test-bucket")
+    const result = await createBucketResources("test-bucket", "us-east-1")
 
     expect(mockSend).toHaveBeenCalledTimes(4)
     expect(result.websiteEndpoint).toBe(

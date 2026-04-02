@@ -22,7 +22,8 @@ export async function requestCertificate(domain: string) {
     })
   )
 
-  const certArn = result.CertificateArn!
+  const certArn = result.CertificateArn
+  if (!certArn) throw new Error("ACM did not return a certificate ARN")
 
   const details = await acm.send(
     new DescribeCertificateCommand({ CertificateArn: certArn })

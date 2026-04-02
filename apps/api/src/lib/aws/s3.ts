@@ -9,7 +9,7 @@ import {
 } from "@aws-sdk/client-s3"
 import { s3 } from "../s3"
 
-export async function createBucketResources(bucketName: string) {
+export async function createBucketResources(bucketName: string, region: string) {
   await s3.send(new CreateBucketCommand({ Bucket: bucketName }))
 
   await s3.send(
@@ -50,7 +50,7 @@ export async function createBucketResources(bucketName: string) {
   )
 
   return {
-    websiteEndpoint: `${bucketName}.s3-website-us-east-1.amazonaws.com`,
+    websiteEndpoint: `${bucketName}.s3-website-${region}.amazonaws.com`,
   }
 }
 

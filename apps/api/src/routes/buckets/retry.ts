@@ -21,7 +21,13 @@ export async function retryBucket(c: Context) {
 
   await db
     .update(buckets)
-    .set({ status: "pending" })
+    .set({
+      status: "pending",
+      acmCertArn: null,
+      dnsRecords: null,
+      cloudfrontDistributionId: null,
+      provisioningJobId: null,
+    })
     .where(eq(buckets.id, id))
 
   const handle = await provisionBucket.trigger({ bucketId: id })

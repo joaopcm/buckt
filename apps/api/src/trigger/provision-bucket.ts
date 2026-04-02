@@ -23,7 +23,7 @@ export const provisionBucket = task({
       .where(eq(buckets.id, bucketId))
 
     logger.info("Creating S3 bucket", { s3BucketName: bucket.s3BucketName })
-    const { websiteEndpoint } = await createBucketResources(bucket.s3BucketName)
+    const { websiteEndpoint } = await createBucketResources(bucket.s3BucketName, bucket.region)
 
     logger.info("Requesting ACM certificate", { domain: bucket.customDomain })
     const { certArn, validationRecords } = await requestCertificate(
