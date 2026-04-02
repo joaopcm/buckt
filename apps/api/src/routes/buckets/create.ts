@@ -4,6 +4,7 @@ import { buckets } from "@buckt/db"
 import { createBucketSchema } from "@buckt/shared"
 import { db } from "../../lib/db"
 import { error } from "../../lib/response"
+import { provisionBucket } from "../../trigger/provision-bucket"
 
 export async function createBucket(c: Context) {
   const body = await c.req.json()
@@ -32,7 +33,11 @@ export async function createBucket(c: Context) {
     .values({ orgId, name, slug, s3BucketName, customDomain, status: "pending" })
     .returning()
 
-  // TODO: trigger provisioning job via Trigger.dev (issue #5)
+  const handle = await provisionBucket.trigger({ bucketId: bucket.id })
+  await db
+    .update(buckets)
+    .set({ provisioningJobId: handle.id })
+    .where(eq(buckets.id, bucket.id))
 
   return c.json({ data: bucket, error: null, meta: null }, 201)
 }

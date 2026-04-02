@@ -7,6 +7,7 @@ config({ path: resolve(__dirname, "../../.env") })
 export default defineConfig({
   test: {
     include: ["src/**/*.spec.ts"],
+    setupFiles: ["src/test-setup.ts"],
     fileParallelism: false,
   },
 })
