@@ -1,17 +1,14 @@
-import { Hono } from "hono"
+import type { Context } from "hono"
 import { eq, and } from "drizzle-orm"
 import { HeadObjectCommand } from "@aws-sdk/client-s3"
 import { buckets } from "@buckt/db"
-import { requireAuth } from "../../middleware/auth"
 import { db } from "../../lib/db"
 import { s3 } from "../../lib/s3"
 import { success, error } from "../../lib/response"
 
-const app = new Hono()
-
-app.get("/:bucketId/files/*", requireAuth("files:read"), async (c) => {
+export async function getFile(c: Context) {
   const orgId = c.get("orgId")
-  const bucketId = c.req.param("bucketId")
+  const bucketId = c.req.param("bucketId") as string
   const filePath = c.req.path.replace(/^.*?\/files\//, "")
 
   if (!filePath) {
@@ -53,6 +50,4 @@ app.get("/:bucketId/files/*", requireAuth("files:read"), async (c) => {
     }
     throw err
   }
-})
-
-export default app
+}

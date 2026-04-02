@@ -1,15 +1,12 @@
-import { Hono } from "hono"
+import type { Context } from "hono"
 import { eq, and } from "drizzle-orm"
 import { buckets } from "@buckt/db"
-import { requireAuth } from "../../middleware/auth"
 import { db } from "../../lib/db"
 import { success, error } from "../../lib/response"
 
-const app = new Hono()
-
-app.get("/:id", requireAuth("buckets:read"), async (c) => {
+export async function getBucket(c: Context) {
   const orgId = c.get("orgId")
-  const id = c.req.param("id")
+  const id = c.req.param("id") as string
 
   const [bucket] = await db
     .select()
@@ -22,6 +19,4 @@ app.get("/:id", requireAuth("buckets:read"), async (c) => {
   }
 
   return success(c, bucket)
-})
-
-export default app
+}

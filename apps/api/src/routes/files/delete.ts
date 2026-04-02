@@ -1,17 +1,14 @@
-import { Hono } from "hono"
+import type { Context } from "hono"
 import { eq, and, sql } from "drizzle-orm"
 import { HeadObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3"
 import { buckets } from "@buckt/db"
-import { requireAuth } from "../../middleware/auth"
 import { db } from "../../lib/db"
 import { s3 } from "../../lib/s3"
 import { success, error } from "../../lib/response"
 
-const app = new Hono()
-
-app.delete("/:bucketId/files/*", requireAuth("files:delete"), async (c) => {
+export async function deleteFile(c: Context) {
   const orgId = c.get("orgId")
-  const bucketId = c.req.param("bucketId")
+  const bucketId = c.req.param("bucketId") as string
   const filePath = c.req.path.replace(/^.*?\/files\//, "")
 
   if (!filePath) {
@@ -62,6 +59,4 @@ app.delete("/:bucketId/files/*", requireAuth("files:delete"), async (c) => {
     .where(eq(buckets.id, bucketId))
 
   return success(c, { key: filePath })
-})
-
-export default app
+}

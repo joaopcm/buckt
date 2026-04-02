@@ -1,18 +1,15 @@
-import { Hono } from "hono"
+import type { Context } from "hono"
 import { eq, and } from "drizzle-orm"
 import { ListObjectsV2Command } from "@aws-sdk/client-s3"
 import { buckets } from "@buckt/db"
 import { listFilesSchema } from "@buckt/shared"
-import { requireAuth } from "../../middleware/auth"
 import { db } from "../../lib/db"
 import { s3 } from "../../lib/s3"
 import { success, error } from "../../lib/response"
 
-const app = new Hono()
-
-app.get("/:bucketId/files", requireAuth("files:read"), async (c) => {
+export async function listFiles(c: Context) {
   const orgId = c.get("orgId")
-  const bucketId = c.req.param("bucketId")
+  const bucketId = c.req.param("bucketId") as string
 
   const parsed = listFilesSchema.safeParse({
     prefix: c.req.query("prefix"),
@@ -59,6 +56,4 @@ app.get("/:bucketId/files", requireAuth("files:read"), async (c) => {
     nextCursor: result.NextContinuationToken ?? null,
     limit,
   })
-})
-
-export default app
+}

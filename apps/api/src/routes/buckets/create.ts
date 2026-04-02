@@ -1,14 +1,11 @@
-import { Hono } from "hono"
+import type { Context } from "hono"
 import { eq } from "drizzle-orm"
 import { buckets } from "@buckt/db"
 import { createBucketSchema } from "@buckt/shared"
-import { requireAuth } from "../../middleware/auth"
 import { db } from "../../lib/db"
 import { error } from "../../lib/response"
 
-const app = new Hono()
-
-app.post("/", requireAuth("buckets:write"), async (c) => {
+export async function createBucket(c: Context) {
   const body = await c.req.json()
   const parsed = createBucketSchema.safeParse(body)
   if (!parsed.success) {
@@ -38,6 +35,4 @@ app.post("/", requireAuth("buckets:write"), async (c) => {
   // TODO: trigger provisioning job via Trigger.dev (issue #5)
 
   return c.json({ data: bucket, error: null, meta: null }, 201)
-})
-
-export default app
+}

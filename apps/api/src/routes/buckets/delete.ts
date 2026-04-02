@@ -1,15 +1,12 @@
-import { Hono } from "hono"
+import type { Context } from "hono"
 import { eq, and } from "drizzle-orm"
 import { buckets } from "@buckt/db"
-import { requireAuth } from "../../middleware/auth"
 import { db } from "../../lib/db"
 import { success, error } from "../../lib/response"
 
-const app = new Hono()
-
-app.delete("/:id", requireAuth("buckets:delete"), async (c) => {
+export async function deleteBucket(c: Context) {
   const orgId = c.get("orgId")
-  const id = c.req.param("id")
+  const id = c.req.param("id") as string
 
   const [bucket] = await db
     .select()
@@ -33,6 +30,4 @@ app.delete("/:id", requireAuth("buckets:delete"), async (c) => {
   // TODO: trigger destroy job via Trigger.dev (issue #5)
 
   return success(c, { id, status: "deleting" })
-})
-
-export default app
+}

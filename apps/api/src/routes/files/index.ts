@@ -1,14 +1,15 @@
 import { Hono } from "hono"
-import upload from "./upload"
-import list from "./list"
-import get from "./get"
-import del from "./delete"
+import { requireAuth } from "../../middleware/auth"
+import { uploadFile } from "./upload"
+import { listFiles } from "./list"
+import { getFile } from "./get"
+import { deleteFile } from "./delete"
 
 const app = new Hono()
 
-app.route("/", upload)
-app.route("/", list)
-app.route("/", get)
-app.route("/", del)
+app.put("/:bucketId/files/*", requireAuth("files:write"), uploadFile)
+app.get("/:bucketId/files", requireAuth("files:read"), listFiles)
+app.get("/:bucketId/files/*", requireAuth("files:read"), getFile)
+app.delete("/:bucketId/files/*", requireAuth("files:delete"), deleteFile)
 
 export default app
