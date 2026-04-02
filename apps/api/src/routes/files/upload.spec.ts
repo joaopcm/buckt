@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest"
 import app from "../../app"
-import { TEST_ORG_ID, createTestApiKey, createActiveBucket, cleanDb } from "../../lib/test-helpers"
+import { createTestApiKey, createActiveBucket, cleanDb } from "../../lib/test-helpers"
 
 vi.mock("../../lib/s3", () => ({
   s3: { send: vi.fn().mockResolvedValue({}) },
@@ -84,5 +84,11 @@ describe("PUT /api/buckets/:id/files/*", () => {
       body: "data",
     })
     expect(res.status).toBe(400)
+  })
+
+  it("returns 404 for bucket in another org", async () => {
+    const { rawKey: otherKey } = await createTestApiKey({ orgId: "other-org" })
+    const res = await req("file.txt", "data", otherKey)
+    expect(res.status).toBe(404)
   })
 })

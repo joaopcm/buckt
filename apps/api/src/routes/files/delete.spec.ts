@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest"
 import app from "../../app"
-import { TEST_ORG_ID, createTestApiKey, createActiveBucket, cleanDb } from "../../lib/test-helpers"
+import { createTestApiKey, createActiveBucket, cleanDb } from "../../lib/test-helpers"
 
 const { mockSend } = vi.hoisted(() => ({ mockSend: vi.fn() }))
 vi.mock("../../lib/s3", () => ({

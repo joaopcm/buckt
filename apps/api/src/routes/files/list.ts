@@ -50,9 +50,9 @@ app.get("/:bucketId/files", requireAuth("files:read"), async (c) => {
   )
 
   const files = (result.Contents ?? []).map((obj) => ({
-    key: obj.Key!,
-    size: obj.Size!,
-    lastModified: obj.LastModified!.toISOString(),
+    key: obj.Key ?? "",
+    size: obj.Size ?? 0,
+    lastModified: (obj.LastModified ?? new Date()).toISOString(),
   }))
 
   return success(c, files, {

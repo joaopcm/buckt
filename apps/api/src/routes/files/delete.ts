@@ -12,7 +12,7 @@ const app = new Hono()
 app.delete("/:bucketId/files/*", requireAuth("files:delete"), async (c) => {
   const orgId = c.get("orgId")
   const bucketId = c.req.param("bucketId")
-  const filePath = c.req.path.split("/files/")[1]
+  const filePath = c.req.path.replace(/^.*?\/files\//, "")
 
   if (!filePath) {
     return error(c, 400, "File path is required")
@@ -41,7 +41,7 @@ app.delete("/:bucketId/files/*", requireAuth("files:delete"), async (c) => {
         Key: filePath,
       })
     )
-    size = head.ContentLength!
+    size = head.ContentLength ?? 0
   } catch (err) {
     if (err instanceof Error && err.name === "NotFound") {
       return error(c, 404, "File not found")

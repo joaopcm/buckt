@@ -12,7 +12,7 @@ const app = new Hono()
 app.get("/:bucketId/files/*", requireAuth("files:read"), async (c) => {
   const orgId = c.get("orgId")
   const bucketId = c.req.param("bucketId")
-  const filePath = c.req.path.split("/files/")[1]
+  const filePath = c.req.path.replace(/^.*?\/files\//, "")
 
   if (!filePath) {
     return error(c, 400, "File path is required")
@@ -42,9 +42,9 @@ app.get("/:bucketId/files/*", requireAuth("files:read"), async (c) => {
 
     return success(c, {
       key: filePath,
-      size: head.ContentLength!,
-      lastModified: head.LastModified!.toISOString(),
-      contentType: head.ContentType!,
+      size: head.ContentLength ?? 0,
+      lastModified: (head.LastModified ?? new Date()).toISOString(),
+      contentType: head.ContentType ?? "application/octet-stream",
       url: `https://${bucket.customDomain}/${filePath}`,
     })
   } catch (err) {

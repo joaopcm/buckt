@@ -1,6 +1,6 @@
 import { Hono } from "hono"
 import { eq, and, sql } from "drizzle-orm"
-import { PutObjectCommand } from "@aws-sdk/client-s3"
+import { PutObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3"
 import { buckets } from "@buckt/db"
 import { requireAuth } from "../../middleware/auth"
 import { db } from "../../lib/db"
@@ -12,7 +12,7 @@ const app = new Hono()
 app.put("/:bucketId/files/*", requireAuth("files:write"), async (c) => {
   const orgId = c.get("orgId")
   const bucketId = c.req.param("bucketId")
-  const filePath = c.req.path.split("/files/")[1]
+  const filePath = c.req.path.replace(/^.*?\/files\//, "")
 
   if (!filePath) {
     return error(c, 400, "File path is required")
@@ -36,6 +36,19 @@ app.put("/:bucketId/files/*", requireAuth("files:write"), async (c) => {
   const size = body.byteLength
   const contentType = c.req.header("Content-Type") ?? "application/octet-stream"
 
+  let existingSize = 0
+  try {
+    const head = await s3.send(
+      new HeadObjectCommand({
+        Bucket: bucket.s3BucketName,
+        Key: filePath,
+      })
+    )
+    existingSize = head.ContentLength ?? 0
+  } catch {
+    // file doesn't exist yet
+  }
+
   await s3.send(
     new PutObjectCommand({
       Bucket: bucket.s3BucketName,
@@ -47,7 +60,9 @@ app.put("/:bucketId/files/*", requireAuth("files:write"), async (c) => {
 
   await db
     .update(buckets)
-    .set({ storageUsedBytes: sql`${buckets.storageUsedBytes} + ${size}` })
+    .set({
+      storageUsedBytes: sql`${buckets.storageUsedBytes} + ${size} - ${existingSize}`,
+    })
     .where(eq(buckets.id, bucketId))
 
   return success(c, {
