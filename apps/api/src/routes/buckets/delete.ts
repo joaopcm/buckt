@@ -3,6 +3,7 @@ import { eq, and } from "drizzle-orm"
 import { buckets } from "@buckt/db"
 import { db } from "../../lib/db"
 import { success, error } from "../../lib/response"
+import { destroyBucket } from "../../trigger/destroy-bucket"
 
 export async function deleteBucket(c: Context) {
   const orgId = c.get("orgId")
@@ -27,7 +28,7 @@ export async function deleteBucket(c: Context) {
     .set({ status: "deleting" })
     .where(eq(buckets.id, id))
 
-  // TODO: trigger destroy job via Trigger.dev (issue #5)
+  await destroyBucket.trigger({ bucketId: id })
 
   return success(c, { id, status: "deleting" })
 }
