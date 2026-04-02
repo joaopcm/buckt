@@ -1,14 +1,11 @@
-import { Hono } from "hono"
+import type { Context } from "hono"
 import { eq, and, gt, asc } from "drizzle-orm"
 import { buckets } from "@buckt/db"
 import { listBucketsSchema } from "@buckt/shared"
-import { requireAuth } from "../../middleware/auth"
 import { db } from "../../lib/db"
 import { success, error } from "../../lib/response"
 
-const app = new Hono()
-
-app.get("/", requireAuth("buckets:read"), async (c) => {
+export async function listBuckets(c: Context) {
   const orgId = c.get("orgId")
   const query = listBucketsSchema.safeParse(c.req.query())
   if (!query.success) {
@@ -38,6 +35,4 @@ app.get("/", requireAuth("buckets:read"), async (c) => {
   const nextCursor = hasMore ? items[items.length - 1].id : null
 
   return success(c, items, { nextCursor, limit })
-})
-
-export default app
+}

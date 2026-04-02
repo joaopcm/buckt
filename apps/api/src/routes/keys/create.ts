@@ -1,14 +1,11 @@
-import { Hono } from "hono"
+import type { Context } from "hono"
 import { apiKeys } from "@buckt/db"
-import { createKeySchema, PERMISSIONS } from "@buckt/shared"
-import { requireAuth } from "../../middleware/auth"
+import { createKeySchema } from "@buckt/shared"
 import { db } from "../../lib/db"
 import { generateApiKey } from "../../lib/hash"
 import { error } from "../../lib/response"
 
-const app = new Hono()
-
-app.post("/", requireAuth(...PERMISSIONS), async (c) => {
+export async function createKey(c: Context) {
   const body = await c.req.json()
   const parsed = createKeySchema.safeParse(body)
   if (!parsed.success) {
@@ -32,6 +29,4 @@ app.post("/", requireAuth(...PERMISSIONS), async (c) => {
     .returning()
 
   return c.json({ data: { ...apiKey, key }, error: null, meta: null }, 201)
-})
-
-export default app
+}

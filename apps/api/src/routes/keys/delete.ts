@@ -1,16 +1,12 @@
-import { Hono } from "hono"
+import type { Context } from "hono"
 import { eq, and } from "drizzle-orm"
 import { apiKeys } from "@buckt/db"
-import { PERMISSIONS } from "@buckt/shared"
-import { requireAuth } from "../../middleware/auth"
 import { db } from "../../lib/db"
 import { success, error } from "../../lib/response"
 
-const app = new Hono()
-
-app.delete("/:id", requireAuth(...PERMISSIONS), async (c) => {
+export async function deleteKey(c: Context) {
   const orgId = c.get("orgId")
-  const id = c.req.param("id")
+  const id = c.req.param("id") as string
 
   const [key] = await db
     .select()
@@ -25,6 +21,4 @@ app.delete("/:id", requireAuth(...PERMISSIONS), async (c) => {
   await db.delete(apiKeys).where(eq(apiKeys.id, id))
 
   return success(c, { id })
-})
-
-export default app
+}
