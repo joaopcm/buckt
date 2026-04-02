@@ -1,9 +1,10 @@
 import { apiKeys, buckets } from "@buckt/db"
-import { sql } from "drizzle-orm"
+import { eq, sql } from "drizzle-orm"
 import { db } from "../lib/db"
 import { generateApiKey } from "../lib/hash"
 import type { Permission } from "@buckt/shared"
 import { PERMISSIONS } from "@buckt/shared"
+import app from "../app"
 
 export const TEST_ORG_ID = "test-org-001"
 
@@ -26,4 +27,28 @@ export async function createTestApiKey(opts?: {
 export async function cleanDb() {
   await db.delete(buckets).where(sql`1=1`)
   await db.delete(apiKeys).where(sql`1=1`)
+}
+
+export async function createActiveBucket(apiKey: string, opts?: { name?: string; customDomain?: string }) {
+  const res = await app.request("/api/buckets", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      name: opts?.name ?? "Test Bucket",
+      customDomain: opts?.customDomain ?? "assets.test.com",
+    }),
+  })
+
+  const json = await res.json()
+  const bucket = json.data
+
+  await db
+    .update(buckets)
+    .set({ status: "active" })
+    .where(eq(buckets.id, bucket.id))
+
+  return { ...bucket, status: "active" as const }
 }
