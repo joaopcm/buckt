@@ -15,5 +15,8 @@ export default defineConfig({
     include: ["src/**/*.spec.ts"],
     setupFiles: ["src/test-setup.ts"],
     fileParallelism: false,
+    env: {
+      REDIS_URL: process.env.REDIS_URL ?? "redis://localhost:6379",
+    },
   },
 });
