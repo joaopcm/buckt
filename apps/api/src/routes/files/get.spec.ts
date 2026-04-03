@@ -27,7 +27,7 @@ describe("GET /api/buckets/:id/files/*", () => {
   });
 
   function req(path: string, key?: string) {
-    return app.request(`/api/buckets/${bucketId}/files/${path}`, {
+    return app.request(`/v1/buckets/${bucketId}/files/${path}`, {
       method: "GET",
       headers: { Authorization: `Bearer ${key ?? apiKey}` },
     });
@@ -61,7 +61,7 @@ describe("GET /api/buckets/:id/files/*", () => {
   });
 
   it("rejects without auth", async () => {
-    const res = await app.request(`/api/buckets/${bucketId}/files/test.txt`, {
+    const res = await app.request(`/v1/buckets/${bucketId}/files/test.txt`, {
       method: "GET",
     });
     expect(res.status).toBe(401);
@@ -74,7 +74,7 @@ describe("GET /api/buckets/:id/files/*", () => {
   });
 
   it("returns 404 for nonexistent bucket", async () => {
-    const res = await app.request("/api/buckets/nonexistent/files/test.txt", {
+    const res = await app.request("/v1/buckets/nonexistent/files/test.txt", {
       method: "GET",
       headers: { Authorization: `Bearer ${apiKey}` },
     });

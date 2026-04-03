@@ -17,7 +17,7 @@ describe("GET /api/buckets", () => {
   });
 
   function createBucket(name: string, domain: string) {
-    return app.request("/api/buckets", {
+    return app.request("/v1/buckets", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -28,7 +28,7 @@ describe("GET /api/buckets", () => {
   }
 
   function list(query = "", key?: string) {
-    return app.request(`/api/buckets${query ? `?${query}` : ""}`, {
+    return app.request(`/v1/buckets${query ? `?${query}` : ""}`, {
       headers: { Authorization: `Bearer ${key ?? apiKey}` },
     });
   }

@@ -12,7 +12,7 @@ describe("DELETE /api/buckets/:id", () => {
   });
 
   async function createBucket(name: string, domain: string) {
-    const res = await app.request("/api/buckets", {
+    const res = await app.request("/v1/buckets", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -25,7 +25,7 @@ describe("DELETE /api/buckets/:id", () => {
   }
 
   function deleteBucket(id: string) {
-    return app.request(`/api/buckets/${id}`, {
+    return app.request(`/v1/buckets/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${apiKey}` },
     });

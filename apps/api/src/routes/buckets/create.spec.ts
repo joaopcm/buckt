@@ -17,7 +17,7 @@ describe("POST /api/buckets", () => {
   });
 
   function req(body: unknown, key?: string) {
-    return app.request("/api/buckets", {
+    return app.request("/v1/buckets", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${key ?? apiKey}`,
@@ -58,7 +58,7 @@ describe("POST /api/buckets", () => {
   });
 
   it("rejects without auth", async () => {
-    const res = await app.request("/api/buckets", { method: "POST" });
+    const res = await app.request("/v1/buckets", { method: "POST" });
     expect(res.status).toBe(401);
   });
 

@@ -12,7 +12,7 @@ describe("GET /api/keys", () => {
   });
 
   function createKey(name: string) {
-    return app.request("/api/keys", {
+    return app.request("/v1/keys", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -23,7 +23,7 @@ describe("GET /api/keys", () => {
   }
 
   function list(query = "") {
-    return app.request(`/api/keys${query ? `?${query}` : ""}`, {
+    return app.request(`/v1/keys${query ? `?${query}` : ""}`, {
       headers: { Authorization: `Bearer ${apiKey}` },
     });
   }

@@ -12,7 +12,7 @@ describe("DELETE /api/keys/:id", () => {
   });
 
   async function createKey(name: string) {
-    const res = await app.request("/api/keys", {
+    const res = await app.request("/v1/keys", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -27,7 +27,7 @@ describe("DELETE /api/keys/:id", () => {
   it("revokes a key", async () => {
     const created = await createKey("Temp");
 
-    const res = await app.request(`/api/keys/${created.id}`, {
+    const res = await app.request(`/v1/keys/${created.id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${apiKey}` },
     });
@@ -40,7 +40,7 @@ describe("DELETE /api/keys/:id", () => {
       permissions: ["buckets:read"],
     });
 
-    const res = await app.request(`/api/keys/${created.id}`, {
+    const res = await app.request(`/v1/keys/${created.id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${limitedKey}` },
     });
@@ -48,7 +48,7 @@ describe("DELETE /api/keys/:id", () => {
   });
 
   it("returns 404 for non-existent key", async () => {
-    const res = await app.request("/api/keys/non-existent-id", {
+    const res = await app.request("/v1/keys/non-existent-id", {
       method: "DELETE",
       headers: { Authorization: `Bearer ${apiKey}` },
     });

@@ -14,7 +14,7 @@ describe("POST /api/keys", () => {
   });
 
   function req(body: unknown, key?: string) {
-    return app.request("/api/keys", {
+    return app.request("/v1/keys", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${key ?? apiKey}`,

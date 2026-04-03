@@ -18,7 +18,7 @@ describe("GET /api/billing/usage", () => {
   });
 
   function getUsage(key?: string) {
-    return app.request("/api/billing/usage", {
+    return app.request("/v1/billing/usage", {
       headers: { Authorization: `Bearer ${key ?? apiKey}` },
     });
   }
@@ -45,7 +45,7 @@ describe("GET /api/billing/usage", () => {
   });
 
   it("rejects without auth", async () => {
-    const res = await app.request("/api/billing/usage");
+    const res = await app.request("/v1/billing/usage");
     expect(res.status).toBe(401);
   });
 });

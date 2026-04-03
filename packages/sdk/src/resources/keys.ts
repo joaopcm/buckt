@@ -18,7 +18,7 @@ export class KeysClient {
     permissions: Permission[];
     expiresAt?: Date;
   }): Promise<ApiKeyWithSecret> {
-    const { data } = await this.http.post<ApiKeyWithSecret>("/api/keys", {
+    const { data } = await this.http.post<ApiKeyWithSecret>("/v1/keys", {
       ...opts,
       expiresAt: opts.expiresAt?.toISOString(),
     });
@@ -29,7 +29,7 @@ export class KeysClient {
     cursor?: string;
     limit?: number;
   }): Promise<{ data: ApiKey[]; meta: CursorMeta }> {
-    const { data, meta } = await this.http.get<ApiKey[]>("/api/keys", {
+    const { data, meta } = await this.http.get<ApiKey[]>("/v1/keys", {
       cursor: opts?.cursor,
       limit: opts?.limit?.toString(),
     });
@@ -37,6 +37,6 @@ export class KeysClient {
   }
 
   async delete(id: string): Promise<void> {
-    await this.http.delete(`/api/keys/${id}`);
+    await this.http.delete(`/v1/keys/${id}`);
   }
 }

@@ -27,10 +27,10 @@ describe("HttpClient", () => {
     vi.stubGlobal("fetch", fetch);
 
     const client = new HttpClient("https://api.test.com", "bkt_test123");
-    await client.get("/api/buckets");
+    await client.get("/v1/buckets");
 
     expect(fetch).toHaveBeenCalledWith(
-      "https://api.test.com/api/buckets",
+      "https://api.test.com/v1/buckets",
       expect.objectContaining({
         headers: expect.objectContaining({
           Authorization: "Bearer bkt_test123",
@@ -44,7 +44,7 @@ describe("HttpClient", () => {
     vi.stubGlobal("fetch", fetch);
 
     const client = new HttpClient("https://api.test.com", "bkt_test");
-    await client.get("/api/buckets", { status: "active", cursor: undefined });
+    await client.get("/v1/buckets", { status: "active", cursor: undefined });
 
     const url = fetch.mock.calls[0][0];
     expect(url).toContain("status=active");
@@ -121,10 +121,10 @@ describe("HttpClient", () => {
     vi.stubGlobal("fetch", fetch);
 
     const client = new HttpClient("https://api.test.com", "bkt_test");
-    await client.post("/api/buckets", { name: "Test" });
+    await client.post("/v1/buckets", { name: "Test" });
 
     expect(fetch).toHaveBeenCalledWith(
-      "https://api.test.com/api/buckets",
+      "https://api.test.com/v1/buckets",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ name: "Test" }),
