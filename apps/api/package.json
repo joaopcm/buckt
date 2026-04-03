@@ -18,9 +18,11 @@
     "@buckt/db": "workspace:*",
     "@buckt/shared": "workspace:*",
     "@hono/node-server": "^1",
+    "@sentry/node": "^10.47.0",
     "@t3-oss/env-core": "^0.13.11",
     "@trigger.dev/sdk": "^4.4.3",
     "drizzle-orm": "^0.45.2",
+    "evlog": "^2.10.0",
     "hono": "^4",
     "stripe": "^20.4.1",
     "zod": "^4.3.6"
