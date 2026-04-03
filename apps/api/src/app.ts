@@ -1,5 +1,4 @@
 import { Hono } from "hono"
-import { PERMISSIONS } from "@buckt/shared"
 import { requireAuth } from "./middleware/auth"
 import { requirePlan } from "./middleware/plan"
 import { createBucket } from "./routes/buckets/create"
@@ -35,8 +34,8 @@ app.delete("/api/buckets/:bucketId/files/*", requireAuth("files:delete"), delete
 app.get("/api/billing/usage", requireAuth(), requirePlan(), getUsage)
 app.get("/api/billing/subscription", requireAuth(), getSubscription)
 
-app.post("/api/keys", requireAuth(...PERMISSIONS), createKey)
-app.get("/api/keys", requireAuth(), listKeys)
-app.delete("/api/keys/:id", requireAuth(...PERMISSIONS), deleteKey)
+app.post("/api/keys", requireAuth("keys:write"), createKey)
+app.get("/api/keys", requireAuth("keys:read"), listKeys)
+app.delete("/api/keys/:id", requireAuth("keys:write"), deleteKey)
 
 export default app
