@@ -1,6 +1,6 @@
 [build]
 builder = "RAILPACK"
-buildCommand = "pnpm build"
+buildCommand = "pnpm --filter @buckt/api build"
 watchPatterns = [
   "apps/api/**",
   "packages/db/**",
