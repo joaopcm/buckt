@@ -8,6 +8,7 @@ import { Hono } from "hono";
 import { requestId } from "./lib/request-id";
 import { requireAuth } from "./middleware/auth";
 import { requirePlan } from "./middleware/plan";
+import { rateLimit } from "./middleware/rate-limit";
 import { getSubscription } from "./routes/billing/subscription";
 import { getUsage } from "./routes/billing/usage";
 import { createBucket } from "./routes/buckets/create";
@@ -63,33 +64,62 @@ app.get("/health", (c) => c.json({ status: "ok" }));
 app.post(
   "/api/buckets",
   requireAuth("buckets:write"),
+  rateLimit,
   requirePlan(),
   createBucket
 );
-app.get("/api/buckets", requireAuth("buckets:read"), listBuckets);
-app.get("/api/buckets/:id", requireAuth("buckets:read"), getBucket);
-app.delete("/api/buckets/:id", requireAuth("buckets:delete"), deleteBucket);
-app.post("/api/buckets/:id/retry", requireAuth("buckets:write"), retryBucket);
+app.get("/api/buckets", requireAuth("buckets:read"), rateLimit, listBuckets);
+app.get("/api/buckets/:id", requireAuth("buckets:read"), rateLimit, getBucket);
+app.delete(
+  "/api/buckets/:id",
+  requireAuth("buckets:delete"),
+  rateLimit,
+  deleteBucket
+);
+app.post(
+  "/api/buckets/:id/retry",
+  requireAuth("buckets:write"),
+  rateLimit,
+  retryBucket
+);
 
 app.put(
   "/api/buckets/:bucketId/files/*",
   requireAuth("files:write"),
+  rateLimit,
   requirePlan(),
   uploadFile
 );
-app.get("/api/buckets/:bucketId/files", requireAuth("files:read"), listFiles);
-app.get("/api/buckets/:bucketId/files/*", requireAuth("files:read"), getFile);
+app.get(
+  "/api/buckets/:bucketId/files",
+  requireAuth("files:read"),
+  rateLimit,
+  listFiles
+);
+app.get(
+  "/api/buckets/:bucketId/files/*",
+  requireAuth("files:read"),
+  rateLimit,
+  getFile
+);
 app.delete(
   "/api/buckets/:bucketId/files/*",
   requireAuth("files:delete"),
+  rateLimit,
   deleteFile
 );
 
-app.get("/api/billing/usage", requireAuth(), requirePlan(), getUsage);
-app.get("/api/billing/subscription", requireAuth(), getSubscription);
+app.get(
+  "/api/billing/usage",
+  requireAuth(),
+  rateLimit,
+  requirePlan(),
+  getUsage
+);
+app.get("/api/billing/subscription", requireAuth(), rateLimit, getSubscription);
 
-app.post("/api/keys", requireAuth("keys:write"), createKey);
-app.get("/api/keys", requireAuth("keys:read"), listKeys);
-app.delete("/api/keys/:id", requireAuth("keys:write"), deleteKey);
+app.post("/api/keys", requireAuth("keys:write"), rateLimit, createKey);
+app.get("/api/keys", requireAuth("keys:read"), rateLimit, listKeys);
+app.delete("/api/keys/:id", requireAuth("keys:write"), rateLimit, deleteKey);
 
 export default app;

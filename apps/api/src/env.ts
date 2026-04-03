@@ -12,6 +12,7 @@ export const env = createEnv({
     STRIPE_METERED_BANDWIDTH_PRICE_ID: z.string().min(1).optional(),
     CLOUDFRONT_LOG_BUCKET: z.string().optional(),
     CLOUDFRONT_LOG_PREFIX: z.string().optional().default("cf-logs/"),
+    REDIS_URL: z.string().min(1),
     TRIGGER_SECRET_KEY: z.string().min(1),
     SENTRY_DSN: z.string().url().optional(),
     AXIOM_TOKEN: z.string().optional(),

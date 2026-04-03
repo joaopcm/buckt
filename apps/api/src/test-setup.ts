@@ -11,3 +11,16 @@ vi.mock("./trigger/destroy-bucket", () => ({
     trigger: vi.fn().mockResolvedValue({ id: "test-run-id" }),
   },
 }));
+
+vi.mock("./lib/redis", () => ({
+  redis: {},
+}));
+
+vi.mock("./lib/rate-limit-store", () => ({
+  checkRateLimit: vi.fn().mockResolvedValue({
+    allowed: true,
+    limit: 100,
+    remaining: 99,
+    resetAt: Math.ceil(Date.now() / 1000) + 60,
+  }),
+}));
