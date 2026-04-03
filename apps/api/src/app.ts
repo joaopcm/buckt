@@ -10,6 +10,8 @@ import { retryBucket } from "./routes/buckets/retry"
 import { createKey } from "./routes/keys/create"
 import { listKeys } from "./routes/keys/list"
 import { deleteKey } from "./routes/keys/delete"
+import { getUsage } from "./routes/billing/usage"
+import { getSubscription } from "./routes/billing/subscription"
 import { uploadFile } from "./routes/files/upload"
 import { listFiles } from "./routes/files/list"
 import { getFile } from "./routes/files/get"
@@ -29,6 +31,9 @@ app.put("/api/buckets/:bucketId/files/*", requireAuth("files:write"), requirePla
 app.get("/api/buckets/:bucketId/files", requireAuth("files:read"), listFiles)
 app.get("/api/buckets/:bucketId/files/*", requireAuth("files:read"), getFile)
 app.delete("/api/buckets/:bucketId/files/*", requireAuth("files:delete"), deleteFile)
+
+app.get("/api/billing/usage", requireAuth("buckets:read"), requirePlan(), getUsage)
+app.get("/api/billing/subscription", requireAuth("buckets:read"), getSubscription)
 
 app.post("/api/keys", requireAuth(...PERMISSIONS), createKey)
 app.get("/api/keys", requireAuth(), listKeys)
