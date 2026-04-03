@@ -1,11 +1,11 @@
 import {
   CloudFrontClient,
   CreateDistributionCommand,
-  UpdateDistributionCommand,
   DeleteDistributionCommand,
   GetDistributionCommand,
-} from "@aws-sdk/client-cloudfront"
-import { env } from "../../env"
+  UpdateDistributionCommand,
+} from "@aws-sdk/client-cloudfront";
+import { env } from "../../env";
 
 const cloudfront = new CloudFrontClient({
   region: "us-east-1",
@@ -13,12 +13,12 @@ const cloudfront = new CloudFrontClient({
     accessKeyId: env.AWS_ACCESS_KEY_ID,
     secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
   },
-})
+});
 
 export async function createDistribution(opts: {
-  domain: string
-  s3WebsiteEndpoint: string
-  certArn: string
+  domain: string;
+  s3WebsiteEndpoint: string;
+  certArn: string;
 }) {
   const result = await cloudfront.send(
     new CreateDistributionCommand({
@@ -67,38 +67,40 @@ export async function createDistribution(opts: {
         Comment: `Buckt CDN for ${opts.domain}`,
       },
     })
-  )
+  );
 
   return {
     distributionId: result.Distribution?.Id ?? "",
     distributionDomain: result.Distribution?.DomainName ?? "",
-  }
+  };
 }
 
 export async function disableDistribution(distributionId: string) {
   const dist = await cloudfront.send(
     new GetDistributionCommand({ Id: distributionId })
-  )
-  const config = dist.Distribution?.DistributionConfig
-  if (!config || !config.Enabled) return
+  );
+  const config = dist.Distribution?.DistributionConfig;
+  if (!config?.Enabled) {
+    return;
+  }
 
   await cloudfront.send(
     new UpdateDistributionCommand({
       Id: distributionId,
-      IfMatch: dist.ETag!,
+      IfMatch: dist.ETag ?? "",
       DistributionConfig: { ...config, Enabled: false },
     })
-  )
+  );
 }
 
 export async function deleteDistribution(distributionId: string) {
   const dist = await cloudfront.send(
     new GetDistributionCommand({ Id: distributionId })
-  )
+  );
   await cloudfront.send(
     new DeleteDistributionCommand({
       Id: distributionId,
-      IfMatch: dist.ETag!,
+      IfMatch: dist.ETag ?? "",
     })
-  )
+  );
 }

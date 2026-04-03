@@ -1,9 +1,8 @@
-"use client"
+"use client";
 
-import { useRouter } from "next/navigation"
-import { LogOut, User } from "lucide-react"
-import { authClient } from "@/lib/auth-client"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { LogOut, User } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,25 +11,27 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
+import { authClient } from "@/lib/auth-client";
 
 export function UserNav() {
-  const router = useRouter()
-  const { data: session } = authClient.useSession()
+  const router = useRouter();
+  const { data: session } = authClient.useSession();
 
   async function handleSignOut() {
-    await authClient.signOut()
-    router.push("/login")
-    router.refresh()
+    await authClient.signOut();
+    router.push("/login");
+    router.refresh();
   }
 
-  const user = session?.user
-  const initials = user?.name
-    ?.split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2) ?? "?"
+  const user = session?.user;
+  const initials =
+    user?.name
+      ?.split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2) ?? "?";
 
   return (
     <DropdownMenu>
@@ -40,16 +41,20 @@ export function UserNav() {
           <AvatarFallback className="text-[10px]">{initials}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col items-start text-xs leading-tight">
-          <span className="font-medium truncate max-w-[140px]">{user?.name}</span>
-          <span className="text-muted-foreground truncate max-w-[140px]">{user?.email}</span>
+          <span className="max-w-[140px] truncate font-medium">
+            {user?.name}
+          </span>
+          <span className="max-w-[140px] truncate text-muted-foreground">
+            {user?.email}
+          </span>
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56">
         <DropdownMenuGroup>
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col gap-1">
-              <p className="text-sm font-medium">{user?.name}</p>
-              <p className="text-xs text-muted-foreground">{user?.email}</p>
+              <p className="font-medium text-sm">{user?.name}</p>
+              <p className="text-muted-foreground text-xs">{user?.email}</p>
             </div>
           </DropdownMenuLabel>
         </DropdownMenuGroup>
@@ -69,5 +74,5 @@ export function UserNav() {
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

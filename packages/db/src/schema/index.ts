@@ -1,5 +1,6 @@
-export * from "./auth"
-export * from "./organization"
-export * from "./subscription"
-export * from "./api-keys"
-export * from "./buckets"
+// biome-ignore lint/performance/noBarrelFile: intentional barrel re-export
+export * from "./api-keys";
+export * from "./auth";
+export * from "./buckets";
+export * from "./organization";
+export * from "./subscription";

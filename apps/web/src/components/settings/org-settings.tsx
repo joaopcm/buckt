@@ -1,15 +1,23 @@
-"use client"
+"use client";
 
-import { authClient } from "@/lib/auth-client"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { authClient } from "@/lib/auth-client";
 
 export function OrgSettings({ orgId }: { orgId: string }) {
-  const { data: org, isPending: orgLoading } = authClient.useActiveOrganization()
-  const { data: members, isPending: membersLoading } = authClient.organization.listMembers({
-    query: { organizationId: orgId },
-  })
+  const { data: org, isPending: orgLoading } =
+    authClient.useActiveOrganization();
+  const { data: members, isPending: membersLoading } =
+    authClient.organization.listMembers({
+      query: { organizationId: orgId },
+    });
 
   return (
     <div className="space-y-6">
@@ -24,7 +32,9 @@ export function OrgSettings({ orgId }: { orgId: string }) {
           ) : (
             <div className="space-y-1">
               <p className="font-medium">{org?.name}</p>
-              <p className="text-sm text-muted-foreground font-mono">{org?.slug}</p>
+              <p className="font-mono text-muted-foreground text-sm">
+                {org?.slug}
+              </p>
             </div>
           )}
         </CardContent>
@@ -39,13 +49,16 @@ export function OrgSettings({ orgId }: { orgId: string }) {
           {membersLoading ? (
             <div className="space-y-3">
               {[1, 2].map((i) => (
-                <Skeleton key={i} className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" key={i} />
               ))}
             </div>
           ) : (
             <div className="space-y-3">
               {members?.data?.map((member) => (
-                <div key={member.id} className="flex items-center justify-between">
+                <div
+                  className="flex items-center justify-between"
+                  key={member.id}
+                >
                   <div className="flex items-center gap-3">
                     <Avatar className="size-8">
                       <AvatarFallback className="text-xs">
@@ -53,11 +66,13 @@ export function OrgSettings({ orgId }: { orgId: string }) {
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="text-sm font-medium">{member.user.name}</p>
-                      <p className="text-xs text-muted-foreground">{member.user.email}</p>
+                      <p className="font-medium text-sm">{member.user.name}</p>
+                      <p className="text-muted-foreground text-xs">
+                        {member.user.email}
+                      </p>
                     </div>
                   </div>
-                  <span className="text-xs font-medium text-muted-foreground capitalize px-2 py-1 rounded-md bg-muted">
+                  <span className="rounded-md bg-muted px-2 py-1 font-medium text-muted-foreground text-xs capitalize">
                     {member.role}
                   </span>
                 </div>
@@ -67,5 +82,5 @@ export function OrgSettings({ orgId }: { orgId: string }) {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

@@ -1,32 +1,32 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockSend = vi.fn()
+const mockSend = vi.fn();
 
 vi.mock("../s3", () => ({
   s3: { send: (...args: unknown[]) => mockSend(...args) },
-}))
+}));
 
 import {
   createBucketResources,
-  emptyBucket,
   deleteBucketResources,
-} from "./s3"
+  emptyBucket,
+} from "./s3";
 
 beforeEach(() => {
-  mockSend.mockReset()
-})
+  mockSend.mockReset();
+});
 
 describe("createBucketResources", () => {
   it("creates bucket with website hosting and public access", async () => {
-    mockSend.mockResolvedValue({})
-    const result = await createBucketResources("test-bucket", "us-east-1")
+    mockSend.mockResolvedValue({});
+    const result = await createBucketResources("test-bucket", "us-east-1");
 
-    expect(mockSend).toHaveBeenCalledTimes(4)
+    expect(mockSend).toHaveBeenCalledTimes(4);
     expect(result.websiteEndpoint).toBe(
       "test-bucket.s3-website-us-east-1.amazonaws.com"
-    )
-  })
-})
+    );
+  });
+});
 
 describe("emptyBucket", () => {
   it("deletes all objects with pagination", async () => {
@@ -41,26 +41,26 @@ describe("emptyBucket", () => {
         Contents: [{ Key: "c.txt" }],
         IsTruncated: false,
       })
-      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce({});
 
-    await emptyBucket("test-bucket")
-    expect(mockSend).toHaveBeenCalledTimes(4)
-  })
+    await emptyBucket("test-bucket");
+    expect(mockSend).toHaveBeenCalledTimes(4);
+  });
 
   it("handles empty bucket", async () => {
-    mockSend.mockResolvedValueOnce({ Contents: undefined, IsTruncated: false })
-    await emptyBucket("test-bucket")
-    expect(mockSend).toHaveBeenCalledTimes(1)
-  })
-})
+    mockSend.mockResolvedValueOnce({ Contents: undefined, IsTruncated: false });
+    await emptyBucket("test-bucket");
+    expect(mockSend).toHaveBeenCalledTimes(1);
+  });
+});
 
 describe("deleteBucketResources", () => {
   it("empties then deletes bucket", async () => {
     mockSend
       .mockResolvedValueOnce({ Contents: undefined, IsTruncated: false })
-      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce({});
 
-    await deleteBucketResources("test-bucket")
-    expect(mockSend).toHaveBeenCalledTimes(2)
-  })
-})
+    await deleteBucketResources("test-bucket");
+    expect(mockSend).toHaveBeenCalledTimes(2);
+  });
+});

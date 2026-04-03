@@ -1,7 +1,7 @@
-import { serve } from "@hono/node-server"
-import { env } from "./env"
-import app from "./app"
+import { serve } from "@hono/node-server";
+import app from "./app";
+import { env } from "./env";
 
 serve({ fetch: app.fetch, port: env.PORT }, (info) => {
-  console.log(`Buckt API running on port ${info.port}`)
-})
+  console.log(`Buckt API running on port ${info.port}`);
+});

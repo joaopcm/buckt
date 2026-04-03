@@ -10,10 +10,10 @@ export const PLAN_LIMITS = {
     maxBandwidthBytesPerMonth: 1024 * 1024 * 1024 * 1024,
   },
   enterprise: {
-    maxBuckets: Infinity,
-    maxStorageBytes: Infinity,
-    maxBandwidthBytesPerMonth: Infinity,
+    maxBuckets: Number.POSITIVE_INFINITY,
+    maxStorageBytes: Number.POSITIVE_INFINITY,
+    maxBandwidthBytesPerMonth: Number.POSITIVE_INFINITY,
   },
-} as const
+} as const;
 
-export type PlanName = keyof typeof PLAN_LIMITS
+export type PlanName = keyof typeof PLAN_LIMITS;

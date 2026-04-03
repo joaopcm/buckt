@@ -1,36 +1,46 @@
-import { z } from "zod"
-import { eq, and, gt, asc, count } from "drizzle-orm"
-import { buckets } from "@buckt/db"
-import { router, protectedProcedure } from "../init"
+import { buckets } from "@buckt/db";
+import { and, asc, count, eq, gt } from "drizzle-orm";
+import { z } from "zod";
+import { protectedProcedure, router } from "../init";
 
 export const bucketsRouter = router({
   list: protectedProcedure
-    .input(z.object({
-      orgId: z.string(),
-      cursor: z.string().optional(),
-      limit: z.number().int().positive().max(100).default(20),
-      status: z.enum(["pending", "provisioning", "active", "failed", "deleting"]).optional(),
-    }))
+    .input(
+      z.object({
+        orgId: z.string(),
+        cursor: z.string().optional(),
+        limit: z.number().int().positive().max(100).default(20),
+        status: z
+          .enum(["pending", "provisioning", "active", "failed", "deleting"])
+          .optional(),
+      })
+    )
     .query(async ({ ctx, input }) => {
-      const { orgId, cursor, limit, status } = input
-      const conditions = [eq(buckets.orgId, orgId)]
-      if (status) conditions.push(eq(buckets.status, status))
-      if (cursor) conditions.push(gt(buckets.id, cursor))
+      const { orgId, cursor, limit, status } = input;
+      const conditions = [eq(buckets.orgId, orgId)];
+      if (status) {
+        conditions.push(eq(buckets.status, status));
+      }
+      if (cursor) {
+        conditions.push(gt(buckets.id, cursor));
+      }
 
       const items = await ctx.db
         .select()
         .from(buckets)
         .where(and(...conditions))
         .orderBy(asc(buckets.id))
-        .limit(limit + 1)
+        .limit(limit + 1);
 
-      const hasMore = items.length > limit
-      if (hasMore) items.pop()
+      const hasMore = items.length > limit;
+      if (hasMore) {
+        items.pop();
+      }
 
       return {
         items,
-        nextCursor: hasMore ? items[items.length - 1].id : null,
-      }
+        nextCursor: hasMore ? (items.at(-1)?.id ?? null) : null,
+      };
     }),
 
   get: protectedProcedure
@@ -40,9 +50,9 @@ export const bucketsRouter = router({
         .select()
         .from(buckets)
         .where(and(eq(buckets.id, input.id), eq(buckets.orgId, input.orgId)))
-        .limit(1)
+        .limit(1);
 
-      return bucket ?? null
+      return bucket ?? null;
     }),
 
   count: protectedProcedure
@@ -51,8 +61,8 @@ export const bucketsRouter = router({
       const [result] = await ctx.db
         .select({ count: count() })
         .from(buckets)
-        .where(eq(buckets.orgId, input.orgId))
+        .where(eq(buckets.orgId, input.orgId));
 
-      return result.count
+      return result.count;
     }),
-})
+});

@@ -1,10 +1,19 @@
-import { pgTable, text, timestamp, jsonb, uniqueIndex, index } from "drizzle-orm/pg-core"
-import { uuidv7 } from "uuidv7"
+import {
+  index,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
+import { uuidv7 } from "uuidv7";
 
 export const apiKeys = pgTable(
   "api_keys",
   {
-    id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
     orgId: text("org_id").notNull(),
     name: text("name").notNull(),
     hashedKey: text("hashed_key").notNull(),
@@ -17,5 +26,5 @@ export const apiKeys = pgTable(
   (table) => [
     uniqueIndex("api_keys_hashed_key_idx").on(table.hashedKey),
     index("api_keys_org_id_idx").on(table.orgId),
-  ],
-)
+  ]
+);

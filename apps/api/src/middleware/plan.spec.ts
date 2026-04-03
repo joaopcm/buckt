@@ -1,17 +1,17 @@
-import { describe, it, expect, beforeEach } from "vitest"
-import { subscription } from "@buckt/db"
-import app from "../app"
-import { TEST_ORG_ID, createTestApiKey, cleanDb } from "../lib/test-helpers"
-import { db } from "../lib/db"
+import { subscription } from "@buckt/db";
+import { beforeEach, describe, expect, it } from "vitest";
+import app from "../app";
+import { db } from "../lib/db";
+import { cleanDb, createTestApiKey, TEST_ORG_ID } from "../lib/test-helpers";
 
 describe("plan middleware", () => {
-  let apiKey: string
+  let apiKey: string;
 
   beforeEach(async () => {
-    await cleanDb()
-    const { rawKey } = await createTestApiKey()
-    apiKey = rawKey
-  })
+    await cleanDb();
+    const { rawKey } = await createTestApiKey();
+    apiKey = rawKey;
+  });
 
   it("defaults to free when no subscription exists", async () => {
     const res = await app.request("/api/buckets", {
@@ -21,8 +21,8 @@ describe("plan middleware", () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ name: "First", customDomain: "a.test.com" }),
-    })
-    expect(res.status).toBe(201)
+    });
+    expect(res.status).toBe(201);
 
     const res2 = await app.request("/api/buckets", {
       method: "POST",
@@ -31,9 +31,9 @@ describe("plan middleware", () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ name: "Second", customDomain: "b.test.com" }),
-    })
-    expect(res2.status).toBe(402)
-  })
+    });
+    expect(res2.status).toBe(402);
+  });
 
   it("sets pro limits when subscription is active", async () => {
     await db.insert(subscription).values({
@@ -41,7 +41,7 @@ describe("plan middleware", () => {
       plan: "pro",
       referenceId: TEST_ORG_ID,
       status: "active",
-    })
+    });
 
     const res = await app.request("/api/buckets", {
       method: "POST",
@@ -50,8 +50,8 @@ describe("plan middleware", () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ name: "First", customDomain: "a.test.com" }),
-    })
-    expect(res.status).toBe(201)
+    });
+    expect(res.status).toBe(201);
 
     const res2 = await app.request("/api/buckets", {
       method: "POST",
@@ -60,9 +60,9 @@ describe("plan middleware", () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ name: "Second", customDomain: "b.test.com" }),
-    })
-    expect(res2.status).toBe(201)
-  })
+    });
+    expect(res2.status).toBe(201);
+  });
 
   it("defaults to free when subscription is canceled", async () => {
     await db.insert(subscription).values({
@@ -70,7 +70,7 @@ describe("plan middleware", () => {
       plan: "pro",
       referenceId: TEST_ORG_ID,
       status: "canceled",
-    })
+    });
 
     const res = await app.request("/api/buckets", {
       method: "POST",
@@ -79,8 +79,8 @@ describe("plan middleware", () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ name: "First", customDomain: "a.test.com" }),
-    })
-    expect(res.status).toBe(201)
+    });
+    expect(res.status).toBe(201);
 
     const res2 = await app.request("/api/buckets", {
       method: "POST",
@@ -89,7 +89,7 @@ describe("plan middleware", () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ name: "Second", customDomain: "b.test.com" }),
-    })
-    expect(res2.status).toBe(402)
-  })
-})
+    });
+    expect(res2.status).toBe(402);
+  });
+});

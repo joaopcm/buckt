@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "zod";
 
 export const PERMISSIONS = [
   "buckets:read",
@@ -9,12 +9,12 @@ export const PERMISSIONS = [
   "files:delete",
   "keys:read",
   "keys:write",
-] as const
+] as const;
 
-export type Permission = (typeof PERMISSIONS)[number]
+export type Permission = (typeof PERMISSIONS)[number];
 
 export const createKeySchema = z.object({
   name: z.string().min(1).max(100),
   permissions: z.array(z.enum(PERMISSIONS)).min(1),
   expiresAt: z.coerce.date().optional(),
-})
+});

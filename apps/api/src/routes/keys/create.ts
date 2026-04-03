@@ -1,20 +1,20 @@
-import type { Context } from "hono"
-import { apiKeys } from "@buckt/db"
-import { createKeySchema } from "@buckt/shared"
-import { db } from "../../lib/db"
-import { generateApiKey } from "../../lib/hash"
-import { error } from "../../lib/response"
+import { apiKeys } from "@buckt/db";
+import { createKeySchema } from "@buckt/shared";
+import type { Context } from "hono";
+import { db } from "../../lib/db";
+import { generateApiKey } from "../../lib/hash";
+import { error } from "../../lib/response";
 
 export async function createKey(c: Context) {
-  const body = await c.req.json()
-  const parsed = createKeySchema.safeParse(body)
+  const body = await c.req.json();
+  const parsed = createKeySchema.safeParse(body);
   if (!parsed.success) {
-    return error(c, 400, parsed.error.issues[0].message)
+    return error(c, 400, parsed.error.issues[0].message);
   }
 
-  const { name, permissions, expiresAt } = parsed.data
-  const orgId = c.get("orgId")
-  const { key, prefix, hashedKey } = generateApiKey()
+  const { name, permissions, expiresAt } = parsed.data;
+  const orgId = c.get("orgId");
+  const { key, prefix, hashedKey } = generateApiKey();
 
   const [apiKey] = await db
     .insert(apiKeys)
@@ -26,7 +26,7 @@ export async function createKey(c: Context) {
       permissions,
       expiresAt: expiresAt ?? null,
     })
-    .returning()
+    .returning();
 
-  return c.json({ data: { ...apiKey, key }, error: null, meta: null }, 201)
+  return c.json({ data: { ...apiKey, key }, error: null, meta: null }, 201);
 }

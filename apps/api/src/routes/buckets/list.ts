@@ -1,25 +1,25 @@
-import type { Context } from "hono"
-import { eq, and, gt, asc } from "drizzle-orm"
-import { buckets } from "@buckt/db"
-import { listBucketsSchema } from "@buckt/shared"
-import { db } from "../../lib/db"
-import { success, error } from "../../lib/response"
+import { buckets } from "@buckt/db";
+import { listBucketsSchema } from "@buckt/shared";
+import { and, asc, eq, gt } from "drizzle-orm";
+import type { Context } from "hono";
+import { db } from "../../lib/db";
+import { error, success } from "../../lib/response";
 
 export async function listBuckets(c: Context) {
-  const orgId = c.get("orgId")
-  const query = listBucketsSchema.safeParse(c.req.query())
+  const orgId = c.get("orgId");
+  const query = listBucketsSchema.safeParse(c.req.query());
   if (!query.success) {
-    return error(c, 400, query.error.issues[0].message)
+    return error(c, 400, query.error.issues[0].message);
   }
 
-  const { status, cursor, limit } = query.data
+  const { status, cursor, limit } = query.data;
 
-  const conditions = [eq(buckets.orgId, orgId)]
+  const conditions = [eq(buckets.orgId, orgId)];
   if (status) {
-    conditions.push(eq(buckets.status, status))
+    conditions.push(eq(buckets.status, status));
   }
   if (cursor) {
-    conditions.push(gt(buckets.id, cursor))
+    conditions.push(gt(buckets.id, cursor));
   }
 
   const items = await db
@@ -27,12 +27,14 @@ export async function listBuckets(c: Context) {
     .from(buckets)
     .where(and(...conditions))
     .orderBy(asc(buckets.id))
-    .limit(limit + 1)
+    .limit(limit + 1);
 
-  const hasMore = items.length > limit
-  if (hasMore) items.pop()
+  const hasMore = items.length > limit;
+  if (hasMore) {
+    items.pop();
+  }
 
-  const nextCursor = hasMore ? items[items.length - 1].id : null
+  const nextCursor = hasMore ? (items.at(-1)?.id ?? null) : null;
 
-  return success(c, items, { nextCursor, limit })
+  return success(c, items, { nextCursor, limit });
 }
