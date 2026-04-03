@@ -23,7 +23,7 @@ describe("rate-limit middleware", () => {
   });
 
   it("sets rate limit headers on success", async () => {
-    const res = await app.request("/api/buckets", {
+    const res = await app.request("/v1/buckets", {
       headers: { Authorization: `Bearer ${apiKey}` },
     });
 
@@ -41,7 +41,7 @@ describe("rate-limit middleware", () => {
       resetAt: Math.ceil(Date.now() / 1000) + 60,
     });
 
-    const res = await app.request("/api/buckets", {
+    const res = await app.request("/v1/buckets", {
       headers: { Authorization: `Bearer ${apiKey}` },
     });
 
@@ -59,7 +59,7 @@ describe("rate-limit middleware", () => {
       status: "active",
     });
 
-    await app.request("/api/buckets", {
+    await app.request("/v1/buckets", {
       headers: { Authorization: `Bearer ${apiKey}` },
     });
 
@@ -67,7 +67,7 @@ describe("rate-limit middleware", () => {
   });
 
   it("uses free limits when no subscription exists", async () => {
-    await app.request("/api/buckets", {
+    await app.request("/v1/buckets", {
       headers: { Authorization: `Bearer ${apiKey}` },
     });
 

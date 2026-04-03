@@ -14,7 +14,7 @@ describe("plan middleware", () => {
   });
 
   it("defaults to free when no subscription exists", async () => {
-    const res = await app.request("/api/buckets", {
+    const res = await app.request("/v1/buckets", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -24,7 +24,7 @@ describe("plan middleware", () => {
     });
     expect(res.status).toBe(201);
 
-    const res2 = await app.request("/api/buckets", {
+    const res2 = await app.request("/v1/buckets", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -43,7 +43,7 @@ describe("plan middleware", () => {
       status: "active",
     });
 
-    const res = await app.request("/api/buckets", {
+    const res = await app.request("/v1/buckets", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -53,7 +53,7 @@ describe("plan middleware", () => {
     });
     expect(res.status).toBe(201);
 
-    const res2 = await app.request("/api/buckets", {
+    const res2 = await app.request("/v1/buckets", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -72,7 +72,7 @@ describe("plan middleware", () => {
       status: "canceled",
     });
 
-    const res = await app.request("/api/buckets", {
+    const res = await app.request("/v1/buckets", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -82,7 +82,7 @@ describe("plan middleware", () => {
     });
     expect(res.status).toBe(201);
 
-    const res2 = await app.request("/api/buckets", {
+    const res2 = await app.request("/v1/buckets", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,

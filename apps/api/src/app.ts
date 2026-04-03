@@ -62,64 +62,64 @@ app.onError((err, c) => {
 app.get("/health", (c) => c.json({ status: "ok" }));
 
 app.post(
-  "/api/buckets",
+  "/v1/buckets",
   requireAuth("buckets:write"),
   rateLimit,
   requirePlan(),
   createBucket
 );
-app.get("/api/buckets", requireAuth("buckets:read"), rateLimit, listBuckets);
-app.get("/api/buckets/:id", requireAuth("buckets:read"), rateLimit, getBucket);
+app.get("/v1/buckets", requireAuth("buckets:read"), rateLimit, listBuckets);
+app.get("/v1/buckets/:id", requireAuth("buckets:read"), rateLimit, getBucket);
 app.delete(
-  "/api/buckets/:id",
+  "/v1/buckets/:id",
   requireAuth("buckets:delete"),
   rateLimit,
   deleteBucket
 );
 app.post(
-  "/api/buckets/:id/retry",
+  "/v1/buckets/:id/retry",
   requireAuth("buckets:write"),
   rateLimit,
   retryBucket
 );
 
 app.put(
-  "/api/buckets/:bucketId/files/*",
+  "/v1/buckets/:bucketId/files/*",
   requireAuth("files:write"),
   rateLimit,
   requirePlan(),
   uploadFile
 );
 app.get(
-  "/api/buckets/:bucketId/files",
+  "/v1/buckets/:bucketId/files",
   requireAuth("files:read"),
   rateLimit,
   listFiles
 );
 app.get(
-  "/api/buckets/:bucketId/files/*",
+  "/v1/buckets/:bucketId/files/*",
   requireAuth("files:read"),
   rateLimit,
   getFile
 );
 app.delete(
-  "/api/buckets/:bucketId/files/*",
+  "/v1/buckets/:bucketId/files/*",
   requireAuth("files:delete"),
   rateLimit,
   deleteFile
 );
 
 app.get(
-  "/api/billing/usage",
+  "/v1/billing/usage",
   requireAuth(),
   rateLimit,
   requirePlan(),
   getUsage
 );
-app.get("/api/billing/subscription", requireAuth(), rateLimit, getSubscription);
+app.get("/v1/billing/subscription", requireAuth(), rateLimit, getSubscription);
 
-app.post("/api/keys", requireAuth("keys:write"), rateLimit, createKey);
-app.get("/api/keys", requireAuth("keys:read"), rateLimit, listKeys);
-app.delete("/api/keys/:id", requireAuth("keys:write"), rateLimit, deleteKey);
+app.post("/v1/keys", requireAuth("keys:write"), rateLimit, createKey);
+app.get("/v1/keys", requireAuth("keys:read"), rateLimit, listKeys);
+app.delete("/v1/keys/:id", requireAuth("keys:write"), rateLimit, deleteKey);
 
 export default app;

@@ -12,7 +12,7 @@ describe("GET /api/buckets/:id", () => {
   });
 
   async function createBucket(name: string, domain: string) {
-    const res = await app.request("/api/buckets", {
+    const res = await app.request("/v1/buckets", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -27,7 +27,7 @@ describe("GET /api/buckets/:id", () => {
   it("returns bucket detail", async () => {
     const bucket = await createBucket("Detail", "detail.test.com");
 
-    const res = await app.request(`/api/buckets/${bucket.id}`, {
+    const res = await app.request(`/v1/buckets/${bucket.id}`, {
       headers: { Authorization: `Bearer ${apiKey}` },
     });
     expect(res.status).toBe(200);
@@ -36,7 +36,7 @@ describe("GET /api/buckets/:id", () => {
   });
 
   it("returns 404 for non-existent bucket", async () => {
-    const res = await app.request("/api/buckets/non-existent-id", {
+    const res = await app.request("/v1/buckets/non-existent-id", {
       headers: { Authorization: `Bearer ${apiKey}` },
     });
     expect(res.status).toBe(404);
@@ -46,7 +46,7 @@ describe("GET /api/buckets/:id", () => {
     const bucket = await createBucket("Mine", "mine.test.com");
 
     const { rawKey: otherKey } = await createTestApiKey({ orgId: "other-org" });
-    const res = await app.request(`/api/buckets/${bucket.id}`, {
+    const res = await app.request(`/v1/buckets/${bucket.id}`, {
       headers: { Authorization: `Bearer ${otherKey}` },
     });
     expect(res.status).toBe(404);

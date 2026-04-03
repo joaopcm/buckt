@@ -18,7 +18,7 @@ describe("POST /api/buckets/:id/retry", () => {
     status: string,
     domain = "retry.test.com"
   ) {
-    const res = await app.request("/api/buckets", {
+    const res = await app.request("/v1/buckets", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -38,7 +38,7 @@ describe("POST /api/buckets/:id/retry", () => {
   }
 
   function retry(id: string) {
-    return app.request(`/api/buckets/${id}/retry`, {
+    return app.request(`/v1/buckets/${id}/retry`, {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}` },
     });
@@ -64,7 +64,7 @@ describe("POST /api/buckets/:id/retry", () => {
   });
 
   it("rejects without auth", async () => {
-    const res = await app.request("/api/buckets/some-id/retry", {
+    const res = await app.request("/v1/buckets/some-id/retry", {
       method: "POST",
     });
     expect(res.status).toBe(401);

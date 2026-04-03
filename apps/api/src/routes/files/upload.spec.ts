@@ -28,7 +28,7 @@ describe("PUT /api/buckets/:id/files/*", () => {
   });
 
   function req(path: string, body: string, key?: string) {
-    return app.request(`/api/buckets/${bucketId}/files/${path}`, {
+    return app.request(`/v1/buckets/${bucketId}/files/${path}`, {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${key ?? apiKey}`,
@@ -48,7 +48,7 @@ describe("PUT /api/buckets/:id/files/*", () => {
   });
 
   it("rejects without auth", async () => {
-    const res = await app.request(`/api/buckets/${bucketId}/files/test.txt`, {
+    const res = await app.request(`/v1/buckets/${bucketId}/files/test.txt`, {
       method: "PUT",
     });
     expect(res.status).toBe(401);
@@ -61,7 +61,7 @@ describe("PUT /api/buckets/:id/files/*", () => {
   });
 
   it("returns 404 for nonexistent bucket", async () => {
-    const res = await app.request("/api/buckets/nonexistent/files/test.txt", {
+    const res = await app.request("/v1/buckets/nonexistent/files/test.txt", {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -75,7 +75,7 @@ describe("PUT /api/buckets/:id/files/*", () => {
   it("rejects upload to inactive bucket", async () => {
     await insertProSubscription();
     const { rawKey } = await createTestApiKey();
-    const createRes = await app.request("/api/buckets", {
+    const createRes = await app.request("/v1/buckets", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${rawKey}`,
@@ -88,7 +88,7 @@ describe("PUT /api/buckets/:id/files/*", () => {
     });
     const { data } = await createRes.json();
 
-    const res = await app.request(`/api/buckets/${data.id}/files/test.txt`, {
+    const res = await app.request(`/v1/buckets/${data.id}/files/test.txt`, {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${rawKey}`,

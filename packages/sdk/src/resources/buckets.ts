@@ -9,7 +9,7 @@ export class BucketsClient {
   }
 
   async create(opts: { name: string; customDomain: string }): Promise<Bucket> {
-    const { data } = await this.http.post<Bucket>("/api/buckets", opts);
+    const { data } = await this.http.post<Bucket>("/v1/buckets", opts);
     return data;
   }
 
@@ -18,7 +18,7 @@ export class BucketsClient {
     limit?: number;
     status?: BucketStatus;
   }): Promise<{ data: Bucket[]; meta: CursorMeta }> {
-    const { data, meta } = await this.http.get<Bucket[]>("/api/buckets", {
+    const { data, meta } = await this.http.get<Bucket[]>("/v1/buckets", {
       cursor: opts?.cursor,
       limit: opts?.limit?.toString(),
       status: opts?.status,
@@ -27,11 +27,11 @@ export class BucketsClient {
   }
 
   async get(id: string): Promise<Bucket> {
-    const { data } = await this.http.get<Bucket>(`/api/buckets/${id}`);
+    const { data } = await this.http.get<Bucket>(`/v1/buckets/${id}`);
     return data;
   }
 
   async delete(id: string): Promise<void> {
-    await this.http.delete(`/api/buckets/${id}`);
+    await this.http.delete(`/v1/buckets/${id}`);
   }
 }

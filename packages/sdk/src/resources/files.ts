@@ -15,7 +15,7 @@ export class FilesClient {
     contentType?: string
   ): Promise<FileInfo> {
     const { data } = await this.http.put<FileInfo>(
-      `/api/buckets/${bucketId}/files/${path}`,
+      `/v1/buckets/${bucketId}/files/${path}`,
       body,
       contentType
     );
@@ -27,7 +27,7 @@ export class FilesClient {
     opts?: { prefix?: string; cursor?: string; limit?: number }
   ): Promise<{ data: FileInfo[]; meta: CursorMeta }> {
     const { data, meta } = await this.http.get<FileInfo[]>(
-      `/api/buckets/${bucketId}/files`,
+      `/v1/buckets/${bucketId}/files`,
       {
         prefix: opts?.prefix,
         cursor: opts?.cursor,
@@ -39,12 +39,12 @@ export class FilesClient {
 
   async get(bucketId: string, path: string): Promise<FileInfo> {
     const { data } = await this.http.get<FileInfo>(
-      `/api/buckets/${bucketId}/files/${path}`
+      `/v1/buckets/${bucketId}/files/${path}`
     );
     return data;
   }
 
   async delete(bucketId: string, path: string): Promise<void> {
-    await this.http.delete(`/api/buckets/${bucketId}/files/${path}`);
+    await this.http.delete(`/v1/buckets/${bucketId}/files/${path}`);
   }
 }

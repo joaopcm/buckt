@@ -43,7 +43,7 @@ export async function createActiveBucket(
   apiKey: string,
   opts?: { name?: string; customDomain?: string }
 ) {
-  const res = await app.request("/api/buckets", {
+  const res = await app.request("/v1/buckets", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
