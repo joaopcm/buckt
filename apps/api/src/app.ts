@@ -32,8 +32,8 @@ app.get("/api/buckets/:bucketId/files", requireAuth("files:read"), listFiles)
 app.get("/api/buckets/:bucketId/files/*", requireAuth("files:read"), getFile)
 app.delete("/api/buckets/:bucketId/files/*", requireAuth("files:delete"), deleteFile)
 
-app.get("/api/billing/usage", requireAuth("buckets:read"), requirePlan(), getUsage)
-app.get("/api/billing/subscription", requireAuth("buckets:read"), getSubscription)
+app.get("/api/billing/usage", requireAuth(), requirePlan(), getUsage)
+app.get("/api/billing/subscription", requireAuth(), getSubscription)
 
 app.post("/api/keys", requireAuth(...PERMISSIONS), createKey)
 app.get("/api/keys", requireAuth(), listKeys)
