@@ -109,13 +109,7 @@ app.delete(
   deleteFile
 );
 
-app.get(
-  "/v1/billing/usage",
-  requireAuth(),
-  rateLimit,
-  requirePlan(),
-  getUsage
-);
+app.get("/v1/billing/usage", requireAuth(), rateLimit, requirePlan(), getUsage);
 app.get("/v1/billing/subscription", requireAuth(), rateLimit, getSubscription);
 
 app.post("/v1/keys", requireAuth("keys:write"), rateLimit, createKey);
