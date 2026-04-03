@@ -1,19 +1,12 @@
-import { createMiddleware } from "hono/factory"
+import type { Context, Next } from "hono"
 import { eq, and } from "drizzle-orm"
 import { subscription } from "@buckt/db"
 import { PLAN_LIMITS, type PlanName } from "@buckt/shared"
 import { db } from "../lib/db"
 
-type PlanEnv = {
-  Variables: {
-    plan: PlanName
-    planLimits: (typeof PLAN_LIMITS)[PlanName]
-  }
-}
-
 export function requirePlan() {
-  return createMiddleware<PlanEnv>(async (c, next) => {
-    const orgId = c.get("orgId")
+  return async (c: Context, next: Next) => {
+    const orgId = c.get("orgId") as string
 
     const [sub] = await db
       .select({ plan: subscription.plan })
@@ -31,5 +24,5 @@ export function requirePlan() {
     c.set("planLimits", PLAN_LIMITS[plan])
 
     await next()
-  })
+  }
 }

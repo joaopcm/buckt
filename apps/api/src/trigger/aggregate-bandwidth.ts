@@ -88,8 +88,8 @@ export const aggregateBandwidth = schedules.task({
       )
     }
 
-    const meteredPriceId = process.env.STRIPE_METERED_BANDWIDTH_PRICE_ID
-    if (!meteredPriceId) return
+    const meterEventName = process.env.STRIPE_METERED_BANDWIDTH_PRICE_ID
+    if (!meterEventName) return
 
     for (const [orgId, totalBytes] of orgBandwidth) {
       try {
@@ -98,20 +98,15 @@ export const aggregateBandwidth = schedules.task({
           .from(subscription)
           .where(eq(subscription.referenceId, orgId))
           .limit(1)
-        if (!sub?.stripeSubscriptionId) continue
-
-        const items = await stripe.subscriptionItems.list({
-          subscription: sub.stripeSubscriptionId,
-        })
-        const meteredItem = items.data.find(
-          (item) => item.price.id === meteredPriceId
-        )
-        if (!meteredItem) continue
+        if (!sub?.stripeCustomerId) continue
 
         const bandwidthGb = Math.ceil(totalBytes / (1024 * 1024 * 1024))
-        await stripe.subscriptionItems.createUsageRecord(meteredItem.id, {
-          quantity: bandwidthGb,
-          action: "set",
+        await stripe.billing.meterEvents.create({
+          event_name: meterEventName,
+          payload: {
+            stripe_customer_id: sub.stripeCustomerId,
+            value: String(bandwidthGb),
+          },
         })
       } catch (err) {
         console.error(
