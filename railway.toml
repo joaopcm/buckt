@@ -1,6 +1,6 @@
 [build]
 builder = "RAILPACK"
-buildCommand = "pnpm --filter @buckt/api build"
+buildCommand = "pnpm install --frozen-lockfile"
 watchPatterns = [
   "apps/api/**",
   "packages/db/**",
@@ -10,7 +10,7 @@ watchPatterns = [
 ]
 
 [deploy]
-startCommand = "node apps/api/dist/index.js"
+startCommand = "pnpm --filter @buckt/api start"
 healthcheckPath = "/health"
 healthcheckTimeout = 30
 restartPolicyType = "ON_FAILURE"
