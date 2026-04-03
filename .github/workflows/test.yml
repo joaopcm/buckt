@@ -28,6 +28,7 @@ jobs:
       NODE_ENV: test
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
+      STRIPE_SECRET_KEY: sk_test_placeholder
       TRIGGER_SECRET_KEY: test
 
     steps:
