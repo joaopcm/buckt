@@ -1,4 +1,9 @@
-export type BucketStatus = "pending" | "provisioning" | "active" | "failed" | "deleting"
+export type BucketStatus =
+  | "pending"
+  | "provisioning"
+  | "active"
+  | "failed"
+  | "deleting";
 
 export type Permission =
   | "buckets:read"
@@ -6,69 +11,69 @@ export type Permission =
   | "buckets:delete"
   | "files:read"
   | "files:write"
-  | "files:delete"
+  | "files:delete";
 
 export interface Bucket {
-  id: string
-  orgId: string
-  name: string
-  slug: string
-  s3BucketName: string
-  region: string
-  customDomain: string
-  cloudfrontDistributionId: string | null
-  acmCertArn: string | null
-  status: BucketStatus
-  dnsRecords: unknown | null
-  provisioningJobId: string | null
-  storageUsedBytes: number
-  bandwidthUsedBytes: number
-  createdAt: string
-  updatedAt: string
+  acmCertArn: string | null;
+  bandwidthUsedBytes: number;
+  cloudfrontDistributionId: string | null;
+  createdAt: string;
+  customDomain: string;
+  dnsRecords: unknown | null;
+  id: string;
+  name: string;
+  orgId: string;
+  provisioningJobId: string | null;
+  region: string;
+  s3BucketName: string;
+  slug: string;
+  status: BucketStatus;
+  storageUsedBytes: number;
+  updatedAt: string;
 }
 
 export interface ApiKey {
-  id: string
-  name: string
-  prefix: string
-  permissions: Permission[]
-  lastUsedAt: string | null
-  expiresAt: string | null
-  createdAt: string
+  createdAt: string;
+  expiresAt: string | null;
+  id: string;
+  lastUsedAt: string | null;
+  name: string;
+  permissions: Permission[];
+  prefix: string;
 }
 
 export interface ApiKeyWithSecret extends ApiKey {
-  key: string
-  orgId: string
-  hashedKey: string
+  hashedKey: string;
+  key: string;
+  orgId: string;
 }
 
 export interface FileInfo {
-  key: string
-  size: number
-  lastModified: string
-  contentType: string
-  url?: string
+  contentType: string;
+  key: string;
+  lastModified: string;
+  size: number;
+  url?: string;
 }
 
 export interface CursorMeta {
-  nextCursor: string | null
-  limit: number
+  limit: number;
+  nextCursor: string | null;
 }
 
 export interface ApiResponse<T> {
-  data: T
-  error: null
-  meta: CursorMeta | null
+  data: T;
+  error: null;
+  meta: CursorMeta | null;
 }
 
 export interface ApiErrorResponse {
-  data: null
-  error: { message: string }
-  meta: null
+  data: null;
+  error: { message: string };
+  meta: null;
 }
 
 export interface BucktOptions {
-  apiKey: string
-  baseUrl?: string
+  apiKey: string;
+  baseUrl?: string;
 }

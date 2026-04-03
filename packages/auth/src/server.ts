@@ -1,19 +1,23 @@
-import { betterAuth } from "better-auth"
-import { organization } from "better-auth/plugins"
-import { drizzleAdapter } from "better-auth/adapters/drizzle"
-import { stripe } from "@better-auth/stripe"
-import { apiKey } from "@better-auth/api-key"
-import Stripe from "stripe"
-import type { Database } from "@buckt/db"
-import * as schema from "@buckt/db/src/schema"
+import { apiKey } from "@better-auth/api-key";
+import { stripe } from "@better-auth/stripe";
+import type { Database } from "@buckt/db";
+// biome-ignore lint/performance/noNamespaceImport: drizzle requires namespace import for schema
+import * as schema from "@buckt/db/src/schema";
+import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { organization } from "better-auth/plugins";
+import Stripe from "stripe";
 
-export function createAuth(db: Database, env: {
-  secret: string
-  baseUrl: string
-  stripeSecretKey: string
-  stripeWebhookSecret: string
-}) {
-  const stripeClient = new Stripe(env.stripeSecretKey)
+export function createAuth(
+  db: Database,
+  env: {
+    secret: string;
+    baseUrl: string;
+    stripeSecretKey: string;
+    stripeWebhookSecret: string;
+  }
+) {
+  const stripeClient = new Stripe(env.stripeSecretKey);
 
   return betterAuth({
     database: drizzleAdapter(db, { provider: "pg", schema }),
@@ -41,7 +45,8 @@ export function createAuth(db: Database, env: {
             },
             {
               name: "enterprise",
-              priceId: process.env.STRIPE_ENTERPRISE_PRICE_ID || "price_enterprise",
+              priceId:
+                process.env.STRIPE_ENTERPRISE_PRICE_ID || "price_enterprise",
             },
           ],
         },
@@ -54,7 +59,7 @@ export function createAuth(db: Database, env: {
         defaultPrefix: "bkt",
       }),
     ],
-  })
+  });
 }
 
-export type Auth = ReturnType<typeof createAuth>
+export type Auth = ReturnType<typeof createAuth>;

@@ -1,4 +1,4 @@
-import { defineConfig } from "@trigger.dev/sdk"
+import { defineConfig } from "@trigger.dev/sdk";
 
 export default defineConfig({
   project: "buckt",
@@ -8,10 +8,10 @@ export default defineConfig({
     default: {
       maxAttempts: 3,
       minTimeoutInMs: 1000,
-      maxTimeoutInMs: 30000,
+      maxTimeoutInMs: 30_000,
       factor: 2,
       randomize: true,
     },
   },
   maxDuration: 3600,
-})
+});

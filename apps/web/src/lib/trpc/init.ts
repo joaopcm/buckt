@@ -1,30 +1,30 @@
-import { initTRPC, TRPCError } from "@trpc/server"
-import { headers } from "next/headers"
-import { auth } from "@/lib/auth"
-import { createDb } from "@buckt/db"
-import { env } from "@/env"
+import { createDb } from "@buckt/db";
+import { initTRPC, TRPCError } from "@trpc/server";
+import { headers } from "next/headers";
+import { env } from "@/env";
+import { auth } from "@/lib/auth";
 
-export type Context = {
-  session: Awaited<ReturnType<typeof auth.api.getSession>>
-  db: ReturnType<typeof createDb>
+export interface Context {
+  db: ReturnType<typeof createDb>;
+  session: Awaited<ReturnType<typeof auth.api.getSession>>;
 }
 
-const t = initTRPC.context<Context>().create()
+const t = initTRPC.context<Context>().create();
 
-export const createCallerFactory = t.createCallerFactory
-export const router = t.router
+export const createCallerFactory = t.createCallerFactory;
+export const router = t.router;
 
-export const publicProcedure = t.procedure
+export const publicProcedure = t.procedure;
 
 export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
   if (!ctx.session) {
-    throw new TRPCError({ code: "UNAUTHORIZED" })
+    throw new TRPCError({ code: "UNAUTHORIZED" });
   }
-  return next({ ctx: { ...ctx, session: ctx.session } })
-})
+  return await next({ ctx: { ...ctx, session: ctx.session } });
+});
 
 export async function createContext(): Promise<Context> {
-  const db = createDb(env.DATABASE_URL)
-  const session = await auth.api.getSession({ headers: await headers() })
-  return { session, db }
+  const db = createDb(env.DATABASE_URL);
+  const session = await auth.api.getSession({ headers: await headers() });
+  return { session, db };
 }

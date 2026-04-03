@@ -1,41 +1,55 @@
-import { Hono } from "hono"
-import { requireAuth } from "./middleware/auth"
-import { requirePlan } from "./middleware/plan"
-import { createBucket } from "./routes/buckets/create"
-import { listBuckets } from "./routes/buckets/list"
-import { getBucket } from "./routes/buckets/get"
-import { deleteBucket } from "./routes/buckets/delete"
-import { retryBucket } from "./routes/buckets/retry"
-import { createKey } from "./routes/keys/create"
-import { listKeys } from "./routes/keys/list"
-import { deleteKey } from "./routes/keys/delete"
-import { getUsage } from "./routes/billing/usage"
-import { getSubscription } from "./routes/billing/subscription"
-import { uploadFile } from "./routes/files/upload"
-import { listFiles } from "./routes/files/list"
-import { getFile } from "./routes/files/get"
-import { deleteFile } from "./routes/files/delete"
+import { Hono } from "hono";
+import { requireAuth } from "./middleware/auth";
+import { requirePlan } from "./middleware/plan";
+import { getSubscription } from "./routes/billing/subscription";
+import { getUsage } from "./routes/billing/usage";
+import { createBucket } from "./routes/buckets/create";
+import { deleteBucket } from "./routes/buckets/delete";
+import { getBucket } from "./routes/buckets/get";
+import { listBuckets } from "./routes/buckets/list";
+import { retryBucket } from "./routes/buckets/retry";
+import { deleteFile } from "./routes/files/delete";
+import { getFile } from "./routes/files/get";
+import { listFiles } from "./routes/files/list";
+import { uploadFile } from "./routes/files/upload";
+import { createKey } from "./routes/keys/create";
+import { deleteKey } from "./routes/keys/delete";
+import { listKeys } from "./routes/keys/list";
 
-const app = new Hono()
+const app = new Hono();
 
-app.get("/health", (c) => c.json({ status: "ok" }))
+app.get("/health", (c) => c.json({ status: "ok" }));
 
-app.post("/api/buckets", requireAuth("buckets:write"), requirePlan(), createBucket)
-app.get("/api/buckets", requireAuth("buckets:read"), listBuckets)
-app.get("/api/buckets/:id", requireAuth("buckets:read"), getBucket)
-app.delete("/api/buckets/:id", requireAuth("buckets:delete"), deleteBucket)
-app.post("/api/buckets/:id/retry", requireAuth("buckets:write"), retryBucket)
+app.post(
+  "/api/buckets",
+  requireAuth("buckets:write"),
+  requirePlan(),
+  createBucket
+);
+app.get("/api/buckets", requireAuth("buckets:read"), listBuckets);
+app.get("/api/buckets/:id", requireAuth("buckets:read"), getBucket);
+app.delete("/api/buckets/:id", requireAuth("buckets:delete"), deleteBucket);
+app.post("/api/buckets/:id/retry", requireAuth("buckets:write"), retryBucket);
 
-app.put("/api/buckets/:bucketId/files/*", requireAuth("files:write"), requirePlan(), uploadFile)
-app.get("/api/buckets/:bucketId/files", requireAuth("files:read"), listFiles)
-app.get("/api/buckets/:bucketId/files/*", requireAuth("files:read"), getFile)
-app.delete("/api/buckets/:bucketId/files/*", requireAuth("files:delete"), deleteFile)
+app.put(
+  "/api/buckets/:bucketId/files/*",
+  requireAuth("files:write"),
+  requirePlan(),
+  uploadFile
+);
+app.get("/api/buckets/:bucketId/files", requireAuth("files:read"), listFiles);
+app.get("/api/buckets/:bucketId/files/*", requireAuth("files:read"), getFile);
+app.delete(
+  "/api/buckets/:bucketId/files/*",
+  requireAuth("files:delete"),
+  deleteFile
+);
 
-app.get("/api/billing/usage", requireAuth(), requirePlan(), getUsage)
-app.get("/api/billing/subscription", requireAuth(), getSubscription)
+app.get("/api/billing/usage", requireAuth(), requirePlan(), getUsage);
+app.get("/api/billing/subscription", requireAuth(), getSubscription);
 
-app.post("/api/keys", requireAuth("keys:write"), createKey)
-app.get("/api/keys", requireAuth("keys:read"), listKeys)
-app.delete("/api/keys/:id", requireAuth("keys:write"), deleteKey)
+app.post("/api/keys", requireAuth("keys:write"), createKey);
+app.get("/api/keys", requireAuth("keys:read"), listKeys);
+app.delete("/api/keys/:id", requireAuth("keys:write"), deleteKey);
 
-export default app
+export default app;

@@ -1,14 +1,14 @@
-import { defineConfig } from "vitest/config"
-import { config } from "dotenv"
-import { existsSync } from "node:fs"
-import { resolve } from "node:path"
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
+import { config } from "dotenv";
+import { defineConfig } from "vitest/config";
 
-const root = resolve(__dirname, "../..")
+const root = resolve(import.meta.dirname, "../..");
 const envFile = existsSync(resolve(root, ".env"))
   ? resolve(root, ".env")
-  : resolve(root, ".env.example")
+  : resolve(root, ".env.example");
 
-config({ path: envFile, override: false })
+config({ path: envFile, override: false });
 
 export default defineConfig({
   test: {
@@ -16,4 +16,4 @@ export default defineConfig({
     setupFiles: ["src/test-setup.ts"],
     fileParallelism: false,
   },
-})
+});

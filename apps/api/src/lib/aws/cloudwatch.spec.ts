@@ -1,42 +1,42 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockSend = vi.fn()
+const mockSend = vi.fn();
 
 vi.mock("@aws-sdk/client-cloudwatch", () => ({
   CloudWatchClient: vi.fn(() => ({ send: mockSend })),
   GetMetricDataCommand: vi.fn((input: unknown) => input),
-}))
+}));
 
-const { getBucketSizeBytes } = await import("./cloudwatch")
+const { getBucketSizeBytes } = await import("./cloudwatch");
 
 describe("getBucketSizeBytes", () => {
   beforeEach(() => {
-    mockSend.mockReset()
-  })
+    mockSend.mockReset();
+  });
 
   it("returns the first metric value", async () => {
     mockSend.mockResolvedValue({
-      MetricDataResults: [{ Values: [123456789] }],
-    })
+      MetricDataResults: [{ Values: [123_456_789] }],
+    });
 
-    const result = await getBucketSizeBytes("my-bucket")
-    expect(result).toBe(123456789)
-    expect(mockSend).toHaveBeenCalledOnce()
-  })
+    const result = await getBucketSizeBytes("my-bucket");
+    expect(result).toBe(123_456_789);
+    expect(mockSend).toHaveBeenCalledOnce();
+  });
 
   it("returns 0 when no metric data", async () => {
     mockSend.mockResolvedValue({
       MetricDataResults: [{ Values: [] }],
-    })
+    });
 
-    const result = await getBucketSizeBytes("empty-bucket")
-    expect(result).toBe(0)
-  })
+    const result = await getBucketSizeBytes("empty-bucket");
+    expect(result).toBe(0);
+  });
 
   it("returns 0 when MetricDataResults is empty", async () => {
-    mockSend.mockResolvedValue({ MetricDataResults: [] })
+    mockSend.mockResolvedValue({ MetricDataResults: [] });
 
-    const result = await getBucketSizeBytes("no-results")
-    expect(result).toBe(0)
-  })
-})
+    const result = await getBucketSizeBytes("no-results");
+    expect(result).toBe(0);
+  });
+});

@@ -1,4 +1,10 @@
-import { pgTable, text, timestamp, boolean, integer } from "drizzle-orm/pg-core"
+import {
+  boolean,
+  integer,
+  pgTable,
+  text,
+  timestamp,
+} from "drizzle-orm/pg-core";
 
 export const subscription = pgTable("subscription", {
   id: text("id").primaryKey(),
@@ -18,4 +24,4 @@ export const subscription = pgTable("subscription", {
   seats: integer("seats"),
   billingInterval: text("billing_interval"),
   stripeScheduleId: text("stripe_schedule_id"),
-})
+});

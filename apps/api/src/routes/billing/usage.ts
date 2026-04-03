@@ -1,16 +1,16 @@
-import type { Context } from "hono"
-import { eq, sql } from "drizzle-orm"
-import { buckets } from "@buckt/db"
-import { db } from "../../lib/db"
-import { success } from "../../lib/response"
+import { buckets } from "@buckt/db";
+import { eq, sql } from "drizzle-orm";
+import type { Context } from "hono";
+import { db } from "../../lib/db";
+import { success } from "../../lib/response";
 
 export async function getUsage(c: Context) {
-  const orgId = c.get("orgId") as string
+  const orgId = c.get("orgId") as string;
   const planLimits = c.get("planLimits") as {
-    maxBuckets: number
-    maxStorageBytes: number
-    maxBandwidthBytesPerMonth: number
-  }
+    maxBuckets: number;
+    maxStorageBytes: number;
+    maxBandwidthBytesPerMonth: number;
+  };
 
   const [result] = await db
     .select({
@@ -19,7 +19,7 @@ export async function getUsage(c: Context) {
       totalBandwidth: sql<number>`coalesce(sum(${buckets.bandwidthUsedBytes}), 0)::bigint`,
     })
     .from(buckets)
-    .where(eq(buckets.orgId, orgId))
+    .where(eq(buckets.orgId, orgId));
 
   return success(c, {
     bucketCount: {
@@ -34,5 +34,5 @@ export async function getUsage(c: Context) {
       usedBytes: Number(result.totalBandwidth),
       limitBytes: planLimits.maxBandwidthBytesPerMonth,
     },
-  })
+  });
 }

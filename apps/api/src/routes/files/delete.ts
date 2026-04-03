@@ -1,35 +1,37 @@
-import type { Context } from "hono"
-import { eq, and, sql } from "drizzle-orm"
-import { HeadObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3"
-import { buckets } from "@buckt/db"
-import { db } from "../../lib/db"
-import { s3 } from "../../lib/s3"
-import { success, error } from "../../lib/response"
+import { DeleteObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
+import { buckets } from "@buckt/db";
+import { and, eq, sql } from "drizzle-orm";
+import type { Context } from "hono";
+import { db } from "../../lib/db";
+import { error, success } from "../../lib/response";
+import { s3 } from "../../lib/s3";
+
+const FILE_PATH_RE = /^.*?\/files\//;
 
 export async function deleteFile(c: Context) {
-  const orgId = c.get("orgId")
-  const bucketId = c.req.param("bucketId") as string
-  const filePath = c.req.path.replace(/^.*?\/files\//, "")
+  const orgId = c.get("orgId");
+  const bucketId = c.req.param("bucketId") as string;
+  const filePath = c.req.path.replace(FILE_PATH_RE, "");
 
   if (!filePath) {
-    return error(c, 400, "File path is required")
+    return error(c, 400, "File path is required");
   }
 
   const [bucket] = await db
     .select()
     .from(buckets)
     .where(and(eq(buckets.id, bucketId), eq(buckets.orgId, orgId)))
-    .limit(1)
+    .limit(1);
 
   if (!bucket) {
-    return error(c, 404, "Bucket not found")
+    return error(c, 404, "Bucket not found");
   }
 
   if (bucket.status !== "active") {
-    return error(c, 400, "Bucket is not active")
+    return error(c, 400, "Bucket is not active");
   }
 
-  let size: number
+  let size: number;
 
   try {
     const head = await s3.send(
@@ -37,13 +39,13 @@ export async function deleteFile(c: Context) {
         Bucket: bucket.s3BucketName,
         Key: filePath,
       })
-    )
-    size = head.ContentLength ?? 0
+    );
+    size = head.ContentLength ?? 0;
   } catch (err) {
     if (err instanceof Error && err.name === "NotFound") {
-      return error(c, 404, "File not found")
+      return error(c, 404, "File not found");
     }
-    throw err
+    throw err;
   }
 
   await s3.send(
@@ -51,12 +53,14 @@ export async function deleteFile(c: Context) {
       Bucket: bucket.s3BucketName,
       Key: filePath,
     })
-  )
+  );
 
   await db
     .update(buckets)
-    .set({ storageUsedBytes: sql`GREATEST(${buckets.storageUsedBytes} - ${size}, 0)` })
-    .where(eq(buckets.id, bucketId))
+    .set({
+      storageUsedBytes: sql`GREATEST(${buckets.storageUsedBytes} - ${size}, 0)`,
+    })
+    .where(eq(buckets.id, bucketId));
 
-  return success(c, { key: filePath })
+  return success(c, { key: filePath });
 }

@@ -1,8 +1,8 @@
 import {
   CloudWatchClient,
   GetMetricDataCommand,
-} from "@aws-sdk/client-cloudwatch"
-import { env } from "../../env"
+} from "@aws-sdk/client-cloudwatch";
+import { env } from "../../env";
 
 const cloudwatch = new CloudWatchClient({
   region: env.AWS_REGION,
@@ -10,13 +10,11 @@ const cloudwatch = new CloudWatchClient({
     accessKeyId: env.AWS_ACCESS_KEY_ID,
     secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
   },
-})
+});
 
-export async function getBucketSizeBytes(
-  bucketName: string
-): Promise<number> {
-  const now = new Date()
-  const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000)
+export async function getBucketSizeBytes(bucketName: string): Promise<number> {
+  const now = new Date();
+  const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
 
   const result = await cloudwatch.send(
     new GetMetricDataCommand({
@@ -34,14 +32,14 @@ export async function getBucketSizeBytes(
                 { Name: "StorageType", Value: "StandardStorage" },
               ],
             },
-            Period: 86400,
+            Period: 86_400,
             Stat: "Average",
           },
         },
       ],
     })
-  )
+  );
 
-  const values = result.MetricDataResults?.[0]?.Values ?? []
-  return values[0] ?? 0
+  const values = result.MetricDataResults?.[0]?.Values ?? [];
+  return values[0] ?? 0;
 }

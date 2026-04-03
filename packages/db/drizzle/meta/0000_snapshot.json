@@ -292,13 +292,7 @@
     "public.bucket_status": {
       "name": "bucket_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "provisioning",
-        "active",
-        "failed",
-        "deleting"
-      ]
+      "values": ["pending", "provisioning", "active", "failed", "deleting"]
     }
   },
   "schemas": {},
