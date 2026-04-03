@@ -33,6 +33,19 @@ export async function uploadFile(c: Context) {
   const size = body.byteLength
   const contentType = c.req.header("Content-Type") ?? "application/octet-stream"
 
+  const planLimits = c.get("planLimits")
+  const orgBuckets = await db
+    .select({ storageUsedBytes: buckets.storageUsedBytes })
+    .from(buckets)
+    .where(eq(buckets.orgId, orgId))
+  const totalStorage = orgBuckets.reduce(
+    (sum, b) => sum + (b.storageUsedBytes ?? 0),
+    0
+  )
+  if (totalStorage + size > planLimits.maxStorageBytes) {
+    return error(c, 402, "Storage limit exceeded. Upgrade your plan.")
+  }
+
   let existingSize = 0
   try {
     const head = await s3.send(

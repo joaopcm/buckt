@@ -1,12 +1,13 @@
 import { describe, it, expect, beforeEach } from "vitest"
 import app from "../../app"
-import { createTestApiKey, cleanDb } from "../../lib/test-helpers"
+import { createTestApiKey, cleanDb, insertProSubscription } from "../../lib/test-helpers"
 
 describe("GET /api/buckets", () => {
   let apiKey: string
 
   beforeEach(async () => {
     await cleanDb()
+    await insertProSubscription()
     const { rawKey } = await createTestApiKey()
     apiKey = rawKey
   })

@@ -1,4 +1,4 @@
-import { apiKeys, buckets } from "@buckt/db"
+import { apiKeys, buckets, subscription } from "@buckt/db"
 import { eq, sql } from "drizzle-orm"
 import { db } from "../lib/db"
 import { generateApiKey } from "../lib/hash"
@@ -27,6 +27,16 @@ export async function createTestApiKey(opts?: {
 export async function cleanDb() {
   await db.delete(buckets).where(sql`1=1`)
   await db.delete(apiKeys).where(sql`1=1`)
+  await db.delete(subscription).where(sql`1=1`)
+}
+
+export async function insertProSubscription(orgId = TEST_ORG_ID) {
+  await db.insert(subscription).values({
+    id: `sub-pro-${orgId}`,
+    plan: "pro",
+    referenceId: orgId,
+    status: "active",
+  })
 }
 
 export async function createActiveBucket(apiKey: string, opts?: { name?: string; customDomain?: string }) {

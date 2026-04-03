@@ -9,3 +9,4 @@ dist/
 .terraform/
 docs/superpowers/
 .vscode/
+.serena/
