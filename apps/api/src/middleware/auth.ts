@@ -1,6 +1,7 @@
 import { apiKeys } from "@buckt/db";
 import type { Permission } from "@buckt/shared";
 import { eq } from "drizzle-orm";
+import type { RequestLogger } from "evlog";
 import { createMiddleware } from "hono/factory";
 import { db } from "../lib/db";
 import { hashApiKey } from "../lib/hash";
@@ -10,6 +11,7 @@ interface AuthEnv {
     orgId: string;
     apiKeyId: string;
     permissions: Permission[];
+    log: RequestLogger;
   };
 }
 
@@ -81,6 +83,11 @@ export function requireAuth(...requiredPermissions: Permission[]) {
     c.set("orgId", apiKey.orgId);
     c.set("apiKeyId", apiKey.id);
     c.set("permissions", keyPermissions);
+
+    const log = c.get("log");
+    if (log) {
+      log.set({ orgId: apiKey.orgId, apiKeyId: apiKey.id });
+    }
 
     await next();
   });
