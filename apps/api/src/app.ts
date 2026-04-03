@@ -1,5 +1,4 @@
 import { Hono } from "hono"
-import { PERMISSIONS } from "@buckt/shared"
 import { requireAuth } from "./middleware/auth"
 import { requirePlan } from "./middleware/plan"
 import { createBucket } from "./routes/buckets/create"
@@ -10,6 +9,8 @@ import { retryBucket } from "./routes/buckets/retry"
 import { createKey } from "./routes/keys/create"
 import { listKeys } from "./routes/keys/list"
 import { deleteKey } from "./routes/keys/delete"
+import { getUsage } from "./routes/billing/usage"
+import { getSubscription } from "./routes/billing/subscription"
 import { uploadFile } from "./routes/files/upload"
 import { listFiles } from "./routes/files/list"
 import { getFile } from "./routes/files/get"
@@ -30,8 +31,11 @@ app.get("/api/buckets/:bucketId/files", requireAuth("files:read"), listFiles)
 app.get("/api/buckets/:bucketId/files/*", requireAuth("files:read"), getFile)
 app.delete("/api/buckets/:bucketId/files/*", requireAuth("files:delete"), deleteFile)
 
-app.post("/api/keys", requireAuth(...PERMISSIONS), createKey)
-app.get("/api/keys", requireAuth(), listKeys)
-app.delete("/api/keys/:id", requireAuth(...PERMISSIONS), deleteKey)
+app.get("/api/billing/usage", requireAuth(), requirePlan(), getUsage)
+app.get("/api/billing/subscription", requireAuth(), getSubscription)
+
+app.post("/api/keys", requireAuth("keys:write"), createKey)
+app.get("/api/keys", requireAuth("keys:read"), listKeys)
+app.delete("/api/keys/:id", requireAuth("keys:write"), deleteKey)
 
 export default app

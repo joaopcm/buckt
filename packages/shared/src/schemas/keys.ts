@@ -7,6 +7,8 @@ export const PERMISSIONS = [
   "files:read",
   "files:write",
   "files:delete",
+  "keys:read",
+  "keys:write",
 ] as const
 
 export type Permission = (typeof PERMISSIONS)[number]
