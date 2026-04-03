@@ -1,6 +1,7 @@
 import { Hono } from "hono"
 import { PERMISSIONS } from "@buckt/shared"
 import { requireAuth } from "./middleware/auth"
+import { requirePlan } from "./middleware/plan"
 import { createBucket } from "./routes/buckets/create"
 import { listBuckets } from "./routes/buckets/list"
 import { getBucket } from "./routes/buckets/get"
@@ -18,13 +19,13 @@ const app = new Hono()
 
 app.get("/health", (c) => c.json({ status: "ok" }))
 
-app.post("/api/buckets", requireAuth("buckets:write"), createBucket)
+app.post("/api/buckets", requireAuth("buckets:write"), requirePlan(), createBucket)
 app.get("/api/buckets", requireAuth("buckets:read"), listBuckets)
 app.get("/api/buckets/:id", requireAuth("buckets:read"), getBucket)
 app.delete("/api/buckets/:id", requireAuth("buckets:delete"), deleteBucket)
 app.post("/api/buckets/:id/retry", requireAuth("buckets:write"), retryBucket)
 
-app.put("/api/buckets/:bucketId/files/*", requireAuth("files:write"), uploadFile)
+app.put("/api/buckets/:bucketId/files/*", requireAuth("files:write"), requirePlan(), uploadFile)
 app.get("/api/buckets/:bucketId/files", requireAuth("files:read"), listFiles)
 app.get("/api/buckets/:bucketId/files/*", requireAuth("files:read"), getFile)
 app.delete("/api/buckets/:bucketId/files/*", requireAuth("files:delete"), deleteFile)

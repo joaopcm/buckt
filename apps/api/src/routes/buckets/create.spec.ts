@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest"
 import app from "../../app"
-import { TEST_ORG_ID, createTestApiKey, cleanDb } from "../../lib/test-helpers"
+import { TEST_ORG_ID, createTestApiKey, cleanDb, insertProSubscription } from "../../lib/test-helpers"
 
 describe("POST /api/buckets", () => {
   let apiKey: string
@@ -33,6 +33,7 @@ describe("POST /api/buckets", () => {
   })
 
   it("rejects duplicate domains", async () => {
+    await insertProSubscription()
     await req({ name: "First", customDomain: "assets.test.com" })
     const res = await req({ name: "Second", customDomain: "assets.test.com" })
     expect(res.status).toBe(409)
@@ -57,5 +58,13 @@ describe("POST /api/buckets", () => {
     const { rawKey } = await createTestApiKey({ permissions: ["buckets:read"] })
     const res = await req({ name: "Test", customDomain: "assets.test.com" }, rawKey)
     expect(res.status).toBe(403)
+  })
+
+  it("rejects when bucket count exceeds free plan limit", async () => {
+    await req({ name: "First", customDomain: "first.test.com" })
+    const res = await req({ name: "Second", customDomain: "second.test.com" })
+    expect(res.status).toBe(402)
+    const json = await res.json()
+    expect(json.error.message).toContain("Plan limit reached")
   })
 })

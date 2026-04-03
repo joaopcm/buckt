@@ -1,6 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from "vitest"
+import { eq } from "drizzle-orm"
+import { buckets } from "@buckt/db"
+import { PLAN_LIMITS } from "@buckt/shared"
 import app from "../../app"
-import { createTestApiKey, createActiveBucket, cleanDb } from "../../lib/test-helpers"
+import { createTestApiKey, createActiveBucket, cleanDb, insertProSubscription } from "../../lib/test-helpers"
+import { db } from "../../lib/db"
 
 vi.mock("../../lib/s3", () => ({
   s3: { send: vi.fn().mockResolvedValue({}) },
@@ -64,6 +68,7 @@ describe("PUT /api/buckets/:id/files/*", () => {
   })
 
   it("rejects upload to inactive bucket", async () => {
+    await insertProSubscription()
     const { rawKey } = await createTestApiKey()
     const createRes = await app.request("/api/buckets", {
       method: "POST",
@@ -90,5 +95,17 @@ describe("PUT /api/buckets/:id/files/*", () => {
     const { rawKey: otherKey } = await createTestApiKey({ orgId: "other-org" })
     const res = await req("file.txt", "data", otherKey)
     expect(res.status).toBe(404)
+  })
+
+  it("rejects upload when storage limit exceeded", async () => {
+    await db
+      .update(buckets)
+      .set({ storageUsedBytes: PLAN_LIMITS.free.maxStorageBytes })
+      .where(eq(buckets.id, bucketId))
+
+    const res = await req("big-file.txt", "x")
+    expect(res.status).toBe(402)
+    const json = await res.json()
+    expect(json.error.message).toContain("Storage limit exceeded")
   })
 })

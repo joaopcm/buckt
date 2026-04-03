@@ -1,5 +1,5 @@
 import type { Context } from "hono"
-import { eq } from "drizzle-orm"
+import { eq, sql } from "drizzle-orm"
 import { buckets } from "@buckt/db"
 import { createBucketSchema } from "@buckt/shared"
 import { db } from "../../lib/db"
@@ -15,8 +15,22 @@ export async function createBucket(c: Context) {
 
   const { name, customDomain } = parsed.data
   const orgId = c.get("orgId")
+  const planLimits = c.get("planLimits")
   const slug = customDomain.replace(/\./g, "-")
   const s3BucketName = `buckt-${orgId.slice(0, 8)}-${slug}`
+
+  const [{ count }] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(buckets)
+    .where(eq(buckets.orgId, orgId))
+
+  if (count >= planLimits.maxBuckets) {
+    return error(
+      c,
+      402,
+      `Plan limit reached: maximum ${planLimits.maxBuckets} bucket(s)`
+    )
+  }
 
   const [existing] = await db
     .select({ id: buckets.id })
