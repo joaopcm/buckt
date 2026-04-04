@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Sans, JetBrains_Mono } from "next/font/google";
+import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 import "./globals.css";
@@ -11,8 +12,16 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Buckt",
+  title: {
+    template: "%s — Buckt",
+    default: "Buckt",
+  },
   description: "Branded S3 buckets on demand",
+  openGraph: {
+    title: "Buckt",
+    description: "Branded S3 buckets on demand",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -24,10 +33,18 @@ export default function RootLayout({
     <html
       className={cn("h-full antialiased", sans.variable, mono.variable)}
       lang="en"
+      suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col font-sans">
-        {children}
-        <Toaster />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          disableTransitionOnChange
+          forcedTheme="dark"
+        >
+          {children}
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

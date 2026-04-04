@@ -35,7 +35,7 @@ export function UserNav() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex w-full items-center gap-2 rounded-md p-2 text-left text-sm hover:bg-sidebar-accent">
+      <DropdownMenuTrigger className="flex w-full items-center gap-2 p-2 text-left text-sm hover:bg-sidebar-accent">
         <Avatar className="size-6">
           <AvatarImage src={user?.image ?? undefined} />
           <AvatarFallback className="text-[10px]">{initials}</AvatarFallback>

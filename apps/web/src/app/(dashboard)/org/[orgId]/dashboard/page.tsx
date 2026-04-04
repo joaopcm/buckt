@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export const metadata: Metadata = { title: "Dashboard — Buckt" };
+export const metadata: Metadata = { title: "Dashboard" };
 
 import { Activity, Database, HardDrive } from "lucide-react";
 
@@ -23,7 +23,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="font-bold text-2xl">0</div>
-            <p className="text-muted-foreground text-xs">of 1 on free plan</p>
+            <p className="text-primary text-xs">of 1 on free plan</p>
           </CardContent>
         </Card>
 
@@ -34,9 +34,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="font-bold text-2xl">0 B</div>
-            <p className="text-muted-foreground text-xs">
-              of 1 GB on free plan
-            </p>
+            <p className="text-primary text-xs">of 1 GB on free plan</p>
           </CardContent>
         </Card>
 
@@ -47,7 +45,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="font-bold text-2xl">0 B</div>
-            <p className="text-muted-foreground text-xs">of 10 GB this month</p>
+            <p className="text-primary text-xs">of 10 GB this month</p>
           </CardContent>
         </Card>
       </div>
