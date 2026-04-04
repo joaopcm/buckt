@@ -16,7 +16,6 @@
     "@aws-sdk/client-cloudfront": "^3.1023.0",
     "@aws-sdk/client-cloudwatch": "^3.1023.0",
     "@aws-sdk/client-s3": "^3.1023.0",
-    "@aws-sdk/client-sts": "^3.1024.0",
     "@buckt/db": "workspace:*",
     "@buckt/shared": "workspace:*",
     "@hono/node-server": "^1",
