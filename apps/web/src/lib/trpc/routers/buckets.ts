@@ -86,7 +86,8 @@ export const bucketsRouter = router({
       }
 
       const slug = input.customDomain.replace(/\./g, "-");
-      const s3BucketName = `buckt-${input.orgId.slice(0, 8)}-${slug}`.toLowerCase();
+      const s3BucketName =
+        `buckt-${input.orgId.slice(0, 8)}-${slug}`.toLowerCase();
 
       const [bucket] = await ctx.db
         .insert(buckets)
