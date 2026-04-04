@@ -18,7 +18,7 @@ jobs:
         run: curl -1sLf 'https://artifacts-cli.infisical.com/setup.deb.sh' | sudo -E bash && sudo apt-get update && sudo apt-get install -y infisical
 
       - name: Authenticate with Infisical
-        run: export INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=${{ secrets.INFISICAL_CLIENT_ID }} --client-secret=${{ secrets.INFISICAL_CLIENT_SECRET }} --silent --plain) && echo "INFISICAL_TOKEN=$INFISICAL_TOKEN" >> $GITHUB_ENV
+        run: export INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=${{ secrets.INFISICAL_CLIENT_ID }} --client-secret=${{ secrets.INFISICAL_CLIENT_SECRET }} --domain=${{ secrets.INFISICAL_HOST_URL }} --silent --plain) && echo "INFISICAL_TOKEN=$INFISICAL_TOKEN" >> $GITHUB_ENV
 
       - run: pnpm install --frozen-lockfile
       - name: Deploy to Trigger.dev (staging)
