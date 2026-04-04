@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { DM_Sans, JetBrains_Mono } from "next/font/google";
-import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 import "./globals.css";
@@ -31,20 +30,12 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      className={cn("h-full antialiased", sans.variable, mono.variable)}
+      className={cn("dark h-full antialiased", sans.variable, mono.variable)}
       lang="en"
-      suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col font-sans">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          disableTransitionOnChange
-          forcedTheme="dark"
-        >
-          {children}
-          <Toaster />
-        </ThemeProvider>
+        {children}
+        <Toaster />
       </body>
     </html>
   );
