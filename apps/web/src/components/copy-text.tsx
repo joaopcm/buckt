@@ -35,7 +35,7 @@ export function CopyText({
   return (
     <button
       className={cn(
-        "flex cursor-pointer items-center gap-2 rounded-sm px-1 py-0.5 text-left font-mono text-xs hover:bg-foreground/10",
+        "flex cursor-pointer items-center gap-2 px-1 py-0.5 text-left font-mono text-xs hover:bg-foreground/10",
         className
       )}
       onClick={handleCopy}
