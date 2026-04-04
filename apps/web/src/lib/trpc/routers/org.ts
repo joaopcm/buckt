@@ -5,9 +5,9 @@ import { protectedProcedure, router } from "../init";
 export const orgRouter = router({
   get: protectedProcedure
     .input(z.object({ orgId: z.string() }))
-    .query(async ({ input }) => {
+    .query(async ({ ctx, input }) => {
       const org = await auth.api.getFullOrganization({
-        headers: new Headers(),
+        headers: ctx.headers,
         query: { organizationId: input.orgId },
       });
       return org;
@@ -15,9 +15,9 @@ export const orgRouter = router({
 
   members: protectedProcedure
     .input(z.object({ orgId: z.string() }))
-    .query(async ({ input }) => {
+    .query(async ({ ctx, input }) => {
       const result = await auth.api.listMembers({
-        headers: new Headers(),
+        headers: ctx.headers,
         query: { organizationId: input.orgId },
       });
       return result;
