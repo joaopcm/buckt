@@ -1,9 +1,39 @@
+import { InfisicalSDK } from "@infisical/sdk";
 import { init as sentryInit } from "@sentry/node";
+import { syncEnvVars } from "@trigger.dev/build";
 import { defineConfig } from "@trigger.dev/sdk";
 
 export default defineConfig({
   project: "proj_zgpmssciifubpxwbkvcx",
   dirs: ["./src/trigger"],
+  build: {
+    extensions: [
+      syncEnvVars(async () => {
+        const clientId = process.env.INFISICAL_CLIENT_ID;
+        const clientSecret = process.env.INFISICAL_CLIENT_SECRET;
+        const projectId = process.env.INFISICAL_PROJECT_ID;
+        const siteUrl = process.env.INFISICAL_HOST_URL;
+
+        if (!clientId || !clientSecret || !projectId || !siteUrl) {
+          return {};
+        }
+
+        const client = new InfisicalSDK({ siteUrl });
+        await client.auth().universalAuth.login({ clientId, clientSecret });
+
+        const secrets = await client.secrets().listSecrets({
+          environment: "prod",
+          projectId,
+        });
+
+        const env: Record<string, string> = {};
+        for (const secret of secrets.secrets) {
+          env[secret.secretKey] = secret.secretValue;
+        }
+        return env;
+      }),
+    ],
+  },
   init: () => {
     const dsn = process.env.SENTRY_DSN;
     if (dsn) {

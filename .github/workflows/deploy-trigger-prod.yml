@@ -27,3 +27,8 @@ jobs:
       - name: Deploy to Trigger.dev
         working-directory: apps/api
         run: infisical run --projectId=${{ secrets.INFISICAL_PROJECT_ID }} --env=prod --domain=${{ secrets.INFISICAL_HOST_URL }} -- pnpm exec trigger deploy
+        env:
+          INFISICAL_CLIENT_ID: ${{ secrets.INFISICAL_CLIENT_ID }}
+          INFISICAL_CLIENT_SECRET: ${{ secrets.INFISICAL_CLIENT_SECRET }}
+          INFISICAL_PROJECT_ID: ${{ secrets.INFISICAL_PROJECT_ID }}
+          INFISICAL_HOST_URL: ${{ secrets.INFISICAL_HOST_URL }}
