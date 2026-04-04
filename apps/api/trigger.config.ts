@@ -1,6 +1,6 @@
 import { InfisicalSDK } from "@infisical/sdk";
 import { init as sentryInit } from "@sentry/node";
-import { syncEnvVars } from "@trigger.dev/build";
+import { syncEnvVars } from "@trigger.dev/build/extensions/core";
 import { defineConfig } from "@trigger.dev/sdk";
 
 export default defineConfig({
