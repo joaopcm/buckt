@@ -44,7 +44,7 @@ export function AppSidebar({ orgId }: { orgId: string }) {
 
   return (
     <Sidebar>
-      <SidebarHeader className="border-b px-4 py-3">
+      <SidebarHeader className="h-14 justify-center border-b px-4">
         <Link
           className="flex items-center gap-2"
           href={`/org/${orgId}/dashboard`}
