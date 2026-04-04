@@ -1,30 +1,21 @@
+import Link from "next/link";
+
 export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid min-h-screen lg:grid-cols-2">
-      <div className="hidden flex-col justify-between bg-foreground p-12 text-background lg:flex">
-        <div>
-          <span className="font-bold text-xl tracking-tight">buckt</span>
-        </div>
-        <div className="space-y-4">
-          <blockquote className="max-w-md font-medium text-lg leading-relaxed">
-            &ldquo;We went from manually provisioning S3 buckets to having
-            branded asset delivery in under 5 minutes.&rdquo;
-          </blockquote>
-          <p className="text-background/60 text-sm">
-            Engineering Team at Acme Corp
-          </p>
-        </div>
-        <p className="text-background/40 text-xs">
-          Branded S3 buckets on demand
-        </p>
+    <div className="flex min-h-screen flex-col items-center justify-center p-8">
+      <div className="mb-8">
+        <Link className="flex items-center gap-2" href="/">
+          <div className="flex h-7 w-7 items-center justify-center bg-primary font-bold text-primary-foreground text-xs">
+            B
+          </div>
+          <span className="font-bold text-base tracking-tight">buckt</span>
+        </Link>
       </div>
-      <div className="flex items-center justify-center p-8">
-        <div className="w-full max-w-sm">{children}</div>
-      </div>
+      <div className="w-full max-w-sm">{children}</div>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { OrgSettings } from "@/components/settings/org-settings";
 
-export const metadata: Metadata = { title: "Settings — Buckt" };
+export const metadata: Metadata = { title: "Settings" };
 
 export default async function SettingsPage({
   params,

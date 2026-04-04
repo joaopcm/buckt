@@ -11,8 +11,16 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Buckt",
+  title: {
+    template: "%s — Buckt",
+    default: "Buckt",
+  },
   description: "Branded S3 buckets on demand",
+  openGraph: {
+    title: "Buckt",
+    description: "Branded S3 buckets on demand",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -22,7 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      className={cn("h-full antialiased", sans.variable, mono.variable)}
+      className={cn("dark h-full antialiased", sans.variable, mono.variable)}
       lang="en"
     >
       <body className="flex min-h-full flex-col font-sans">

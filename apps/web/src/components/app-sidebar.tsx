@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -16,7 +17,6 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
@@ -33,8 +33,16 @@ const navigation = [
 
 export function AppSidebar({ orgId }: { orgId: string }) {
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   function isActive(href: string) {
+    if (!mounted) {
+      return false;
+    }
     const fullPath = `/org/${orgId}${href}`;
     if (href === "/dashboard") {
       return pathname === fullPath;
@@ -44,17 +52,17 @@ export function AppSidebar({ orgId }: { orgId: string }) {
 
   return (
     <Sidebar>
-      <SidebarHeader className="border-b px-4 py-3">
+      <div className="flex h-14 shrink-0 items-center border-b px-4">
         <Link
           className="flex items-center gap-2"
           href={`/org/${orgId}/dashboard`}
         >
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-foreground font-bold text-background text-xs">
+          <div className="flex h-7 w-7 items-center justify-center bg-primary font-bold text-primary-foreground text-xs">
             B
           </div>
           <span className="font-bold text-base tracking-tight">buckt</span>
         </Link>
-      </SidebarHeader>
+      </div>
 
       <SidebarContent>
         <SidebarGroup>
@@ -65,7 +73,7 @@ export function AppSidebar({ orgId }: { orgId: string }) {
                 <SidebarMenuItem key={item.name}>
                   <Link
                     className={cn(
-                      "flex w-full items-center gap-2 rounded-md p-2 text-xs transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                      "flex w-full items-center gap-2 p-2 text-xs transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                       isActive(item.href) &&
                         "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
                     )}

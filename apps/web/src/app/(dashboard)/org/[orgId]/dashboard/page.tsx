@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export const metadata: Metadata = { title: "Dashboard — Buckt" };
+export const metadata: Metadata = { title: "Dashboard" };
 
 import { Activity, Database, HardDrive } from "lucide-react";
 
