@@ -1,6 +1,6 @@
 "use client";
 
-import { HardDrive, MoreVertical, RefreshCw, Trash2 } from "lucide-react";
+import { HardDrive, MoreVertical } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -157,7 +157,6 @@ function BucketActions({
               disabled={retryBucket.isPending}
               onClick={() => retryBucket.mutate({ orgId, id: bucketId })}
             >
-              <RefreshCw className="size-4" />
               Retry provisioning
             </DropdownMenuItem>
           )}
@@ -167,7 +166,6 @@ function BucketActions({
             onClick={() => setDeleteOpen(true)}
             variant="destructive"
           >
-            <Trash2 className="size-4" />
             Delete bucket
           </DropdownMenuItem>
         </DropdownMenuContent>
