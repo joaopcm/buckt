@@ -14,7 +14,7 @@ export default defineConfig({
         const projectId = process.env.INFISICAL_PROJECT_ID;
         const siteUrl = process.env.INFISICAL_HOST_URL;
 
-        if (!clientId || !clientSecret || !projectId || !siteUrl) {
+        if (!(clientId && clientSecret && projectId && siteUrl)) {
           return {};
         }
 
