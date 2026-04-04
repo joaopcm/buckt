@@ -17,7 +17,7 @@ export async function createBucket(c: Context) {
   const orgId = c.get("orgId");
   const planLimits = c.get("planLimits");
   const slug = customDomain.replace(/\./g, "-");
-  const s3BucketName = `buckt-${orgId.slice(0, 8)}-${slug}`;
+  const s3BucketName = `buckt-${orgId.slice(0, 8)}-${slug}`.toLowerCase();
 
   const [{ count }] = await db
     .select({ count: sql<number>`count(*)::int` })
