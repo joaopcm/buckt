@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Card,
@@ -14,10 +15,13 @@ import { authClient } from "@/lib/auth-client";
 export function OrgSettings({ orgId }: { orgId: string }) {
   const { data: org, isPending: orgLoading } =
     authClient.useActiveOrganization();
-  const { data: members, isPending: membersLoading } =
-    authClient.organization.listMembers({
-      query: { organizationId: orgId },
-    });
+  const { data: members, isPending: membersLoading } = useQuery({
+    queryKey: ["org-members", orgId],
+    queryFn: () =>
+      authClient.organization.listMembers({
+        query: { organizationId: orgId },
+      }),
+  });
 
   return (
     <div className="space-y-6">
@@ -54,7 +58,7 @@ export function OrgSettings({ orgId }: { orgId: string }) {
             </div>
           ) : (
             <div className="space-y-3">
-              {members?.data?.map((member) => (
+              {members?.data?.members?.map((member) => (
                 <div
                   className="flex items-center justify-between"
                   key={member.id}
