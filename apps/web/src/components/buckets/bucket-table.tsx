@@ -1,8 +1,19 @@
 "use client";
 
-import { HardDrive } from "lucide-react";
+import { HardDrive, MoreVertical } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 import { StatusBadge } from "@/components/buckets/status-badge";
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -46,6 +57,7 @@ export function BucketTable({ orgId }: { orgId: string }) {
           <TableHead>Domain</TableHead>
           <TableHead>Status</TableHead>
           <TableHead>Created</TableHead>
+          <TableHead className="w-10" />
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -68,9 +80,105 @@ export function BucketTable({ orgId }: { orgId: string }) {
             <TableCell className="text-muted-foreground text-xs">
               {new Date(bucket.createdAt).toLocaleDateString()}
             </TableCell>
+            <TableCell>
+              <BucketActions
+                bucketId={bucket.id}
+                bucketName={bucket.name}
+                orgId={orgId}
+                status={bucket.status}
+              />
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>
     </Table>
+  );
+}
+
+function BucketActions({
+  orgId,
+  bucketId,
+  bucketName,
+  status,
+}: {
+  orgId: string;
+  bucketId: string;
+  bucketName: string;
+  status: string;
+}) {
+  const router = useRouter();
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const utils = trpc.useUtils();
+
+  const deleteBucket = trpc.buckets.delete.useMutation({
+    onSuccess: () => {
+      utils.buckets.list.invalidate({ orgId });
+      utils.buckets.count.invalidate({ orgId });
+      toast.success("Bucket deletion started");
+      setDeleteOpen(false);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const retryBucket = trpc.buckets.retry.useMutation({
+    onSuccess: () => {
+      utils.buckets.list.invalidate({ orgId });
+      toast.success("Bucket provisioning retried");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger className="flex size-7 cursor-pointer items-center justify-center text-muted-foreground hover:bg-foreground/10 hover:text-foreground">
+          <MoreVertical className="size-4" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" side="bottom">
+          <DropdownMenuItem
+            onClick={() => router.push(`/org/${orgId}/buckets/${bucketId}`)}
+          >
+            View details
+          </DropdownMenuItem>
+          {status === "failed" && (
+            <DropdownMenuItem
+              disabled={retryBucket.isPending}
+              onClick={() => retryBucket.mutate({ orgId, id: bucketId })}
+            >
+              Retry provisioning
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            disabled={status === "deleting"}
+            onClick={() => setDeleteOpen(true)}
+            variant="destructive"
+          >
+            Delete bucket
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <ConfirmDialog
+        confirmLabel="Delete"
+        confirmValue={bucketName}
+        description={
+          <>
+            This will destroy all files, the S3 bucket, CloudFront distribution,
+            and SSL certificate. This action cannot be undone.
+          </>
+        }
+        destructive
+        loading={deleteBucket.isPending}
+        onConfirm={() => deleteBucket.mutate({ orgId, id: bucketId })}
+        onOpenChange={setDeleteOpen}
+        open={deleteOpen}
+        title="Delete bucket"
+      />
+    </>
   );
 }
