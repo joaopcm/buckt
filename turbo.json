@@ -3,6 +3,18 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
+      "env": [
+        "DATABASE_URL",
+        "BETTER_AUTH_SECRET",
+        "BETTER_AUTH_URL",
+        "NEXT_PUBLIC_BETTER_AUTH_URL",
+        "STRIPE_SECRET_KEY",
+        "STRIPE_WEBHOOK_SECRET",
+        "STRIPE_FREE_PRICE_ID",
+        "STRIPE_PRO_PRICE_ID",
+        "STRIPE_ENTERPRISE_PRICE_ID",
+        "API_URL"
+      ],
       "outputs": ["dist/**", ".next/**"]
     },
     "dev": {
