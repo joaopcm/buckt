@@ -13,7 +13,8 @@
         "STRIPE_FREE_PRICE_ID",
         "STRIPE_PRO_PRICE_ID",
         "STRIPE_ENTERPRISE_PRICE_ID",
-        "API_URL"
+        "API_URL",
+        "TRIGGER_SECRET_KEY"
       ],
       "outputs": ["dist/**", ".next/**"]
     },

@@ -1,4 +1,7 @@
 import { buckets } from "@buckt/db";
+import { createBucketSchema } from "@buckt/shared";
+import { tasks } from "@trigger.dev/sdk/v3";
+import { TRPCError } from "@trpc/server";
 import { and, asc, count, eq, gt } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure, router } from "../init";
@@ -64,5 +67,48 @@ export const bucketsRouter = router({
         .where(eq(buckets.orgId, input.orgId));
 
       return result.count;
+    }),
+
+  create: protectedProcedure
+    .input(createBucketSchema.extend({ orgId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const [existing] = await ctx.db
+        .select({ id: buckets.id })
+        .from(buckets)
+        .where(eq(buckets.customDomain, input.customDomain))
+        .limit(1);
+
+      if (existing) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Domain already in use",
+        });
+      }
+
+      const slug = input.customDomain.replace(/\./g, "-");
+      const s3BucketName = `buckt-${input.orgId.slice(0, 8)}-${slug}`;
+
+      const [bucket] = await ctx.db
+        .insert(buckets)
+        .values({
+          orgId: input.orgId,
+          name: input.name,
+          slug,
+          s3BucketName,
+          customDomain: input.customDomain,
+          status: "pending",
+        })
+        .returning();
+
+      const handle = await tasks.trigger("provision-bucket", {
+        bucketId: bucket.id,
+      });
+
+      await ctx.db
+        .update(buckets)
+        .set({ provisioningJobId: handle.id })
+        .where(eq(buckets.id, bucket.id));
+
+      return bucket;
     }),
 });

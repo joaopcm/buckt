@@ -12,6 +12,7 @@ export const env = createEnv({
     STRIPE_PRO_PRICE_ID: z.string().min(1),
     STRIPE_ENTERPRISE_PRICE_ID: z.string().min(1),
     API_URL: z.url(),
+    TRIGGER_SECRET_KEY: z.string().min(1),
   },
   client: {
     NEXT_PUBLIC_BETTER_AUTH_URL: z.url(),

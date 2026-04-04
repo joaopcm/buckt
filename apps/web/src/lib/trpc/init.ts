@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 
 export interface Context {
   db: ReturnType<typeof createDb>;
+  headers: Headers;
   session: Awaited<ReturnType<typeof auth.api.getSession>>;
 }
 
@@ -25,6 +26,7 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
 
 export async function createContext(): Promise<Context> {
   const db = createDb(env.DATABASE_URL);
-  const session = await auth.api.getSession({ headers: await headers() });
-  return { session, db };
+  const h = await headers();
+  const session = await auth.api.getSession({ headers: h });
+  return { session, db, headers: h };
 }
