@@ -46,7 +46,6 @@ export function DnsRecords({ records }: { records: unknown }) {
               <TableHead>Type</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Value</TableHead>
-              <TableHead className="w-10" />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -55,14 +54,11 @@ export function DnsRecords({ records }: { records: unknown }) {
                 <TableCell className="font-mono text-xs">
                   {record.type}
                 </TableCell>
-                <TableCell className="font-mono text-xs">
-                  {record.name}
-                </TableCell>
-                <TableCell className="max-w-xs truncate font-mono text-xs">
-                  {record.value}
+                <TableCell>
+                  <CopyableCell value={record.name} />
                 </TableCell>
                 <TableCell>
-                  <CopyButton value={record.value} />
+                  <CopyableCell value={record.value} />
                 </TableCell>
               </TableRow>
             ))}
@@ -73,22 +69,26 @@ export function DnsRecords({ records }: { records: unknown }) {
   );
 }
 
-function CopyButton({ value }: { value: string }) {
+function CopyableCell({ value }: { value: string }) {
   const [copied, setCopied] = useState(false);
 
   function handleCopy() {
     navigator.clipboard.writeText(value);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   }
 
   return (
     <button
-      className="flex size-7 cursor-pointer items-center justify-center text-muted-foreground hover:text-foreground"
+      className="flex w-full cursor-pointer items-center gap-2 text-left font-mono text-xs"
       onClick={handleCopy}
       type="button"
     >
-      {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
+      <span className="max-w-xs truncate">{value}</span>
+      {copied ? (
+        <Check className="size-3 shrink-0 text-green-500" />
+      ) : (
+        <Copy className="size-3 shrink-0 text-muted-foreground" />
+      )}
     </button>
   );
 }
