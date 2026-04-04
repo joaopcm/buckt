@@ -52,7 +52,7 @@ export function CreateBucketForm({ orgId }: { orgId: string }) {
   }
 
   return (
-    <Card className="max-w-lg">
+    <Card className="mx-auto max-w-lg">
       <CardHeader>
         <CardTitle>Bucket details</CardTitle>
       </CardHeader>
