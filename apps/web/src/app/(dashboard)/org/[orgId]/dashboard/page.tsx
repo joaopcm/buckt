@@ -23,7 +23,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="font-bold text-2xl">0</div>
-            <p className="text-primary text-xs">of 1 on free plan</p>
+            <p className="text-muted-foreground text-xs">of 1 on free plan</p>
           </CardContent>
         </Card>
 
@@ -34,7 +34,9 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="font-bold text-2xl">0 B</div>
-            <p className="text-primary text-xs">of 1 GB on free plan</p>
+            <p className="text-muted-foreground text-xs">
+              of 1 GB on free plan
+            </p>
           </CardContent>
         </Card>
 
@@ -45,7 +47,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="font-bold text-2xl">0 B</div>
-            <p className="text-primary text-xs">of 10 GB this month</p>
+            <p className="text-muted-foreground text-xs">of 10 GB this month</p>
           </CardContent>
         </Card>
       </div>

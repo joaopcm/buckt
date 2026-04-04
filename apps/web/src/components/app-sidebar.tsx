@@ -48,7 +48,7 @@ export function AppSidebar({ orgId }: { orgId: string }) {
           className="flex items-center gap-2"
           href={`/org/${orgId}/dashboard`}
         >
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary font-bold text-primary-foreground text-xs">
+          <div className="flex h-7 w-7 items-center justify-center bg-primary font-bold text-primary-foreground text-xs">
             B
           </div>
           <span className="font-bold text-base tracking-tight">buckt</span>
@@ -66,7 +66,7 @@ export function AppSidebar({ orgId }: { orgId: string }) {
                     className={cn(
                       "flex w-full items-center gap-2 p-2 text-xs transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                       isActive(item.href) &&
-                        "bg-primary/10 font-medium text-primary"
+                        "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
                     )}
                     href={`/org/${orgId}${item.href}`}
                   >
