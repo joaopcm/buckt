@@ -1,13 +1,8 @@
 "use client";
 
-import {
-  Eye,
-  HardDrive,
-  MoreHorizontal,
-  RefreshCw,
-  Trash2,
-} from "lucide-react";
+import { HardDrive, MoreVertical, RefreshCw, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { StatusBadge } from "@/components/buckets/status-badge";
@@ -19,7 +14,6 @@ import {
   DialogDescription,
   DialogFooter,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -120,6 +114,7 @@ function BucketActions({
   bucketName: string;
   status: string;
 }) {
+  const router = useRouter();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const utils = trpc.useUtils();
 
@@ -146,19 +141,16 @@ function BucketActions({
   });
 
   return (
-    <Dialog onOpenChange={setDeleteOpen} open={deleteOpen}>
+    <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button size="icon-xs" variant="ghost">
-            <MoreHorizontal className="size-4" />
-          </Button>
+        <DropdownMenuTrigger className="flex size-7 cursor-pointer items-center justify-center text-muted-foreground hover:text-foreground">
+          <MoreVertical className="size-4" />
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem asChild>
-            <Link href={`/org/${orgId}/buckets/${bucketId}`}>
-              <Eye className="size-4" />
-              View details
-            </Link>
+        <DropdownMenuContent align="end" side="bottom">
+          <DropdownMenuItem
+            onClick={() => router.push(`/org/${orgId}/buckets/${bucketId}`)}
+          >
+            View details
           </DropdownMenuItem>
           {status === "failed" && (
             <DropdownMenuItem
@@ -170,38 +162,39 @@ function BucketActions({
             </DropdownMenuItem>
           )}
           <DropdownMenuSeparator />
-          <DialogTrigger asChild>
-            <DropdownMenuItem
-              className="text-destructive focus:text-destructive"
-              disabled={status === "deleting"}
-            >
-              <Trash2 className="size-4" />
-              Delete bucket
-            </DropdownMenuItem>
-          </DialogTrigger>
+          <DropdownMenuItem
+            disabled={status === "deleting"}
+            onClick={() => setDeleteOpen(true)}
+            variant="destructive"
+          >
+            <Trash2 className="size-4" />
+            Delete bucket
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <DialogContent>
-        <DialogTitle>Delete bucket</DialogTitle>
-        <DialogDescription>
-          Are you sure you want to delete <strong>{bucketName}</strong>? This
-          will destroy all files, the S3 bucket, CloudFront distribution, and
-          SSL certificate. This action cannot be undone.
-        </DialogDescription>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DialogClose>
-          <Button
-            disabled={deleteBucket.isPending}
-            onClick={() => deleteBucket.mutate({ orgId, id: bucketId })}
-            variant="destructive"
-          >
-            {deleteBucket.isPending ? "Deleting..." : "Delete"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      <Dialog onOpenChange={setDeleteOpen} open={deleteOpen}>
+        <DialogContent>
+          <DialogTitle>Delete bucket</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to delete <strong>{bucketName}</strong>? This
+            will destroy all files, the S3 bucket, CloudFront distribution, and
+            SSL certificate. This action cannot be undone.
+          </DialogDescription>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button
+              disabled={deleteBucket.isPending}
+              onClick={() => deleteBucket.mutate({ orgId, id: bucketId })}
+              variant="destructive"
+            >
+              {deleteBucket.isPending ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
