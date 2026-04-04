@@ -80,4 +80,24 @@ describe("POST /api/buckets", () => {
     const json = await res.json();
     expect(json.error.message).toContain("Plan limit reached");
   });
+
+  it("generates a lowercase S3 bucket name even with mixed-case orgId", async () => {
+    const mixedCaseOrgId = "qnSBsTU6QXyhFuWC";
+    const { rawKey } = await createTestApiKey({ orgId: mixedCaseOrgId });
+    const res = await app.request("/v1/buckets", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${rawKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: "Mixed Case Test",
+        customDomain: "cdn.example.com",
+      }),
+    });
+    expect(res.status).toBe(201);
+    const json = await res.json();
+    expect(json.data.s3BucketName).toMatch(/^[a-z0-9-]+$/);
+    expect(json.data.s3BucketName).toBe("buckt-qnsbstu6-cdn-example-com");
+  });
 });
