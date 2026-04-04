@@ -1,6 +1,7 @@
 name: Deploy Trigger.dev (Production)
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths: ["apps/api/src/trigger/**", "apps/api/trigger.config.ts"]
