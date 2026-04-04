@@ -31,4 +31,4 @@ jobs:
 
       - name: Run migrations
         working-directory: packages/db
-        run: infisical run --projectId=${{ secrets.INFISICAL_PROJECT_ID }} --env=prod -- pnpm drizzle-kit migrate
+        run: infisical run --projectId=${{ secrets.INFISICAL_PROJECT_ID }} --env=prod --domain=${{ secrets.INFISICAL_HOST_URL }} -- pnpm drizzle-kit migrate
