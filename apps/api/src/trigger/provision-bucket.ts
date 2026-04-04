@@ -1,4 +1,3 @@
-import { GetCallerIdentityCommand, STSClient } from "@aws-sdk/client-sts";
 import { buckets, createDb } from "@buckt/db";
 import { logger, task } from "@trigger.dev/sdk/v3";
 import { eq } from "drizzle-orm";
@@ -10,23 +9,6 @@ const db = createDb(process.env.DATABASE_PUBLIC_URL ?? "");
 export const provisionBucket = task({
   id: "provision-bucket",
   run: async ({ bucketId }: { bucketId: string }) => {
-    const sts = new STSClient({
-      region: process.env.AWS_REGION ?? "us-east-1",
-      credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID ?? "",
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ?? "",
-      },
-    });
-    const identity = await sts.send(new GetCallerIdentityCommand({}));
-    logger.info("AWS caller identity", {
-      arn: identity.Arn,
-      account: identity.Account,
-      userId: identity.UserId,
-      awsRegion: process.env.AWS_REGION,
-      hasAccessKey: !!process.env.AWS_ACCESS_KEY_ID,
-      hasSecretKey: !!process.env.AWS_SECRET_ACCESS_KEY,
-    });
-
     const [bucket] = await db
       .select()
       .from(buckets)
