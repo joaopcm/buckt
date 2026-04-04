@@ -9,6 +9,7 @@ import { requestId } from "./lib/request-id";
 import { requireAuth } from "./middleware/auth";
 import { requirePlan } from "./middleware/plan";
 import { rateLimit } from "./middleware/rate-limit";
+import { timeout } from "./middleware/timeout";
 import { getSubscription } from "./routes/billing/subscription";
 import { getUsage } from "./routes/billing/usage";
 import { createBucket } from "./routes/buckets/create";
@@ -30,6 +31,7 @@ type AppEnv = EvlogVariables & { Variables: { requestId: string } };
 
 const app = new Hono<AppEnv>();
 
+app.use(timeout);
 app.use(requestId);
 
 const axiomConfigured = !!process.env.AXIOM_TOKEN;

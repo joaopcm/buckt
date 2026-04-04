@@ -10,7 +10,7 @@ export function success<T>(
 
 export function error(
   c: Context,
-  status: 400 | 401 | 402 | 403 | 404 | 409 | 429 | 500,
+  status: 400 | 401 | 402 | 403 | 404 | 408 | 409 | 429 | 500,
   message: string
 ) {
   return c.json({ data: null, error: { message }, meta: null }, status);

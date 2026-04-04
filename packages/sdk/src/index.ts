@@ -25,6 +25,9 @@ export {
   ConflictError,
   ForbiddenError,
   NotFoundError,
+  PaymentRequiredError,
+  RateLimitError,
+  TimeoutError,
   UnauthorizedError,
   ValidationError,
 } from "./errors";
