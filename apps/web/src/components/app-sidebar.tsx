@@ -16,7 +16,6 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
@@ -44,7 +43,7 @@ export function AppSidebar({ orgId }: { orgId: string }) {
 
   return (
     <Sidebar>
-      <SidebarHeader className="h-14 justify-center border-b px-4">
+      <div className="flex h-14 shrink-0 items-center border-b px-4">
         <Link
           className="flex items-center gap-2"
           href={`/org/${orgId}/dashboard`}
@@ -54,7 +53,7 @@ export function AppSidebar({ orgId }: { orgId: string }) {
           </div>
           <span className="font-bold text-base tracking-tight">buckt</span>
         </Link>
-      </SidebarHeader>
+      </div>
 
       <SidebarContent>
         <SidebarGroup>
