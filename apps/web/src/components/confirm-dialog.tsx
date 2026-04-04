@@ -71,10 +71,8 @@ export function ConfirmDialog({
             />
           </div>
           <DialogFooter className="mt-4">
-            <DialogClose asChild>
-              <Button type="button" variant="outline">
-                Cancel
-              </Button>
+            <DialogClose render={<Button type="button" variant="outline" />}>
+              Cancel
             </DialogClose>
             <Button
               disabled={!matches || loading}
