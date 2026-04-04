@@ -97,7 +97,6 @@ describe("POST /api/buckets", () => {
     });
     expect(res.status).toBe(201);
     const json = await res.json();
-    expect(json.data.s3BucketName).toMatch(/^[a-z0-9-]+$/);
     expect(json.data.s3BucketName).toBe("buckt-qnsbstu6-cdn-example-com");
   });
 });
