@@ -21,10 +21,15 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
 
+      - name: Install Infisical CLI
+        run: curl -1sLf 'https://dl.cloudsmith.io/public/infisical/infisical-cli/setup.deb.sh' | sudo -E bash && sudo apt-get install -y infisical
+
       - run: pnpm install --frozen-lockfile
 
       - name: Run migrations
         working-directory: packages/db
-        run: pnpm drizzle-kit migrate
+        run: infisical run --env=prod -- pnpm drizzle-kit migrate
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          INFISICAL_CLIENT_ID: ${{ secrets.INFISICAL_CLIENT_ID }}
+          INFISICAL_CLIENT_SECRET: ${{ secrets.INFISICAL_CLIENT_SECRET }}
+          INFISICAL_PROJECT_ID: ${{ secrets.INFISICAL_PROJECT_ID }}
