@@ -1,6 +1,5 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Card,
@@ -10,18 +9,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { authClient } from "@/lib/auth-client";
+import { trpc } from "@/lib/trpc/client";
 
 export function OrgSettings({ orgId }: { orgId: string }) {
-  const { data: org, isPending: orgLoading } =
-    authClient.useActiveOrganization();
-  const { data: members, isPending: membersLoading } = useQuery({
-    queryKey: ["org-members", orgId],
-    queryFn: () =>
-      authClient.organization.listMembers({
-        query: { organizationId: orgId },
-      }),
-  });
+  const { data: org, isPending: orgLoading } = trpc.org.get.useQuery({ orgId });
+  const { data: members, isPending: membersLoading } =
+    trpc.org.members.useQuery({ orgId });
 
   return (
     <div className="space-y-6">
@@ -58,7 +51,7 @@ export function OrgSettings({ orgId }: { orgId: string }) {
             </div>
           ) : (
             <div className="space-y-3">
-              {members?.data?.members?.map((member) => (
+              {members?.members?.map((member) => (
                 <div
                   className="flex items-center justify-between"
                   key={member.id}
@@ -76,7 +69,7 @@ export function OrgSettings({ orgId }: { orgId: string }) {
                       </p>
                     </div>
                   </div>
-                  <span className="rounded-md bg-muted px-2 py-1 font-medium text-muted-foreground text-xs capitalize">
+                  <span className="bg-muted px-2 py-1 font-medium text-muted-foreground text-xs capitalize">
                     {member.role}
                   </span>
                 </div>
