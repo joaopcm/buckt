@@ -2,7 +2,7 @@ import { buckets } from "@buckt/db";
 import { createBucketSchema } from "@buckt/shared";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
-import { and, asc, count, eq, gt } from "drizzle-orm";
+import { and, count, desc, eq, lt } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure, router } from "../init";
 
@@ -25,14 +25,14 @@ export const bucketsRouter = router({
         conditions.push(eq(buckets.status, status));
       }
       if (cursor) {
-        conditions.push(gt(buckets.id, cursor));
+        conditions.push(lt(buckets.id, cursor));
       }
 
       const items = await ctx.db
         .select()
         .from(buckets)
         .where(and(...conditions))
-        .orderBy(asc(buckets.id))
+        .orderBy(desc(buckets.createdAt))
         .limit(limit + 1);
 
       const hasMore = items.length > limit;
@@ -111,5 +111,77 @@ export const bucketsRouter = router({
         .where(eq(buckets.id, bucket.id));
 
       return bucket;
+    }),
+
+  delete: protectedProcedure
+    .input(z.object({ orgId: z.string(), id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const [bucket] = await ctx.db
+        .select()
+        .from(buckets)
+        .where(and(eq(buckets.id, input.id), eq(buckets.orgId, input.orgId)))
+        .limit(1);
+
+      if (!bucket) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Bucket not found" });
+      }
+
+      if (bucket.status === "deleting") {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Bucket is already being deleted",
+        });
+      }
+
+      await ctx.db
+        .update(buckets)
+        .set({ status: "deleting" })
+        .where(eq(buckets.id, input.id));
+
+      await tasks.trigger("destroy-bucket", { bucketId: input.id });
+
+      return { id: input.id, status: "deleting" as const };
+    }),
+
+  retry: protectedProcedure
+    .input(z.object({ orgId: z.string(), id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const [bucket] = await ctx.db
+        .select()
+        .from(buckets)
+        .where(and(eq(buckets.id, input.id), eq(buckets.orgId, input.orgId)))
+        .limit(1);
+
+      if (!bucket) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Bucket not found" });
+      }
+
+      if (bucket.status !== "failed") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Only failed buckets can be retried",
+        });
+      }
+
+      await ctx.db
+        .update(buckets)
+        .set({
+          status: "pending",
+          acmCertArn: null,
+          dnsRecords: null,
+          cloudfrontDistributionId: null,
+        })
+        .where(eq(buckets.id, input.id));
+
+      const handle = await tasks.trigger("provision-bucket", {
+        bucketId: input.id,
+      });
+
+      await ctx.db
+        .update(buckets)
+        .set({ provisioningJobId: handle.id })
+        .where(eq(buckets.id, input.id));
+
+      return { id: input.id, status: "pending" as const };
     }),
 });

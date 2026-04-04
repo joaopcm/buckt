@@ -1,8 +1,33 @@
 "use client";
 
-import { HardDrive } from "lucide-react";
+import {
+  Eye,
+  HardDrive,
+  MoreHorizontal,
+  RefreshCw,
+  Trash2,
+} from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
+import { toast } from "sonner";
 import { StatusBadge } from "@/components/buckets/status-badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -46,6 +71,7 @@ export function BucketTable({ orgId }: { orgId: string }) {
           <TableHead>Domain</TableHead>
           <TableHead>Status</TableHead>
           <TableHead>Created</TableHead>
+          <TableHead className="w-10" />
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -68,9 +94,114 @@ export function BucketTable({ orgId }: { orgId: string }) {
             <TableCell className="text-muted-foreground text-xs">
               {new Date(bucket.createdAt).toLocaleDateString()}
             </TableCell>
+            <TableCell>
+              <BucketActions
+                bucketId={bucket.id}
+                bucketName={bucket.name}
+                orgId={orgId}
+                status={bucket.status}
+              />
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>
     </Table>
+  );
+}
+
+function BucketActions({
+  orgId,
+  bucketId,
+  bucketName,
+  status,
+}: {
+  orgId: string;
+  bucketId: string;
+  bucketName: string;
+  status: string;
+}) {
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const utils = trpc.useUtils();
+
+  const deleteBucket = trpc.buckets.delete.useMutation({
+    onSuccess: () => {
+      utils.buckets.list.invalidate({ orgId });
+      utils.buckets.count.invalidate({ orgId });
+      toast.success("Bucket deletion started");
+      setDeleteOpen(false);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const retryBucket = trpc.buckets.retry.useMutation({
+    onSuccess: () => {
+      utils.buckets.list.invalidate({ orgId });
+      toast.success("Bucket provisioning retried");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  return (
+    <Dialog onOpenChange={setDeleteOpen} open={deleteOpen}>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button size="icon-xs" variant="ghost">
+            <MoreHorizontal className="size-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem asChild>
+            <Link href={`/org/${orgId}/buckets/${bucketId}`}>
+              <Eye className="size-4" />
+              View details
+            </Link>
+          </DropdownMenuItem>
+          {status === "failed" && (
+            <DropdownMenuItem
+              disabled={retryBucket.isPending}
+              onClick={() => retryBucket.mutate({ orgId, id: bucketId })}
+            >
+              <RefreshCw className="size-4" />
+              Retry provisioning
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuSeparator />
+          <DialogTrigger asChild>
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              disabled={status === "deleting"}
+            >
+              <Trash2 className="size-4" />
+              Delete bucket
+            </DropdownMenuItem>
+          </DialogTrigger>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <DialogContent>
+        <DialogTitle>Delete bucket</DialogTitle>
+        <DialogDescription>
+          Are you sure you want to delete <strong>{bucketName}</strong>? This
+          will destroy all files, the S3 bucket, CloudFront distribution, and
+          SSL certificate. This action cannot be undone.
+        </DialogDescription>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="outline">Cancel</Button>
+          </DialogClose>
+          <Button
+            disabled={deleteBucket.isPending}
+            onClick={() => deleteBucket.mutate({ orgId, id: bucketId })}
+            variant="destructive"
+          >
+            {deleteBucket.isPending ? "Deleting..." : "Delete"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
