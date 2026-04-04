@@ -2,6 +2,12 @@
 
 import { Check, ClipboardCopy } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 export function CopyText({
@@ -33,20 +39,25 @@ export function CopyText({
   }
 
   return (
-    <button
-      className={cn(
-        "flex cursor-pointer items-center gap-2 px-1 py-0.5 text-left font-mono text-xs hover:bg-foreground/10",
-        className
-      )}
-      onClick={handleCopy}
-      type="button"
-    >
-      <span className="truncate">{value}</span>
-      {copied ? (
-        <Check className="size-3 shrink-0 text-green-500" />
-      ) : (
-        <ClipboardCopy className="size-3 shrink-0 text-muted-foreground" />
-      )}
-    </button>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger
+          className={cn(
+            "flex cursor-pointer items-center gap-2 px-1 py-0.5 text-left font-mono text-xs hover:bg-foreground/10",
+            className
+          )}
+          onClick={handleCopy}
+          type="button"
+        >
+          <span className="truncate">{value}</span>
+          {copied ? (
+            <Check className="size-3 shrink-0 text-green-500" />
+          ) : (
+            <ClipboardCopy className="size-3 shrink-0 text-muted-foreground" />
+          )}
+        </TooltipTrigger>
+        <TooltipContent>{copied ? "Copied!" : "Click to copy"}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
