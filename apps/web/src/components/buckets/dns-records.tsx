@@ -1,7 +1,4 @@
-"use client";
-
-import { Check, Copy } from "lucide-react";
-import { useState } from "react";
+import { CopyText } from "@/components/copy-text";
 import {
   Card,
   CardContent,
@@ -55,10 +52,18 @@ export function DnsRecords({ records }: { records: unknown }) {
                   {record.type}
                 </TableCell>
                 <TableCell>
-                  <CopyableCell value={record.name} />
+                  <CopyText
+                    className="max-w-xs"
+                    persistent
+                    value={record.name}
+                  />
                 </TableCell>
                 <TableCell>
-                  <CopyableCell value={record.value} />
+                  <CopyText
+                    className="max-w-xs"
+                    persistent
+                    value={record.value}
+                  />
                 </TableCell>
               </TableRow>
             ))}
@@ -66,29 +71,5 @@ export function DnsRecords({ records }: { records: unknown }) {
         </Table>
       </CardContent>
     </Card>
-  );
-}
-
-function CopyableCell({ value }: { value: string }) {
-  const [copied, setCopied] = useState(false);
-
-  function handleCopy() {
-    navigator.clipboard.writeText(value);
-    setCopied(true);
-  }
-
-  return (
-    <button
-      className="flex w-full cursor-pointer items-center gap-2 text-left font-mono text-xs"
-      onClick={handleCopy}
-      type="button"
-    >
-      <span className="max-w-xs truncate">{value}</span>
-      {copied ? (
-        <Check className="size-3 shrink-0 text-green-500" />
-      ) : (
-        <Copy className="size-3 shrink-0 text-muted-foreground" />
-      )}
-    </button>
   );
 }
