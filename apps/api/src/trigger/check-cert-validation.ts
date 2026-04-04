@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { getCertificateStatus } from "../lib/aws/acm";
 import { createDistribution } from "../lib/aws/cloudfront";
 
-const db = createDb(process.env.DATABASE_URL ?? "");
+const db = createDb(process.env.DATABASE_PUBLIC_URL ?? "");
 
 const TIMEOUT_HOURS = 72;
 

@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import Stripe from "stripe";
 import { getBucketSizeBytes } from "../lib/aws/cloudwatch";
 
-const db = createDb(process.env.DATABASE_URL ?? "");
+const db = createDb(process.env.DATABASE_PUBLIC_URL ?? "");
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "");
 
 export const aggregateStorage = schedules.task({

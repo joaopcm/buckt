@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { requestCertificate } from "../lib/aws/acm";
 import { createBucketResources } from "../lib/aws/s3";
 
-const db = createDb(process.env.DATABASE_URL ?? "");
+const db = createDb(process.env.DATABASE_PUBLIC_URL ?? "");
 
 export const provisionBucket = task({
   id: "provision-bucket",

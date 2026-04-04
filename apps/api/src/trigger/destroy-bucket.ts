@@ -5,7 +5,7 @@ import { deleteCertificate } from "../lib/aws/acm";
 import { deleteDistribution, disableDistribution } from "../lib/aws/cloudfront";
 import { deleteBucketResources } from "../lib/aws/s3";
 
-const db = createDb(process.env.DATABASE_URL ?? "");
+const db = createDb(process.env.DATABASE_PUBLIC_URL ?? "");
 
 export const destroyBucket = task({
   id: "destroy-bucket",
