@@ -1,11 +1,10 @@
-import { createDb } from "@buckt/db";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { headers } from "next/headers";
-import { env } from "@/env";
 import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
 
 export interface Context {
-  db: ReturnType<typeof createDb>;
+  db: typeof db;
   headers: Headers;
   session: Awaited<ReturnType<typeof auth.api.getSession>>;
 }
@@ -25,7 +24,6 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
 });
 
 export async function createContext(): Promise<Context> {
-  const db = createDb(env.DATABASE_URL);
   const h = await headers();
   const session = await auth.api.getSession({ headers: h });
   return { session, db, headers: h };
