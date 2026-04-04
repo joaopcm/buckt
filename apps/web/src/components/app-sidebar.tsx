@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -32,8 +33,16 @@ const navigation = [
 
 export function AppSidebar({ orgId }: { orgId: string }) {
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   function isActive(href: string) {
+    if (!mounted) {
+      return false;
+    }
     const fullPath = `/org/${orgId}${href}`;
     if (href === "/dashboard") {
       return pathname === fullPath;
