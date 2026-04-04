@@ -36,9 +36,30 @@ export class ValidationError extends BucktError {
   }
 }
 
+export class PaymentRequiredError extends BucktError {
+  constructor(message = "Payment required") {
+    super(message, 402);
+    this.name = "PaymentRequiredError";
+  }
+}
+
+export class TimeoutError extends BucktError {
+  constructor(message = "Request timeout") {
+    super(message, 408);
+    this.name = "TimeoutError";
+  }
+}
+
 export class ConflictError extends BucktError {
   constructor(message = "Conflict") {
     super(message, 409);
     this.name = "ConflictError";
+  }
+}
+
+export class RateLimitError extends BucktError {
+  constructor(message = "Rate limit exceeded") {
+    super(message, 429);
+    this.name = "RateLimitError";
   }
 }

@@ -3,6 +3,9 @@ import {
   ConflictError,
   ForbiddenError,
   NotFoundError,
+  PaymentRequiredError,
+  RateLimitError,
+  TimeoutError,
   UnauthorizedError,
   ValidationError,
 } from "./errors";
@@ -35,12 +38,18 @@ export class HttpClient {
           throw new ValidationError(message);
         case 401:
           throw new UnauthorizedError(message);
+        case 402:
+          throw new PaymentRequiredError(message);
         case 403:
           throw new ForbiddenError(message);
         case 404:
           throw new NotFoundError(message);
+        case 408:
+          throw new TimeoutError(message);
         case 409:
           throw new ConflictError(message);
+        case 429:
+          throw new RateLimitError(message);
         default:
           throw new BucktError(message, res.status);
       }
