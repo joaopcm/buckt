@@ -22,14 +22,13 @@ jobs:
           cache: pnpm
 
       - name: Install Infisical CLI
-        run: curl -1sLf 'https://dl.cloudsmith.io/public/infisical/infisical-cli/setup.deb.sh' | sudo -E bash && sudo apt-get install -y infisical
+        run: curl -1sLf 'https://artifacts-cli.infisical.com/setup.deb.sh' | sudo -E bash && sudo apt-get update && sudo apt-get install -y infisical
+
+      - name: Authenticate with Infisical
+        run: export INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=${{ secrets.INFISICAL_CLIENT_ID }} --client-secret=${{ secrets.INFISICAL_CLIENT_SECRET }} --silent --plain) && echo "INFISICAL_TOKEN=$INFISICAL_TOKEN" >> $GITHUB_ENV
 
       - run: pnpm install --frozen-lockfile
 
       - name: Run migrations
         working-directory: packages/db
-        run: infisical run --env=prod -- pnpm drizzle-kit migrate
-        env:
-          INFISICAL_CLIENT_ID: ${{ secrets.INFISICAL_CLIENT_ID }}
-          INFISICAL_CLIENT_SECRET: ${{ secrets.INFISICAL_CLIENT_SECRET }}
-          INFISICAL_PROJECT_ID: ${{ secrets.INFISICAL_PROJECT_ID }}
+        run: infisical run --projectId=${{ secrets.INFISICAL_PROJECT_ID }} --env=prod -- pnpm drizzle-kit migrate
