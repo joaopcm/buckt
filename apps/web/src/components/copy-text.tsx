@@ -56,7 +56,9 @@ export function CopyText({
             <ClipboardCopy className="size-3 shrink-0 text-muted-foreground" />
           )}
         </TooltipTrigger>
-        <TooltipContent>{copied ? "Copied!" : "Click to copy"}</TooltipContent>
+        <TooltipContent sideOffset={8}>
+          {copied ? "Copied!" : "Click to copy"}
+        </TooltipContent>
       </Tooltip>
     </TooltipProvider>
   );
