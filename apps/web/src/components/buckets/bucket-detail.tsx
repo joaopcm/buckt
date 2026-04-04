@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { BucketActions } from "@/components/buckets/bucket-actions";
 import { BucketUsage } from "@/components/buckets/bucket-usage";
 import { DnsRecords } from "@/components/buckets/dns-records";
@@ -27,28 +26,11 @@ export function BucketDetail({
     }
   );
 
-  if (isPending) {
+  if (isPending || !bucket) {
     return (
       <div className="space-y-6">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-48 w-full" />
-      </div>
-    );
-  }
-
-  if (!bucket) {
-    return (
-      <div className="space-y-4">
-        <h1 className="font-bold text-2xl tracking-tight">Bucket not found</h1>
-        <p className="text-muted-foreground text-sm">
-          This bucket doesn't exist or you don't have access to it.
-        </p>
-        <Link
-          className="text-sm underline underline-offset-4"
-          href={`/org/${orgId}/buckets`}
-        >
-          Back to buckets
-        </Link>
       </div>
     );
   }

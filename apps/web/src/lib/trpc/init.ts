@@ -1,5 +1,6 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import { headers } from "next/headers";
+import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 
@@ -22,6 +23,24 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
   }
   return await next({ ctx: { ...ctx, session: ctx.session } });
 });
+
+export const orgProcedure = protectedProcedure
+  .input(z.object({ orgId: z.string() }))
+  .use(async ({ ctx, input, next }) => {
+    const member = await auth.api.getActiveMember({
+      headers: ctx.headers,
+      query: { organizationId: input.orgId },
+    });
+
+    if (!member) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Not a member of this organization",
+      });
+    }
+
+    return await next({ ctx: { ...ctx, orgId: input.orgId } });
+  });
 
 export async function createContext(): Promise<Context> {
   const h = await headers();

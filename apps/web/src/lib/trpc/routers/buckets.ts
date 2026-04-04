@@ -4,13 +4,12 @@ import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
 import { and, count, desc, eq, lt } from "drizzle-orm";
 import { z } from "zod";
-import { protectedProcedure, router } from "../init";
+import { orgProcedure, router } from "../init";
 
 export const bucketsRouter = router({
-  list: protectedProcedure
+  list: orgProcedure
     .input(
       z.object({
-        orgId: z.string(),
         cursor: z.string().optional(),
         limit: z.number().int().positive().max(100).default(20),
         status: z
@@ -19,8 +18,8 @@ export const bucketsRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
-      const { orgId, cursor, limit, status } = input;
-      const conditions = [eq(buckets.orgId, orgId)];
+      const { cursor, limit, status } = input;
+      const conditions = [eq(buckets.orgId, ctx.orgId)];
       if (status) {
         conditions.push(eq(buckets.status, status));
       }
@@ -46,31 +45,33 @@ export const bucketsRouter = router({
       };
     }),
 
-  get: protectedProcedure
-    .input(z.object({ orgId: z.string(), id: z.string() }))
+  get: orgProcedure
+    .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const [bucket] = await ctx.db
         .select()
         .from(buckets)
-        .where(and(eq(buckets.id, input.id), eq(buckets.orgId, input.orgId)))
+        .where(and(eq(buckets.id, input.id), eq(buckets.orgId, ctx.orgId)))
         .limit(1);
 
-      return bucket ?? null;
+      if (!bucket) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Bucket not found" });
+      }
+
+      return bucket;
     }),
 
-  count: protectedProcedure
-    .input(z.object({ orgId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const [result] = await ctx.db
-        .select({ count: count() })
-        .from(buckets)
-        .where(eq(buckets.orgId, input.orgId));
+  count: orgProcedure.query(async ({ ctx }) => {
+    const [result] = await ctx.db
+      .select({ count: count() })
+      .from(buckets)
+      .where(eq(buckets.orgId, ctx.orgId));
 
-      return result.count;
-    }),
+    return result.count;
+  }),
 
-  create: protectedProcedure
-    .input(createBucketSchema.extend({ orgId: z.string() }))
+  create: orgProcedure
+    .input(createBucketSchema)
     .mutation(async ({ ctx, input }) => {
       const [existing] = await ctx.db
         .select({ id: buckets.id })
@@ -87,12 +88,12 @@ export const bucketsRouter = router({
 
       const slug = input.customDomain.replace(/\./g, "-");
       const s3BucketName =
-        `buckt-${input.orgId.slice(0, 8)}-${slug}`.toLowerCase();
+        `buckt-${ctx.orgId.slice(0, 8)}-${slug}`.toLowerCase();
 
       const [bucket] = await ctx.db
         .insert(buckets)
         .values({
-          orgId: input.orgId,
+          orgId: ctx.orgId,
           name: input.name,
           slug,
           s3BucketName,
@@ -113,17 +114,20 @@ export const bucketsRouter = router({
       return bucket;
     }),
 
-  delete: protectedProcedure
-    .input(z.object({ orgId: z.string(), id: z.string() }))
+  delete: orgProcedure
+    .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const [bucket] = await ctx.db
         .select()
         .from(buckets)
-        .where(and(eq(buckets.id, input.id), eq(buckets.orgId, input.orgId)))
+        .where(and(eq(buckets.id, input.id), eq(buckets.orgId, ctx.orgId)))
         .limit(1);
 
       if (!bucket) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Bucket not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Bucket not found",
+        });
       }
 
       if (bucket.status === "deleting") {
@@ -143,17 +147,20 @@ export const bucketsRouter = router({
       return { id: input.id, status: "deleting" as const };
     }),
 
-  retry: protectedProcedure
-    .input(z.object({ orgId: z.string(), id: z.string() }))
+  retry: orgProcedure
+    .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const [bucket] = await ctx.db
         .select()
         .from(buckets)
-        .where(and(eq(buckets.id, input.id), eq(buckets.orgId, input.orgId)))
+        .where(and(eq(buckets.id, input.id), eq(buckets.orgId, ctx.orgId)))
         .limit(1);
 
       if (!bucket) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Bucket not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Bucket not found",
+        });
       }
 
       if (bucket.status !== "failed") {
