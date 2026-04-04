@@ -6,15 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { StatusBadge } from "@/components/buckets/status-badge";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -171,28 +163,22 @@ function BucketActions({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Dialog onOpenChange={setDeleteOpen} open={deleteOpen}>
-        <DialogContent>
-          <DialogTitle>Delete bucket</DialogTitle>
-          <DialogDescription>
-            Are you sure you want to delete <strong>{bucketName}</strong>? This
-            will destroy all files, the S3 bucket, CloudFront distribution, and
-            SSL certificate. This action cannot be undone.
-          </DialogDescription>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
-            <Button
-              disabled={deleteBucket.isPending}
-              onClick={() => deleteBucket.mutate({ orgId, id: bucketId })}
-              variant="destructive"
-            >
-              {deleteBucket.isPending ? "Deleting..." : "Delete"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmDialog
+        confirmLabel="Delete"
+        confirmValue={bucketName}
+        description={
+          <>
+            This will destroy all files, the S3 bucket, CloudFront distribution,
+            and SSL certificate. This action cannot be undone.
+          </>
+        }
+        destructive
+        loading={deleteBucket.isPending}
+        onConfirm={() => deleteBucket.mutate({ orgId, id: bucketId })}
+        onOpenChange={setDeleteOpen}
+        open={deleteOpen}
+        title="Delete bucket"
+      />
     </>
   );
 }
