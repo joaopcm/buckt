@@ -1,6 +1,8 @@
 import { createAuth } from "@buckt/auth";
+import { createDb } from "@buckt/db";
 import { env } from "@/env";
-import { db } from "@/lib/db";
+
+const db = createDb(env.DATABASE_URL);
 
 export const auth = createAuth(db, {
   secret: env.BETTER_AUTH_SECRET,

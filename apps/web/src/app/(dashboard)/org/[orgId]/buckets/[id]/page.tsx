@@ -1,8 +1,8 @@
-import { buckets } from "@buckt/db";
+import { buckets, createDb } from "@buckt/db";
 import { eq } from "drizzle-orm";
 import type { Metadata } from "next";
 import { BucketDetail } from "@/components/buckets/bucket-detail";
-import { db } from "@/lib/db";
+import { env } from "@/env";
 
 export async function generateMetadata({
   params,
@@ -10,6 +10,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
+  const db = createDb(env.DATABASE_URL);
   const [bucket] = await db
     .select({ name: buckets.name })
     .from(buckets)
