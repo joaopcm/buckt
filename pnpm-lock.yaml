@@ -130,6 +130,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.96.0
         version: 5.96.0(react@19.2.4)
+      '@trigger.dev/sdk':
+        specifier: ^4.4.3
+        version: 4.4.3(zod@4.3.6)
       '@trpc/client':
         specifier: ^11.16.0
         version: 11.16.0(@trpc/server@11.16.0(typescript@5.9.3))(typescript@5.9.3)
