@@ -23,6 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatBytes } from "@/lib/format";
 import { trpc } from "@/lib/trpc/client";
 
 export function BucketTable({ orgId }: { orgId: string }) {
@@ -63,6 +64,7 @@ export function BucketTable({ orgId }: { orgId: string }) {
           <TableHead>Name</TableHead>
           <TableHead>Domain</TableHead>
           <TableHead>Status</TableHead>
+          <TableHead>Storage</TableHead>
           <TableHead>Created</TableHead>
           <TableHead className="w-10" />
         </TableRow>
@@ -89,6 +91,9 @@ export function BucketTable({ orgId }: { orgId: string }) {
             </TableCell>
             <TableCell>
               <StatusBadge status={bucket.status} />
+            </TableCell>
+            <TableCell className="text-muted-foreground text-xs">
+              {formatBytes(bucket.storageUsedBytes ?? 0)}
             </TableCell>
             <TableCell className="text-muted-foreground text-xs">
               {new Date(bucket.createdAt).toLocaleDateString()}
