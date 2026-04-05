@@ -1,5 +1,5 @@
-import { buckets } from "@buckt/db";
-import { createBucketSchema } from "@buckt/shared";
+import { buckets, subscription } from "@buckt/db";
+import { createBucketSchema, PLAN_LIMITS, type PlanName } from "@buckt/shared";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
 import { and, count, desc, eq, lt, sum } from "drizzle-orm";
@@ -90,6 +90,32 @@ export const bucketsRouter = router({
   create: orgProcedure
     .input(createBucketSchema)
     .mutation(async ({ ctx, input }) => {
+      const [sub] = await ctx.db
+        .select({ plan: subscription.plan })
+        .from(subscription)
+        .where(
+          and(
+            eq(subscription.referenceId, ctx.orgId),
+            eq(subscription.status, "active")
+          )
+        )
+        .limit(1);
+
+      const plan = (sub?.plan ?? "free") as PlanName;
+      const limits = PLAN_LIMITS[plan];
+
+      const [{ bucketCount }] = await ctx.db
+        .select({ bucketCount: count() })
+        .from(buckets)
+        .where(eq(buckets.orgId, ctx.orgId));
+
+      if (bucketCount >= limits.maxBuckets) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: `Plan limit reached: maximum ${limits.maxBuckets} bucket(s)`,
+        });
+      }
+
       const [existing] = await ctx.db
         .select({ id: buckets.id })
         .from(buckets)
