@@ -74,9 +74,7 @@ export function FileBrowser({
           prefix={prefix}
         />
 
-        {breadcrumbs.length > 0 && (
-          <Breadcrumbs onNavigate={setPrefix} parts={breadcrumbs} />
-        )}
+        <Breadcrumbs onNavigate={setPrefix} parts={breadcrumbs} />
 
         {isPending ? (
           <div className="space-y-3">
@@ -189,7 +187,7 @@ function FileTable({
           const name = folder.replace(prefix, "").replace(TRAILING_SLASH, "");
           return (
             <TableRow
-              className="cursor-pointer"
+              className="h-10 cursor-pointer"
               key={folder}
               onClick={() => onNavigate(folder)}
               onMouseEnter={() => onPrefetch(folder)}
