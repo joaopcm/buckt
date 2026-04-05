@@ -48,10 +48,10 @@ export function DateDisplay({
           {formatDateTime(d)}
         </TooltipTrigger>
         <TooltipContent sideOffset={8}>
-          <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 font-mono text-xs">
-            <span className="text-muted-foreground">{LOCAL_TZ}</span>
+          <div className="grid grid-cols-[auto_auto] gap-x-6 gap-y-1 whitespace-nowrap font-mono text-xs">
+            <span className="opacity-70">{LOCAL_TZ}</span>
             <span>{formatWithTZ(d, LOCAL_TZ)}</span>
-            <span className="text-muted-foreground">UTC</span>
+            <span className="opacity-70">UTC</span>
             <span>{formatWithTZ(d, "UTC")}</span>
           </div>
         </TooltipContent>
