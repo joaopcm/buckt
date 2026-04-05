@@ -192,9 +192,11 @@ function FileTable({
               onClick={() => onNavigate(folder)}
               onMouseEnter={() => onPrefetch(folder)}
             >
-              <TableCell className="flex items-center gap-2 font-mono text-xs">
-                <FolderIcon className="size-4 text-muted-foreground" />
-                {name}
+              <TableCell className="font-mono text-xs">
+                <div className="flex items-center gap-2">
+                  <FolderIcon className="size-4 text-muted-foreground" />
+                  {name}
+                </div>
               </TableCell>
               <TableCell className="text-muted-foreground text-xs">—</TableCell>
               <TableCell className="text-muted-foreground text-xs">—</TableCell>
@@ -247,9 +249,11 @@ function FileRow({
 
   return (
     <TableRow>
-      <TableCell className="flex items-center gap-2 font-mono text-xs">
-        <FileIcon className="size-4 text-muted-foreground" />
-        {fileName}
+      <TableCell className="font-mono text-xs">
+        <div className="flex items-center gap-2">
+          <FileIcon className="size-4 text-muted-foreground" />
+          {fileName}
+        </div>
       </TableCell>
       <TableCell className="text-muted-foreground text-xs">
         {formatBytes(file.size)}
