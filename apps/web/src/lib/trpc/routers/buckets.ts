@@ -2,7 +2,7 @@ import { buckets } from "@buckt/db";
 import { createBucketSchema } from "@buckt/shared";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
-import { and, count, desc, eq, lt } from "drizzle-orm";
+import { and, count, desc, eq, lt, sum } from "drizzle-orm";
 import { z } from "zod";
 import { orgProcedure, router } from "../init";
 
@@ -68,6 +68,23 @@ export const bucketsRouter = router({
       .where(eq(buckets.orgId, ctx.orgId));
 
     return result.count;
+  }),
+
+  stats: orgProcedure.query(async ({ ctx }) => {
+    const [result] = await ctx.db
+      .select({
+        count: count(),
+        totalStorage: sum(buckets.storageUsedBytes),
+        totalBandwidth: sum(buckets.bandwidthUsedBytes),
+      })
+      .from(buckets)
+      .where(eq(buckets.orgId, ctx.orgId));
+
+    return {
+      bucketCount: result.count,
+      totalStorageBytes: Number(result.totalStorage ?? 0),
+      totalBandwidthBytes: Number(result.totalBandwidth ?? 0),
+    };
   }),
 
   create: orgProcedure
