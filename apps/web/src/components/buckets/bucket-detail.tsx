@@ -53,7 +53,10 @@ export function BucketDetail({
       </div>
 
       {(bucket.status === "provisioning" || bucket.status === "pending") && (
-        <ProvisioningSteps records={bucket.dnsRecords} />
+        <ProvisioningSteps
+          domain={bucket.customDomain}
+          records={bucket.dnsRecords}
+        />
       )}
 
       {bucket.status === "active" && (
