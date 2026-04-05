@@ -1,14 +1,12 @@
 "use client";
 
-import { ChevronRight, FileIcon, FolderIcon } from "lucide-react";
+import { ChevronRight, FileIcon, FolderIcon, MoreVertical } from "lucide-react";
 
 const TRAILING_SLASH = /\/$/;
 
 import { useState } from "react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/confirm-dialog";
-import { CopyText } from "@/components/copy-text";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -16,6 +14,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -176,7 +181,6 @@ function FileTable({
           <TableHead>Name</TableHead>
           <TableHead>Size</TableHead>
           <TableHead>Modified</TableHead>
-          <TableHead>URL</TableHead>
           <TableHead className="w-10" />
         </TableRow>
       </TableHeader>
@@ -196,7 +200,6 @@ function FileTable({
               </TableCell>
               <TableCell className="text-muted-foreground text-xs">—</TableCell>
               <TableCell className="text-muted-foreground text-xs">—</TableCell>
-              <TableCell />
               <TableCell />
             </TableRow>
           );
@@ -257,16 +260,28 @@ function FileRow({
         {new Date(file.lastModified).toLocaleDateString()}
       </TableCell>
       <TableCell>
-        <CopyText className="max-w-xs text-muted-foreground" value={url} />
-      </TableCell>
-      <TableCell>
-        <Button
-          onClick={() => setDeleteOpen(true)}
-          size="icon-xs"
-          variant="ghost"
-        >
-          <span className="text-destructive text-xs">Delete</span>
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="flex size-7 cursor-pointer items-center justify-center text-muted-foreground hover:bg-foreground/10 hover:text-foreground">
+            <MoreVertical className="size-4" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" side="bottom">
+            <DropdownMenuItem
+              onClick={() => {
+                navigator.clipboard.writeText(url);
+                toast.success("URL copied");
+              }}
+            >
+              Copy URL
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => setDeleteOpen(true)}
+              variant="destructive"
+            >
+              Delete file
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <ConfirmDialog
           confirmLabel="Delete"
