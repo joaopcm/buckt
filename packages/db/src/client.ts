@@ -3,8 +3,13 @@ import postgres from "postgres";
 // biome-ignore lint/performance/noNamespaceImport: drizzle requires namespace import for schema
 import * as schema from "./schema";
 
-export function createDb(connectionString: string) {
-  const client = postgres(connectionString);
+export function createDb(
+  connectionString: string,
+  opts?: { maxConnections?: number }
+) {
+  const client = postgres(connectionString, {
+    max: opts?.maxConnections ?? 10,
+  });
   return drizzle(client, { schema });
 }
 
