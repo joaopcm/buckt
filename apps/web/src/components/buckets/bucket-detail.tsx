@@ -3,6 +3,7 @@
 import { BucketActions } from "@/components/buckets/bucket-actions";
 import { BucketUsage } from "@/components/buckets/bucket-usage";
 import { DnsRecords } from "@/components/buckets/dns-records";
+import { FileBrowser } from "@/components/buckets/file-browser";
 import { StatusBadge } from "@/components/buckets/status-badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/lib/trpc/client";
@@ -59,6 +60,11 @@ export function BucketDetail({
           <BucketUsage
             bandwidthUsedBytes={bucket.bandwidthUsedBytes}
             storageUsedBytes={bucket.storageUsedBytes}
+          />
+          <FileBrowser
+            bucketId={bucket.id}
+            customDomain={bucket.customDomain}
+            orgId={orgId}
           />
         </>
       )}

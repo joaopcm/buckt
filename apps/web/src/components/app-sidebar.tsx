@@ -21,6 +21,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { UserNav } from "@/components/user-nav";
+import { trpc } from "@/lib/trpc/client";
 import { cn } from "@/lib/utils";
 
 const navigation = [
@@ -34,6 +35,15 @@ const navigation = [
 export function AppSidebar({ orgId }: { orgId: string }) {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
+  const utils = trpc.useUtils();
+
+  const prefetchMap: Record<string, () => void> = {
+    "/buckets": () => utils.buckets.list.prefetch({ orgId }),
+    "/settings": () => {
+      utils.org.get.prefetch({ orgId });
+      utils.org.members.prefetch({ orgId });
+    },
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -78,6 +88,7 @@ export function AppSidebar({ orgId }: { orgId: string }) {
                         "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
                     )}
                     href={`/org/${orgId}${item.href}`}
+                    onMouseEnter={() => prefetchMap[item.href]?.()}
                   >
                     <item.icon className="size-4 shrink-0" />
                     <span>{item.name}</span>

@@ -27,6 +27,12 @@ import { trpc } from "@/lib/trpc/client";
 
 export function BucketTable({ orgId }: { orgId: string }) {
   const { data, isPending } = trpc.buckets.list.useQuery({ orgId });
+  const utils = trpc.useUtils();
+
+  function prefetchBucket(bucketId: string) {
+    utils.buckets.get.prefetch({ orgId, id: bucketId });
+    utils.files.list.prefetch({ orgId, bucketId });
+  }
 
   if (isPending) {
     return (
@@ -63,7 +69,10 @@ export function BucketTable({ orgId }: { orgId: string }) {
       </TableHeader>
       <TableBody>
         {data.items.map((bucket) => (
-          <TableRow key={bucket.id}>
+          <TableRow
+            key={bucket.id}
+            onMouseEnter={() => prefetchBucket(bucket.id)}
+          >
             <TableCell>
               <Link
                 className="font-medium hover:underline"

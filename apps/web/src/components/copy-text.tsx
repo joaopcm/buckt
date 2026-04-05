@@ -39,7 +39,7 @@ export function CopyText({
   }
 
   return (
-    <TooltipProvider delay={500}>
+    <TooltipProvider delay={250}>
       <Tooltip>
         <TooltipTrigger
           className={cn(
