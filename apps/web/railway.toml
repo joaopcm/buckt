@@ -10,7 +10,7 @@ watchPatterns = [
 ]
 
 [deploy]
-startCommand = "node apps/web/.next/standalone/apps/web/server.js"
+startCommand = "HOSTNAME=0.0.0.0 node apps/web/.next/standalone/apps/web/server.js"
 healthcheckPath = "/"
 healthcheckTimeout = 30
 restartPolicyType = "ON_FAILURE"
