@@ -19,7 +19,18 @@ export async function createDistribution(opts: {
   domain: string;
   s3WebsiteEndpoint: string;
   certArn: string;
+  logBucket?: string;
+  logPrefix?: string;
 }) {
+  const logging = opts.logBucket
+    ? {
+        Enabled: true,
+        Bucket: `${opts.logBucket}.s3.amazonaws.com`,
+        Prefix: `${opts.logPrefix ?? "cf-logs/"}${opts.domain}/`,
+        IncludeCookies: false,
+      }
+    : { Enabled: false, Bucket: "", Prefix: "", IncludeCookies: false };
+
   const result = await cloudfront.send(
     new CreateDistributionCommand({
       DistributionConfig: {
@@ -64,6 +75,7 @@ export async function createDistribution(opts: {
         Restrictions: {
           GeoRestriction: { RestrictionType: "none", Quantity: 0 },
         },
+        Logging: logging,
         Comment: `Buckt CDN for ${opts.domain}`,
       },
     })

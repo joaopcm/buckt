@@ -38,6 +38,8 @@ export const checkCertValidation = schedules.task({
               domain: bucket.customDomain,
               s3WebsiteEndpoint: websiteEndpoint,
               certArn: bucket.acmCertArn,
+              logBucket: process.env.CLOUDFRONT_LOG_BUCKET,
+              logPrefix: process.env.CLOUDFRONT_LOG_PREFIX,
             });
 
           const dnsRecords = (
