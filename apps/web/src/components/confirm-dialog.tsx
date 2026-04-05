@@ -58,9 +58,11 @@ export function ConfirmDialog({
           }}
         >
           <div className="space-y-2">
-            <Label htmlFor="confirm-input">
-              Type <strong className="text-foreground">{confirmValue}</strong>{" "}
-              to confirm
+            <Label className="block" htmlFor="confirm-input">
+              <span>Type the following to confirm:</span>
+              <strong className="mt-1 block break-all text-foreground">
+                {confirmValue}
+              </strong>
             </Label>
             <Input
               autoComplete="off"
