@@ -5,7 +5,8 @@ import {
   ListObjectsV2Command,
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
-import { buckets } from "@buckt/db";
+import { buckets, subscription } from "@buckt/db";
+import { PLAN_LIMITS, type PlanName } from "@buckt/shared";
 import { TRPCError } from "@trpc/server";
 import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -105,6 +106,36 @@ export const filesRouter = router({
       }
 
       const body = Buffer.from(input.data, "base64");
+
+      const [sub] = await ctx.db
+        .select({ plan: subscription.plan })
+        .from(subscription)
+        .where(
+          and(
+            eq(subscription.referenceId, ctx.orgId),
+            eq(subscription.status, "active")
+          )
+        )
+        .limit(1);
+
+      const plan = (sub?.plan ?? "free") as PlanName;
+      const limits = PLAN_LIMITS[plan];
+
+      const orgBuckets = await ctx.db
+        .select({ storageUsedBytes: buckets.storageUsedBytes })
+        .from(buckets)
+        .where(eq(buckets.orgId, ctx.orgId));
+      const totalStorage = orgBuckets.reduce(
+        (sum, b) => sum + (b.storageUsedBytes ?? 0),
+        0
+      );
+
+      if (totalStorage + body.length > limits.maxStorageBytes) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Storage limit exceeded. Upgrade your plan.",
+        });
+      }
 
       let existingSize = 0;
       try {
