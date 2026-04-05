@@ -1,12 +1,13 @@
 import {
   DeleteObjectCommand,
   DeleteObjectsCommand,
+  HeadObjectCommand,
   ListObjectsV2Command,
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
 import { buckets } from "@buckt/db";
 import { TRPCError } from "@trpc/server";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { s3 } from "@/lib/s3";
 import { orgProcedure, router } from "../init";
@@ -105,6 +106,19 @@ export const filesRouter = router({
 
       const body = Buffer.from(input.data, "base64");
 
+      let existingSize = 0;
+      try {
+        const head = await s3.send(
+          new HeadObjectCommand({
+            Bucket: bucket.s3BucketName,
+            Key: input.key,
+          })
+        );
+        existingSize = head.ContentLength ?? 0;
+      } catch {
+        // file doesn't exist yet
+      }
+
       await s3.send(
         new PutObjectCommand({
           Bucket: bucket.s3BucketName,
@@ -113,6 +127,13 @@ export const filesRouter = router({
           ContentType: input.contentType,
         })
       );
+
+      await ctx.db
+        .update(buckets)
+        .set({
+          storageUsedBytes: sql`${buckets.storageUsedBytes} + ${body.length} - ${existingSize}`,
+        })
+        .where(eq(buckets.id, input.bucketId));
 
       return {
         key: input.key,
@@ -146,12 +167,34 @@ export const filesRouter = router({
         });
       }
 
+      let size = 0;
+      try {
+        const head = await s3.send(
+          new HeadObjectCommand({
+            Bucket: bucket.s3BucketName,
+            Key: input.key,
+          })
+        );
+        size = head.ContentLength ?? 0;
+      } catch {
+        // file may not exist
+      }
+
       await s3.send(
         new DeleteObjectCommand({
           Bucket: bucket.s3BucketName,
           Key: input.key,
         })
       );
+
+      if (size > 0) {
+        await ctx.db
+          .update(buckets)
+          .set({
+            storageUsedBytes: sql`GREATEST(${buckets.storageUsedBytes} - ${size}, 0)`,
+          })
+          .where(eq(buckets.id, input.bucketId));
+      }
 
       return { key: input.key };
     }),
@@ -182,6 +225,7 @@ export const filesRouter = router({
 
       let continuationToken: string | undefined;
       let deleted = 0;
+      let totalBytes = 0;
 
       do {
         const list = await s3.send(
@@ -193,6 +237,9 @@ export const filesRouter = router({
         );
 
         if (list.Contents?.length) {
+          for (const obj of list.Contents) {
+            totalBytes += obj.Size ?? 0;
+          }
           await s3.send(
             new DeleteObjectsCommand({
               Bucket: bucket.s3BucketName,
@@ -208,6 +255,15 @@ export const filesRouter = router({
           ? list.NextContinuationToken
           : undefined;
       } while (continuationToken);
+
+      if (totalBytes > 0) {
+        await ctx.db
+          .update(buckets)
+          .set({
+            storageUsedBytes: sql`GREATEST(${buckets.storageUsedBytes} - ${totalBytes}, 0)`,
+          })
+          .where(eq(buckets.id, input.bucketId));
+      }
 
       return { prefix: input.prefix, deleted };
     }),
