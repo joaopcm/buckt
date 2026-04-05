@@ -1,0 +1,17 @@
+[build]
+builder = "RAILPACK"
+buildCommand = "pnpm --filter @buckt/web build"
+watchPatterns = [
+  "apps/web/**",
+  "packages/db/**",
+  "packages/shared/**",
+  "packages/auth/**",
+  "pnpm-lock.yaml",
+]
+
+[deploy]
+startCommand = "node apps/web/.next/standalone/server.js"
+healthcheckPath = "/"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
