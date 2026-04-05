@@ -1,6 +1,6 @@
 [build]
 builder = "RAILPACK"
-buildCommand = "pnpm --filter @buckt/web build"
+buildCommand = "pnpm --filter @buckt/web build && cp -r apps/web/.next/static apps/web/.next/standalone/apps/web/.next/static && cp -r apps/web/public apps/web/.next/standalone/apps/web/public"
 watchPatterns = [
   "apps/web/**",
   "packages/db/**",
