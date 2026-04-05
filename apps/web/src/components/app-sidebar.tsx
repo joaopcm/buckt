@@ -10,6 +10,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import {
   Sidebar,
   SidebarContent,
@@ -36,6 +37,7 @@ export function AppSidebar({ orgId }: { orgId: string }) {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const utils = trpc.useUtils();
+  const { data: plan } = trpc.org.plan.useQuery({ orgId });
 
   const prefetchMap: Record<string, () => void> = {
     "/buckets": () => utils.buckets.list.prefetch({ orgId }),
@@ -72,6 +74,11 @@ export function AppSidebar({ orgId }: { orgId: string }) {
           </div>
           <span className="font-bold text-base tracking-tight">buckt</span>
         </Link>
+        {plan && (
+          <Badge className="ml-auto text-[10px] uppercase" variant="outline">
+            {plan}
+          </Badge>
+        )}
       </div>
 
       <SidebarContent>
