@@ -31,6 +31,7 @@ export function BucketTable({ orgId }: { orgId: string }) {
 
   function prefetchBucket(bucketId: string) {
     utils.buckets.get.prefetch({ orgId, id: bucketId });
+    utils.files.list.prefetch({ orgId, bucketId });
   }
 
   if (isPending) {

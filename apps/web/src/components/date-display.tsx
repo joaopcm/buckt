@@ -7,6 +7,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+const LOCAL_TZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
 function formatDateTime(date: Date): string {
   return date.toLocaleString(undefined, {
     year: "numeric",
@@ -18,7 +20,7 @@ function formatDateTime(date: Date): string {
   });
 }
 
-function formatUTC(date: Date): string {
+function formatWithTZ(date: Date, timeZone: string): string {
   return date.toLocaleString(undefined, {
     year: "numeric",
     month: "2-digit",
@@ -26,20 +28,7 @@ function formatUTC(date: Date): string {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
-    timeZone: "UTC",
-    timeZoneName: "short",
-  });
-}
-
-function formatLocal(date: Date): string {
-  return date.toLocaleString(undefined, {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    timeZoneName: "short",
+    timeZone,
   });
 }
 
@@ -53,15 +42,17 @@ export function DateDisplay({
   const d = typeof date === "string" ? new Date(date) : date;
 
   return (
-    <TooltipProvider delay={500}>
+    <TooltipProvider delay={250}>
       <Tooltip>
         <TooltipTrigger className={className}>
           {formatDateTime(d)}
         </TooltipTrigger>
         <TooltipContent sideOffset={8}>
-          <div className="flex flex-col gap-1">
-            <span>{formatLocal(d)}</span>
-            <span>{formatUTC(d)}</span>
+          <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 font-mono text-xs">
+            <span className="text-muted-foreground">{LOCAL_TZ}</span>
+            <span>{formatWithTZ(d, LOCAL_TZ)}</span>
+            <span className="text-muted-foreground">UTC</span>
+            <span>{formatWithTZ(d, "UTC")}</span>
           </div>
         </TooltipContent>
       </Tooltip>
