@@ -66,22 +66,38 @@ function stepStatus(current: number, target: number): StepStatus {
   return "pending";
 }
 
-export function ProvisioningSteps({ records }: { records: unknown }) {
+export function ProvisioningSteps({
+  records,
+  domain,
+}: {
+  records: unknown;
+  domain: string;
+}) {
   const dnsRecords = (Array.isArray(records) ? records : []) as DnsRecord[];
 
   const step = deriveStep(dnsRecords);
   const validationRecords = dnsRecords.filter((r) => r.value !== PLACEHOLDER);
   const domainRecord = dnsRecords.find((r) => r.value === PLACEHOLDER);
+  const rootDomain = domain.split(".").slice(-2).join(".");
 
   return (
     <div className="space-y-4">
       <Step
-        description="Add the following CNAME record to your DNS provider. This proves you own the domain so we can issue an SSL certificate."
+        description="Add the following DNS records to your provider. The CNAME proves domain ownership for the SSL certificate. The CAA record authorizes Amazon to issue it."
         status={step === 0 ? "pending" : stepStatus(step, 1)}
-        title="Add DNS validation record"
+        title="Add DNS records"
       >
         {validationRecords.length > 0 && (
-          <DnsTable records={validationRecords} />
+          <DnsTable
+            records={[
+              ...validationRecords,
+              {
+                name: rootDomain,
+                type: "CAA",
+                value: '0 issue "amazon.com"',
+              },
+            ]}
+          />
         )}
       </Step>
 
