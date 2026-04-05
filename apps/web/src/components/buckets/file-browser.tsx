@@ -7,6 +7,7 @@ const TRAILING_SLASH = /\/$/;
 import { useState } from "react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { DateDisplay } from "@/components/date-display";
 import {
   Card,
   CardContent,
@@ -183,27 +184,18 @@ function FileTable({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {folders.map((folder) => {
-          const name = folder.replace(prefix, "").replace(TRAILING_SLASH, "");
-          return (
-            <TableRow
-              className="h-10 cursor-pointer"
-              key={folder}
-              onClick={() => onNavigate(folder)}
-              onMouseEnter={() => onPrefetch(folder)}
-            >
-              <TableCell className="font-mono text-xs">
-                <div className="flex items-center gap-2">
-                  <FolderIcon className="size-4 text-muted-foreground" />
-                  {name}
-                </div>
-              </TableCell>
-              <TableCell className="text-muted-foreground text-xs">—</TableCell>
-              <TableCell className="text-muted-foreground text-xs">—</TableCell>
-              <TableCell />
-            </TableRow>
-          );
-        })}
+        {folders.map((folder) => (
+          <FolderRow
+            bucketId={bucketId}
+            folder={folder}
+            key={folder}
+            onDelete={onDelete}
+            onNavigate={onNavigate}
+            onPrefetch={onPrefetch}
+            orgId={orgId}
+            prefix={prefix}
+          />
+        ))}
         {files.map((file) => (
           <FileRow
             bucketId={bucketId}
@@ -216,6 +208,96 @@ function FileTable({
         ))}
       </TableBody>
     </Table>
+  );
+}
+
+function FolderRow({
+  orgId,
+  bucketId,
+  folder,
+  prefix,
+  onNavigate,
+  onPrefetch,
+  onDelete,
+}: {
+  orgId: string;
+  bucketId: string;
+  folder: string;
+  prefix: string;
+  onNavigate: (prefix: string) => void;
+  onPrefetch: (prefix: string) => void;
+  onDelete: () => void;
+}) {
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const name = folder.replace(prefix, "").replace(TRAILING_SLASH, "");
+
+  const deleteFolder = trpc.files.deleteFolder.useMutation({
+    onSuccess: (data) => {
+      toast.success(`Deleted ${data.deleted} file(s)`);
+      setDeleteOpen(false);
+      onDelete();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  return (
+    <TableRow
+      className="h-10 cursor-pointer"
+      key={folder}
+      onMouseEnter={() => onPrefetch(folder)}
+    >
+      <TableCell
+        className="font-mono text-xs"
+        onClick={() => onNavigate(folder)}
+      >
+        <div className="flex items-center gap-2">
+          <FolderIcon className="size-4 text-muted-foreground" />
+          {name}
+        </div>
+      </TableCell>
+      <TableCell className="text-muted-foreground text-xs">—</TableCell>
+      <TableCell className="text-muted-foreground text-xs">—</TableCell>
+      <TableCell>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="flex size-7 cursor-pointer items-center justify-center text-muted-foreground hover:bg-foreground/10 hover:text-foreground">
+            <MoreVertical className="size-4" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" side="bottom">
+            <DropdownMenuItem onClick={() => onNavigate(folder)}>
+              Open folder
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => setDeleteOpen(true)}
+              variant="destructive"
+            >
+              Delete folder
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <ConfirmDialog
+          confirmLabel="Delete"
+          confirmValue={name}
+          description={
+            <>
+              This will permanently delete the folder <strong>{name}</strong>{" "}
+              and all its contents. This action cannot be undone.
+            </>
+          }
+          destructive
+          loading={deleteFolder.isPending}
+          onConfirm={() =>
+            deleteFolder.mutate({ orgId, bucketId, prefix: folder })
+          }
+          onOpenChange={setDeleteOpen}
+          open={deleteOpen}
+          title="Delete folder"
+        />
+      </TableCell>
+    </TableRow>
   );
 }
 
@@ -258,8 +340,11 @@ function FileRow({
       <TableCell className="text-muted-foreground text-xs">
         {formatBytes(file.size)}
       </TableCell>
-      <TableCell className="text-muted-foreground text-xs">
-        {new Date(file.lastModified).toLocaleDateString()}
+      <TableCell>
+        <DateDisplay
+          className="text-muted-foreground text-xs"
+          date={file.lastModified}
+        />
       </TableCell>
       <TableCell>
         <DropdownMenu>

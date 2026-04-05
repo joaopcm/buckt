@@ -1,5 +1,6 @@
 import {
   DeleteObjectCommand,
+  DeleteObjectsCommand,
   ListObjectsV2Command,
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
@@ -151,5 +152,61 @@ export const filesRouter = router({
       );
 
       return { key: input.key };
+    }),
+
+  deleteFolder: orgProcedure
+    .input(z.object({ bucketId: z.string(), prefix: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const [bucket] = await ctx.db
+        .select()
+        .from(buckets)
+        .where(
+          and(eq(buckets.id, input.bucketId), eq(buckets.orgId, ctx.orgId))
+        )
+        .limit(1);
+
+      if (!bucket) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Bucket not found",
+        });
+      }
+      if (bucket.status !== "active") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Bucket is not active",
+        });
+      }
+
+      let continuationToken: string | undefined;
+      let deleted = 0;
+
+      do {
+        const list = await s3.send(
+          new ListObjectsV2Command({
+            Bucket: bucket.s3BucketName,
+            Prefix: input.prefix,
+            ContinuationToken: continuationToken,
+          })
+        );
+
+        if (list.Contents?.length) {
+          await s3.send(
+            new DeleteObjectsCommand({
+              Bucket: bucket.s3BucketName,
+              Delete: {
+                Objects: list.Contents.map((o) => ({ Key: o.Key ?? "" })),
+              },
+            })
+          );
+          deleted += list.Contents.length;
+        }
+
+        continuationToken = list.IsTruncated
+          ? list.NextContinuationToken
+          : undefined;
+      } while (continuationToken);
+
+      return { prefix: input.prefix, deleted };
     }),
 });
