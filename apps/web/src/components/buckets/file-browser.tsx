@@ -254,7 +254,7 @@ function FolderRow({
       >
         <div className="flex items-center gap-2">
           <FolderIcon className="size-4 text-muted-foreground" />
-          {name}
+          <span className="hover:underline">{name}</span>
         </div>
       </TableCell>
       <TableCell className="text-muted-foreground text-xs">—</TableCell>
