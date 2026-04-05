@@ -28,12 +28,17 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
 export const orgProcedure = protectedProcedure
   .input(z.object({ orgId: z.string() }))
   .use(async ({ ctx, input, next }) => {
-    const member = await auth.api.getActiveMember({
+    const members = await auth.api.listMembers({
       headers: ctx.headers,
       query: { organizationId: input.orgId },
     });
 
-    if (!member) {
+    const userId = ctx.session?.user?.id;
+    const isMember = members?.members?.some(
+      (m: { userId: string }) => m.userId === userId
+    );
+
+    if (!isMember) {
       throw new TRPCError({
         code: "FORBIDDEN",
         message: "Not a member of this organization",
