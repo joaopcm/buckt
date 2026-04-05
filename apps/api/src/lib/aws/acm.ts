@@ -27,18 +27,36 @@ export async function requestCertificate(domain: string) {
     throw new Error("ACM did not return a certificate ARN");
   }
 
-  const details = await acm.send(
-    new DescribeCertificateCommand({ CertificateArn: certArn })
-  );
-
-  const validationRecords =
-    details.Certificate?.DomainValidationOptions?.map((opt) => ({
-      name: opt.ResourceRecord?.Name ?? "",
-      type: opt.ResourceRecord?.Type ?? "CNAME",
-      value: opt.ResourceRecord?.Value ?? "",
-    })) ?? [];
+  const validationRecords = await pollValidationRecords(certArn);
 
   return { certArn, validationRecords };
+}
+
+async function pollValidationRecords(certArn: string, maxAttempts = 10) {
+  for (let i = 0; i < maxAttempts; i++) {
+    const details = await acm.send(
+      new DescribeCertificateCommand({ CertificateArn: certArn })
+    );
+
+    const options = details.Certificate?.DomainValidationOptions ?? [];
+    const records = options
+      .filter((opt) => opt.ResourceRecord?.Name)
+      .map((opt) => ({
+        name: opt.ResourceRecord?.Name ?? "",
+        type: opt.ResourceRecord?.Type ?? "CNAME",
+        value: opt.ResourceRecord?.Value ?? "",
+      }));
+
+    if (records.length > 0) {
+      return records;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+  }
+
+  throw new Error(
+    `ACM validation records not available after ${maxAttempts} attempts`
+  );
 }
 
 export async function getCertificateStatus(certArn: string) {

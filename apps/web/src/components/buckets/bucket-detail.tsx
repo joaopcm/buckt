@@ -4,6 +4,7 @@ import { BucketActions } from "@/components/buckets/bucket-actions";
 import { BucketUsage } from "@/components/buckets/bucket-usage";
 import { DnsRecords } from "@/components/buckets/dns-records";
 import { FileBrowser } from "@/components/buckets/file-browser";
+import { ProvisioningSteps } from "@/components/buckets/provisioning-steps";
 import { StatusBadge } from "@/components/buckets/status-badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/lib/trpc/client";
@@ -51,10 +52,9 @@ export function BucketDetail({
         <BucketActions bucket={bucket} orgId={orgId} />
       </div>
 
-      {(bucket.status === "provisioning" || bucket.status === "pending") &&
-      bucket.dnsRecords ? (
-        <DnsRecords records={bucket.dnsRecords} />
-      ) : null}
+      {(bucket.status === "provisioning" || bucket.status === "pending") && (
+        <ProvisioningSteps records={bucket.dnsRecords} />
+      )}
 
       {bucket.status === "active" && (
         <>
