@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CopyText } from "@/components/copy-text";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -58,10 +59,12 @@ export function ConfirmDialog({
           }}
         >
           <div className="space-y-2">
-            <Label className="block leading-relaxed" htmlFor="confirm-input">
-              Type <strong className="text-foreground">{confirmValue}</strong>{" "}
-              to confirm
-            </Label>
+            <div className="space-y-1">
+              <Label htmlFor="confirm-input">
+                Type the following to confirm
+              </Label>
+              <CopyText value={confirmValue} />
+            </div>
             <Input
               autoComplete="off"
               id="confirm-input"
