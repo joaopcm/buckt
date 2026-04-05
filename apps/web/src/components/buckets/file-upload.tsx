@@ -21,10 +21,12 @@ export function FileUpload({
   orgId,
   bucketId,
   onUploadComplete,
+  prefix = "",
 }: {
   orgId: string;
   bucketId: string;
   onUploadComplete: () => void;
+  prefix?: string;
 }) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -45,7 +47,7 @@ export function FileUpload({
           await uploadFile.mutateAsync({
             orgId,
             bucketId,
-            key: file.name,
+            key: `${prefix}${file.name}`,
             contentType: file.type || "application/octet-stream",
             data,
           });
@@ -60,7 +62,7 @@ export function FileUpload({
         setUploading(false);
       }
     },
-    [orgId, bucketId, uploadFile, onUploadComplete]
+    [orgId, bucketId, prefix, uploadFile, onUploadComplete]
   );
 
   function handleDragOver(e: React.DragEvent) {

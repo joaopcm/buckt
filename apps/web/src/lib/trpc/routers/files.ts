@@ -46,10 +46,13 @@ export const filesRouter = router({
         new ListObjectsV2Command({
           Bucket: bucket.s3BucketName,
           Prefix: input.prefix,
+          Delimiter: "/",
           ContinuationToken: input.cursor,
           MaxKeys: input.limit,
         })
       );
+
+      const folders = (result.CommonPrefixes ?? []).map((p) => p.Prefix ?? "");
 
       const files = (result.Contents ?? []).map((obj) => ({
         key: obj.Key ?? "",
@@ -58,6 +61,7 @@ export const filesRouter = router({
       }));
 
       return {
+        folders,
         files,
         nextCursor: result.IsTruncated
           ? (result.NextContinuationToken ?? null)
