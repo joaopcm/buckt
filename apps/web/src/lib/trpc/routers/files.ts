@@ -55,11 +55,13 @@ export const filesRouter = router({
 
       const folders = (result.CommonPrefixes ?? []).map((p) => p.Prefix ?? "");
 
-      const files = (result.Contents ?? []).map((obj) => ({
-        key: obj.Key ?? "",
-        size: obj.Size ?? 0,
-        lastModified: obj.LastModified?.toISOString() ?? "",
-      }));
+      const files = (result.Contents ?? [])
+        .filter((obj) => obj.Key !== input.prefix)
+        .map((obj) => ({
+          key: obj.Key ?? "",
+          size: obj.Size ?? 0,
+          lastModified: obj.LastModified?.toISOString() ?? "",
+        }));
 
       return {
         folders,
