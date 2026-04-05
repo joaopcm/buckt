@@ -7,6 +7,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { StatusBadge } from "@/components/buckets/status-badge";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { CopyText } from "@/components/copy-text";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -71,8 +72,11 @@ export function BucketTable({ orgId }: { orgId: string }) {
                 {bucket.name}
               </Link>
             </TableCell>
-            <TableCell className="font-mono text-muted-foreground text-xs">
-              {bucket.customDomain}
+            <TableCell>
+              <CopyText
+                className="text-muted-foreground"
+                value={bucket.customDomain}
+              />
             </TableCell>
             <TableCell>
               <StatusBadge status={bucket.status} />

@@ -1,11 +1,11 @@
-import { createDb } from "@buckt/db";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { headers } from "next/headers";
-import { env } from "@/env";
+import { z } from "zod";
 import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
 
 export interface Context {
-  db: ReturnType<typeof createDb>;
+  db: typeof db;
   headers: Headers;
   session: Awaited<ReturnType<typeof auth.api.getSession>>;
 }
@@ -24,8 +24,30 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
   return await next({ ctx: { ...ctx, session: ctx.session } });
 });
 
+export const orgProcedure = protectedProcedure
+  .input(z.object({ orgId: z.string() }))
+  .use(async ({ ctx, input, next }) => {
+    const members = await auth.api.listMembers({
+      headers: ctx.headers,
+      query: { organizationId: input.orgId },
+    });
+
+    const userId = ctx.session?.user?.id;
+    const isMember = members?.members?.some(
+      (m: { userId: string }) => m.userId === userId
+    );
+
+    if (!isMember) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Not a member of this organization",
+      });
+    }
+
+    return await next({ ctx: { ...ctx, orgId: input.orgId } });
+  });
+
 export async function createContext(): Promise<Context> {
-  const db = createDb(env.DATABASE_URL);
   const h = await headers();
   const session = await auth.api.getSession({ headers: h });
   return { session, db, headers: h };
