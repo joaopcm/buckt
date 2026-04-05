@@ -1,0 +1,39 @@
+name: Build
+
+on:
+  pull_request:
+    branches: [main]
+
+env:
+  DATABASE_URL: "postgresql://fake:fake@localhost:5432/fake"
+  BETTER_AUTH_SECRET: "fake-secret"
+  BETTER_AUTH_URL: "http://localhost:3000"
+  NEXT_PUBLIC_BETTER_AUTH_URL: "http://localhost:3000"
+  STRIPE_SECRET_KEY: "sk_test_fake"
+  STRIPE_WEBHOOK_SECRET: "whsec_fake"
+  STRIPE_FREE_PRICE_ID: "price_fake"
+  STRIPE_PRO_PRICE_ID: "price_fake"
+  STRIPE_ENTERPRISE_PRICE_ID: "price_fake"
+  API_URL: "http://localhost:8787"
+  TRIGGER_SECRET_KEY: "tr_dev_fake"
+  AWS_ACCESS_KEY_ID: "AKIAFAKE"
+  AWS_SECRET_ACCESS_KEY: "fake-secret-key"
+  AWS_REGION: "us-east-1"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm turbo run build

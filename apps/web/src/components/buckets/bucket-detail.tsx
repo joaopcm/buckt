@@ -52,7 +52,9 @@ export function BucketDetail({
       </div>
 
       {(bucket.status === "provisioning" || bucket.status === "pending") &&
-        bucket.dnsRecords && <DnsRecords records={bucket.dnsRecords} />}
+      bucket.dnsRecords ? (
+        <DnsRecords records={bucket.dnsRecords} />
+      ) : null}
 
       {bucket.status === "active" && (
         <>
