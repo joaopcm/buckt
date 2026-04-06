@@ -31,6 +31,11 @@ export class BucketsClient {
     return data;
   }
 
+  async update(id: string, opts: { name: string }): Promise<Bucket> {
+    const { data } = await this.http.patch<Bucket>(`/v1/buckets/${id}`, opts);
+    return data;
+  }
+
   async delete(id: string): Promise<void> {
     await this.http.delete(`/v1/buckets/${id}`);
   }

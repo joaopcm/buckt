@@ -17,6 +17,7 @@ import { deleteBucket } from "./routes/buckets/delete";
 import { getBucket } from "./routes/buckets/get";
 import { listBuckets } from "./routes/buckets/list";
 import { retryBucket } from "./routes/buckets/retry";
+import { updateBucket } from "./routes/buckets/update";
 import { deleteFile } from "./routes/files/delete";
 import { getFile } from "./routes/files/get";
 import { listFiles } from "./routes/files/list";
@@ -72,6 +73,12 @@ app.post(
 );
 app.get("/v1/buckets", requireAuth("buckets:read"), rateLimit, listBuckets);
 app.get("/v1/buckets/:id", requireAuth("buckets:read"), rateLimit, getBucket);
+app.patch(
+  "/v1/buckets/:id",
+  requireAuth("buckets:write"),
+  rateLimit,
+  updateBucket
+);
 app.delete(
   "/v1/buckets/:id",
   requireAuth("buckets:delete"),
