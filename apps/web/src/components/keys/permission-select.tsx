@@ -6,7 +6,6 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -88,23 +87,37 @@ export function PermissionSelect({
           All permissions
         </DropdownMenuCheckboxItem>
         <DropdownMenuSeparator />
-        {PERMISSION_GROUPS.map((group) => (
-          <DropdownMenuGroup key={group.label}>
-            <DropdownMenuLabel className="py-1.5">
-              {group.label}
-            </DropdownMenuLabel>
-            {group.permissions.map((perm) => (
+        {PERMISSION_GROUPS.map((group) => {
+          const allSelected = group.permissions.every((p) => value.includes(p));
+          return (
+            <DropdownMenuGroup key={group.label}>
               <DropdownMenuCheckboxItem
-                checked={value.includes(perm)}
-                className="cursor-pointer py-1.5"
-                key={perm}
-                onCheckedChange={() => toggle(perm)}
+                checked={allSelected}
+                className="cursor-pointer py-1.5 text-muted-foreground"
+                onCheckedChange={() => {
+                  const perms = [...group.permissions];
+                  onChange(
+                    allSelected
+                      ? value.filter((p) => !perms.includes(p as never))
+                      : [...new Set([...value, ...perms])]
+                  );
+                }}
               >
-                <span className="font-mono">{perm}</span>
+                {group.label}
               </DropdownMenuCheckboxItem>
-            ))}
-          </DropdownMenuGroup>
-        ))}
+              {group.permissions.map((perm) => (
+                <DropdownMenuCheckboxItem
+                  checked={value.includes(perm)}
+                  className="cursor-pointer py-1.5"
+                  key={perm}
+                  onCheckedChange={() => toggle(perm)}
+                >
+                  <span className="font-mono">{perm}</span>
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuGroup>
+          );
+        })}
       </DropdownMenuContent>
     </DropdownMenu>
   );
