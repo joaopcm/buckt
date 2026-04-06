@@ -1,6 +1,16 @@
 "use client";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { renameOrgSchema } from "@buckt/shared";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Plus } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type { z } from "zod";
+import { InviteMemberDialog } from "@/components/settings/invite-member-dialog";
+import { MemberRow } from "@/components/settings/member-row";
+import { PendingInvites } from "@/components/settings/pending-invites";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,39 +18,53 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { authClient } from "@/lib/auth-client";
 import { trpc } from "@/lib/trpc/client";
 
+type RenameValues = z.infer<typeof renameOrgSchema>;
+
 export function OrgSettings({ orgId }: { orgId: string }) {
-  const { data: org, isPending: orgLoading } = trpc.org.get.useQuery({ orgId });
-  const { data: members, isPending: membersLoading } =
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const { data: session } = authClient.useSession();
+
+  const { data: org, isPending: orgLoading } = trpc.org.get.useQuery({
+    orgId,
+  });
+  const { data: membersData, isPending: membersLoading } =
     trpc.org.members.useQuery({ orgId });
+
+  const currentUserId = session?.user?.id ?? "";
+  const currentMember = membersData?.members?.find(
+    (m: { userId: string }) => m.userId === currentUserId
+  );
+
+  const currentUserRole = currentMember?.role ?? "member";
+  const isAdmin = currentUserRole === "owner" || currentUserRole === "admin";
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Organization</CardTitle>
-          <CardDescription>Your organization details</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {orgLoading ? (
-            <Skeleton className="h-6 w-48" />
-          ) : (
-            <div className="space-y-1">
-              <p className="font-medium">{org?.name}</p>
-              <p className="font-mono text-muted-foreground text-sm">
-                {org?.slug}
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <OrgNameCard
+        isAdmin={isAdmin}
+        loading={orgLoading}
+        org={org}
+        orgId={orgId}
+      />
 
       <Card>
-        <CardHeader>
-          <CardTitle>Members</CardTitle>
-          <CardDescription>People in your organization</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Members</CardTitle>
+            <CardDescription>People in your organization</CardDescription>
+          </div>
+          {isAdmin && (
+            <Button onClick={() => setInviteOpen(true)} size="sm">
+              <Plus className="mr-1 size-4" />
+              Invite
+            </Button>
+          )}
         </CardHeader>
         <CardContent>
           {membersLoading ? (
@@ -51,33 +75,115 @@ export function OrgSettings({ orgId }: { orgId: string }) {
             </div>
           ) : (
             <div className="space-y-3">
-              {members?.members?.map((member) => (
-                <div
-                  className="flex items-center justify-between"
-                  key={member.id}
-                >
-                  <div className="flex items-center gap-3">
-                    <Avatar className="size-8">
-                      <AvatarFallback className="text-xs">
-                        {member.user.name?.[0]?.toUpperCase() ?? "?"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium text-sm">{member.user.name}</p>
-                      <p className="text-muted-foreground text-xs">
-                        {member.user.email}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="bg-muted px-2 py-1 font-medium text-muted-foreground text-xs capitalize">
-                    {member.role}
-                  </span>
-                </div>
-              ))}
+              {membersData?.members?.map(
+                (member: {
+                  id: string;
+                  role: string;
+                  user: { id: string; name: string; email: string };
+                }) => (
+                  <MemberRow
+                    currentUserId={currentUserId ?? ""}
+                    currentUserRole={currentUserRole}
+                    key={member.id}
+                    member={member}
+                    orgId={orgId}
+                  />
+                )
+              )}
             </div>
           )}
         </CardContent>
       </Card>
+
+      <PendingInvites isAdmin={isAdmin} orgId={orgId} />
+
+      <InviteMemberDialog
+        onOpenChange={setInviteOpen}
+        open={inviteOpen}
+        orgId={orgId}
+      />
     </div>
+  );
+}
+
+function OrgNameCard({
+  orgId,
+  org,
+  loading,
+  isAdmin,
+}: {
+  orgId: string;
+  org: { name: string; slug: string } | null | undefined;
+  loading: boolean;
+  isAdmin: boolean;
+}) {
+  const utils = trpc.useUtils();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isDirty },
+    reset,
+  } = useForm<RenameValues>({
+    resolver: zodResolver(renameOrgSchema),
+    values: org ? { name: org.name } : undefined,
+  });
+
+  const rename = trpc.org.rename.useMutation({
+    onSuccess: (updated) => {
+      toast.success("Organization renamed");
+      utils.org.get.invalidate({ orgId });
+      if (updated) {
+        reset({ name: updated.name });
+      }
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  function onSubmit(values: RenameValues) {
+    rename.mutate({ ...values, orgId });
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Organization</CardTitle>
+        <CardDescription>Your organization details</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {loading && <Skeleton className="h-6 w-48" />}
+        {!loading && isAdmin && (
+          <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+            <div className="space-y-2">
+              <Label htmlFor="org-name">Name</Label>
+              <Input id="org-name" {...register("name")} />
+              {errors.name && (
+                <p className="text-destructive text-xs">
+                  {errors.name.message}
+                </p>
+              )}
+            </div>
+            <p className="font-mono text-muted-foreground text-sm">
+              {org?.slug}
+            </p>
+            {isDirty && (
+              <Button disabled={rename.isPending} type="submit">
+                {rename.isPending ? "Saving..." : "Save"}
+              </Button>
+            )}
+          </form>
+        )}
+        {!(loading || isAdmin) && (
+          <div className="space-y-1">
+            <p className="font-medium">{org?.name}</p>
+            <p className="font-mono text-muted-foreground text-sm">
+              {org?.slug}
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

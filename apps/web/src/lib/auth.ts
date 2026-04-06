@@ -7,4 +7,5 @@ export const auth = createAuth(db, {
   baseUrl: env.BETTER_AUTH_URL,
   stripeSecretKey: env.STRIPE_SECRET_KEY,
   stripeWebhookSecret: env.STRIPE_WEBHOOK_SECRET,
+  resendApiKey: env.RESEND_API_KEY,
 });

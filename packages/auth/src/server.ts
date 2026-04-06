@@ -3,9 +3,12 @@ import { stripe } from "@better-auth/stripe";
 import type { Database } from "@buckt/db";
 // biome-ignore lint/performance/noNamespaceImport: drizzle requires namespace import for schema
 import * as schema from "@buckt/db/src/schema";
+import { InviteEmail } from "@buckt/emails";
+import { render } from "@react-email/components";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { organization } from "better-auth/plugins";
+import { Resend } from "resend";
 import Stripe from "stripe";
 
 export function createAuth(
@@ -15,9 +18,11 @@ export function createAuth(
     baseUrl: string;
     stripeSecretKey: string;
     stripeWebhookSecret: string;
+    resendApiKey?: string;
   }
 ) {
   const stripeClient = new Stripe(env.stripeSecretKey);
+  const resend = env.resendApiKey ? new Resend(env.resendApiKey) : null;
 
   return betterAuth({
     database: drizzleAdapter(db, { provider: "pg", schema }),
@@ -27,7 +32,30 @@ export function createAuth(
       enabled: true,
     },
     plugins: [
-      organization(),
+      organization({
+        async sendInvitationEmail(data) {
+          if (!resend) {
+            return;
+          }
+
+          const acceptUrl = `${env.baseUrl}/invite/${data.invitation.id}`;
+          const html = await render(
+            InviteEmail({
+              orgName: data.organization.name,
+              inviterName: data.inviter.user.name ?? "Someone",
+              role: data.invitation.role,
+              acceptUrl,
+            })
+          );
+
+          await resend.emails.send({
+            from: "Buckt <noreply@buckt.dev>",
+            to: data.email,
+            subject: `Join ${data.organization.name} on Buckt`,
+            html,
+          });
+        },
+      }),
       stripe({
         stripeClient,
         stripeWebhookSecret: env.stripeWebhookSecret,

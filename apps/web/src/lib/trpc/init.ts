@@ -33,19 +33,42 @@ export const orgProcedure = protectedProcedure
     });
 
     const userId = ctx.session?.user?.id;
-    const isMember = members?.members?.some(
+    const currentMember = members?.members?.find(
       (m: { userId: string }) => m.userId === userId
     );
 
-    if (!isMember) {
+    if (!currentMember) {
       throw new TRPCError({
         code: "FORBIDDEN",
         message: "Not a member of this organization",
       });
     }
 
-    return await next({ ctx: { ...ctx, orgId: input.orgId } });
+    return await next({
+      ctx: { ...ctx, orgId: input.orgId, member: currentMember },
+    });
   });
+
+export const adminProcedure = orgProcedure.use(async ({ ctx, next }) => {
+  const role = ctx.member?.role;
+  if (role !== "owner" && role !== "admin") {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Requires admin or owner role",
+    });
+  }
+  return await next({ ctx });
+});
+
+export const ownerProcedure = adminProcedure.use(async ({ ctx, next }) => {
+  if (ctx.member?.role !== "owner") {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Requires owner role",
+    });
+  }
+  return await next({ ctx });
+});
 
 export async function createContext(): Promise<Context> {
   const h = await headers();
