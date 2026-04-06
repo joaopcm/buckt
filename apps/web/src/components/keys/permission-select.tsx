@@ -56,16 +56,24 @@ export function PermissionSelect({
               key={perm}
             >
               {perm}
-              <button
+              {/* biome-ignore lint/a11y/useSemanticElements: can't nest <button> inside DropdownMenuTrigger */}
+              <span
                 className="cursor-pointer text-muted-foreground hover:text-foreground"
                 onClick={(e) => {
                   e.stopPropagation();
                   remove(perm);
                 }}
-                type="button"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.stopPropagation();
+                    remove(perm);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
               >
                 <X className="size-2.5" />
-              </button>
+              </span>
             </span>
           ))}
         </div>
