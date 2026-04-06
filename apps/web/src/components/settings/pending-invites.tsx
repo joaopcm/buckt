@@ -1,6 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
+import { DateDisplay } from "@/components/date-display";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -80,9 +81,10 @@ export function PendingInvites({
                 <div className="flex items-center gap-3">
                   <div>
                     <p className="font-medium text-sm">{inv.email}</p>
-                    <p className="text-muted-foreground text-xs">
-                      Invited {new Date(inv.createdAt).toLocaleDateString()}
-                    </p>
+                    <DateDisplay
+                      className="text-muted-foreground text-xs"
+                      date={inv.createdAt}
+                    />
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
