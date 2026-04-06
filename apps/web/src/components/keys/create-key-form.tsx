@@ -25,7 +25,9 @@ import { trpc } from "@/lib/trpc/client";
 
 const createKeyFormSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
-  permissions: z.array(z.enum(PERMISSIONS)).min(1, "Select at least one permission"),
+  permissions: z
+    .array(z.enum(PERMISSIONS))
+    .min(1, "Select at least one permission"),
 });
 
 type CreateKeyValues = z.infer<typeof createKeyFormSchema>;
