@@ -35,6 +35,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useCursorPagination } from "@/hooks/use-cursor-pagination";
 import { useDebounce } from "@/hooks/use-debounce";
 import { trpc } from "@/lib/trpc/client";
@@ -116,17 +122,9 @@ export function KeyTable({ orgId }: { orgId: string }) {
                     {apiKey.prefix}...
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {(apiKey.permissions as string[]).map((perm) => (
-                        <Badge
-                          className="font-mono text-[10px]"
-                          key={perm}
-                          variant="outline"
-                        >
-                          {perm}
-                        </Badge>
-                      ))}
-                    </div>
+                    <PermissionBadges
+                      permissions={apiKey.permissions as string[]}
+                    />
                   </TableCell>
                   <TableCell>
                     {apiKey.lastUsedAt ? (
@@ -174,6 +172,48 @@ export function KeyTable({ orgId }: { orgId: string }) {
           />
         </>
       ) : null}
+    </div>
+  );
+}
+
+const MAX_VISIBLE_PERMISSIONS = 2;
+
+function PermissionBadges({ permissions }: { permissions: string[] }) {
+  const visible = permissions.slice(0, MAX_VISIBLE_PERMISSIONS);
+  const remaining = permissions.length - MAX_VISIBLE_PERMISSIONS;
+
+  return (
+    <div className="flex items-center gap-1">
+      {visible.map((perm) => (
+        <Badge className="font-mono text-[10px]" key={perm} variant="outline">
+          {perm}
+        </Badge>
+      ))}
+      {remaining > 0 && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger
+              className="cursor-default font-mono text-[10px] text-muted-foreground"
+              render={<span />}
+            >
+              +{remaining} more
+            </TooltipTrigger>
+            <TooltipContent>
+              <div className="flex flex-wrap gap-1">
+                {permissions.map((perm) => (
+                  <Badge
+                    className="font-mono text-[10px]"
+                    key={perm}
+                    variant="outline"
+                  >
+                    {perm}
+                  </Badge>
+                ))}
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
     </div>
   );
 }
