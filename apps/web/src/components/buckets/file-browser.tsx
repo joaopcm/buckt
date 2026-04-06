@@ -1,5 +1,6 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ChevronRight,
   FileIcon,
@@ -10,7 +11,9 @@ import {
 } from "lucide-react";
 import { parseAsString, useQueryState } from "nuqs";
 import { useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { DateDisplay } from "@/components/date-display";
 import { Button } from "@/components/ui/button";
@@ -244,6 +247,12 @@ function EmptyMessage({ search, prefix }: { search: string; prefix: string }) {
   return "No files yet";
 }
 
+const createFolderSchema = z.object({
+  name: z.string().min(1, "Folder name is required").max(255),
+});
+
+type CreateFolderValues = z.infer<typeof createFolderSchema>;
+
 function CreateFolderButton({
   orgId,
   bucketId,
@@ -256,19 +265,36 @@ function CreateFolderButton({
   onCreated: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState("");
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<CreateFolderValues>({
+    resolver: zodResolver(createFolderSchema),
+    defaultValues: { name: "" },
+  });
 
   const createFolder = trpc.files.createFolder.useMutation({
     onSuccess: () => {
       toast.success("Folder created");
       setOpen(false);
-      setName("");
+      reset();
       onCreated();
     },
     onError: (error) => {
       toast.error(error.message);
     },
   });
+
+  function onSubmit(values: CreateFolderValues) {
+    createFolder.mutate({
+      orgId,
+      bucketId,
+      key: `${prefix}${values.name.trim()}`,
+    });
+  }
 
   return (
     <>
@@ -284,7 +310,7 @@ function CreateFolderButton({
         onOpenChange={(next) => {
           setOpen(next);
           if (!next) {
-            setName("");
+            reset();
           }
         }}
         open={open}
@@ -301,36 +327,26 @@ function CreateFolderButton({
               "This folder will be created in the root directory"
             )}
           </DialogDescription>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (name.trim()) {
-                createFolder.mutate({
-                  orgId,
-                  bucketId,
-                  key: `${prefix}${name.trim()}`,
-                });
-              }
-            }}
-          >
+          <form onSubmit={handleSubmit(onSubmit)}>
             <div className="space-y-2">
               <Label htmlFor="folder-name">Folder name</Label>
               <Input
                 autoComplete="off"
                 id="folder-name"
-                onChange={(e) => setName(e.target.value)}
                 placeholder="my-folder"
-                value={name}
+                {...register("name")}
               />
+              {errors.name && (
+                <p className="text-destructive text-xs">
+                  {errors.name.message}
+                </p>
+              )}
             </div>
             <DialogFooter className="mt-4">
               <DialogClose render={<Button type="button" variant="outline" />}>
                 Cancel
               </DialogClose>
-              <Button
-                disabled={!name.trim() || createFolder.isPending}
-                type="submit"
-              >
+              <Button disabled={createFolder.isPending} type="submit">
                 {createFolder.isPending ? "Creating..." : "Create"}
               </Button>
             </DialogFooter>
@@ -381,6 +397,12 @@ function Breadcrumbs({
   );
 }
 
+const renameFolderSchema = z.object({
+  name: z.string().min(1, "Folder name is required").max(255),
+});
+
+type RenameFolderValues = z.infer<typeof renameFolderSchema>;
+
 function FolderRow({
   orgId,
   bucketId,
@@ -400,8 +422,17 @@ function FolderRow({
 }) {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [renameOpen, setRenameOpen] = useState(false);
-  const [newName, setNewName] = useState("");
   const name = folder.replace(prefix, "").replace(TRAILING_SLASH, "");
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<RenameFolderValues>({
+    resolver: zodResolver(renameFolderSchema),
+    defaultValues: { name: "" },
+  });
 
   const deleteFolder = trpc.files.deleteFolder.useMutation({
     onSuccess: (data) => {
@@ -418,13 +449,26 @@ function FolderRow({
     onSuccess: (data) => {
       toast.success(`Renamed to ${data.newPrefix}`);
       setRenameOpen(false);
-      setNewName("");
+      reset();
       onDelete();
     },
     onError: (error) => {
       toast.error(error.message);
     },
   });
+
+  function onSubmit(values: RenameFolderValues) {
+    const trimmed = values.name.trim();
+    if (trimmed === name) {
+      return;
+    }
+    renameFolder.mutate({
+      orgId,
+      bucketId,
+      oldPrefix: folder,
+      newPrefix: `${prefix}${trimmed}`,
+    });
+  }
 
   return (
     <TableRow
@@ -454,7 +498,7 @@ function FolderRow({
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
-                setNewName(name);
+                reset({ name });
                 setRenameOpen(true);
               }}
             >
@@ -474,7 +518,7 @@ function FolderRow({
           onOpenChange={(next) => {
             setRenameOpen(next);
             if (!next) {
-              setNewName("");
+              reset();
             }
           }}
           open={renameOpen}
@@ -485,27 +529,19 @@ function FolderRow({
               Rename <strong className="text-foreground">{name}</strong> — all
               files inside will be moved to the new location.
             </DialogDescription>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (newName.trim() && newName.trim() !== name) {
-                  renameFolder.mutate({
-                    orgId,
-                    bucketId,
-                    oldPrefix: folder,
-                    newPrefix: `${prefix}${newName.trim()}`,
-                  });
-                }
-              }}
-            >
+            <form onSubmit={handleSubmit(onSubmit)}>
               <div className="space-y-2">
                 <Label htmlFor="rename-folder">New name</Label>
                 <Input
                   autoComplete="off"
                   id="rename-folder"
-                  onChange={(e) => setNewName(e.target.value)}
-                  value={newName}
+                  {...register("name")}
                 />
+                {errors.name && (
+                  <p className="text-destructive text-xs">
+                    {errors.name.message}
+                  </p>
+                )}
               </div>
               <DialogFooter className="mt-4">
                 <DialogClose
@@ -513,14 +549,7 @@ function FolderRow({
                 >
                   Cancel
                 </DialogClose>
-                <Button
-                  disabled={
-                    !newName.trim() ||
-                    newName.trim() === name ||
-                    renameFolder.isPending
-                  }
-                  type="submit"
-                >
+                <Button disabled={renameFolder.isPending} type="submit">
                   {renameFolder.isPending ? "Renaming..." : "Rename"}
                 </Button>
               </DialogFooter>

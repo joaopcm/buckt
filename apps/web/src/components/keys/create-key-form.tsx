@@ -1,10 +1,13 @@
 "use client";
 
-import type { PERMISSIONS } from "@buckt/shared";
+import { PERMISSIONS } from "@buckt/shared";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertTriangle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 import { CopyText } from "@/components/copy-text";
 import { PermissionSelect } from "@/components/keys/permission-select";
 import { Button } from "@/components/ui/button";
@@ -20,12 +23,29 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { trpc } from "@/lib/trpc/client";
 
+const createKeyFormSchema = z.object({
+  name: z.string().min(1, "Name is required").max(100),
+  permissions: z
+    .array(z.enum(PERMISSIONS))
+    .min(1, "Select at least one permission"),
+});
+
+type CreateKeyValues = z.infer<typeof createKeyFormSchema>;
+
 export function CreateKeyForm({ orgId }: { orgId: string }) {
   const router = useRouter();
   const utils = trpc.useUtils();
-  const [name, setName] = useState("");
-  const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
   const [secret, setSecret] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<CreateKeyValues>({
+    resolver: zodResolver(createKeyFormSchema),
+    defaultValues: { name: "", permissions: [] },
+  });
 
   const createKey = trpc.keys.create.useMutation({
     onSuccess: (data) => {
@@ -37,6 +57,10 @@ export function CreateKeyForm({ orgId }: { orgId: string }) {
     },
   });
 
+  function onSubmit(values: CreateKeyValues) {
+    createKey.mutate({ ...values, orgId });
+  }
+
   return (
     <>
       <Card className="max-w-lg">
@@ -44,51 +68,44 @@ export function CreateKeyForm({ orgId }: { orgId: string }) {
           <CardTitle>Key details</CardTitle>
         </CardHeader>
         <CardContent>
-          <form
-            className="space-y-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (name.trim() && selectedPermissions.length > 0) {
-                createKey.mutate({
-                  orgId,
-                  name: name.trim(),
-                  permissions:
-                    selectedPermissions as (typeof PERMISSIONS)[number][],
-                });
-              }
-            }}
-          >
+          <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
             <div className="space-y-2">
               <Label htmlFor="key-name">Name</Label>
               <Input
                 autoComplete="off"
                 id="key-name"
-                onChange={(e) => setName(e.target.value)}
                 placeholder="My API key"
-                value={name}
+                {...register("name")}
               />
+              {errors.name && (
+                <p className="text-destructive text-xs">
+                  {errors.name.message}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
               <Label>Permissions</Label>
-              <PermissionSelect
-                onChange={setSelectedPermissions}
-                value={selectedPermissions}
+              <Controller
+                control={control}
+                name="permissions"
+                render={({ field }) => (
+                  <PermissionSelect
+                    onChange={field.onChange}
+                    value={field.value}
+                  />
+                )}
               />
-              {selectedPermissions.length === 0 && (
-                <p className="text-muted-foreground text-xs">
-                  Select at least one permission
+              {errors.permissions && (
+                <p className="text-destructive text-xs">
+                  {errors.permissions.message}
                 </p>
               )}
             </div>
 
             <Button
               className="w-full"
-              disabled={
-                !name.trim() ||
-                selectedPermissions.length === 0 ||
-                createKey.isPending
-              }
+              disabled={createKey.isPending}
               type="submit"
             >
               {createKey.isPending ? "Creating..." : "Create key"}
