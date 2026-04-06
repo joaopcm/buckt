@@ -80,7 +80,7 @@ export function PendingInvites({
               <div className="flex items-center justify-between" key={inv.id}>
                 <div className="flex items-center gap-3">
                   <div>
-                    <p className="font-medium text-sm">{inv.email}</p>
+                    <p className="font-medium text-xs">{inv.email}</p>
                     <DateDisplay
                       className="text-muted-foreground text-xs"
                       date={inv.createdAt}
