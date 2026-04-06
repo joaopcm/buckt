@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { RenameBucketDialog } from "@/components/buckets/rename-bucket-dialog";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc/client";
@@ -18,6 +19,7 @@ interface BucketActionsProps {
 
 export function BucketActions({ orgId, bucket }: BucketActionsProps) {
   const router = useRouter();
+  const [renameOpen, setRenameOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const utils = trpc.useUtils();
 
@@ -44,6 +46,9 @@ export function BucketActions({ orgId, bucket }: BucketActionsProps) {
 
   return (
     <div className="flex items-center gap-2">
+      <Button onClick={() => setRenameOpen(true)} variant="outline">
+        Rename
+      </Button>
       {bucket.status === "failed" && (
         <Button
           disabled={retryBucket.isPending}
@@ -60,6 +65,13 @@ export function BucketActions({ orgId, bucket }: BucketActionsProps) {
       >
         Delete
       </Button>
+
+      <RenameBucketDialog
+        bucket={bucket}
+        onOpenChange={setRenameOpen}
+        open={renameOpen}
+        orgId={orgId}
+      />
 
       <ConfirmDialog
         confirmLabel="Delete"

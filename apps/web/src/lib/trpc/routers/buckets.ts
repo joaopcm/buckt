@@ -170,6 +170,30 @@ export const bucketsRouter = router({
       return bucket;
     }),
 
+  rename: orgProcedure
+    .input(z.object({ id: z.string(), name: z.string().min(1).max(100) }))
+    .mutation(async ({ ctx, input }) => {
+      const [bucket] = await ctx.db
+        .select({ id: buckets.id })
+        .from(buckets)
+        .where(and(eq(buckets.id, input.id), eq(buckets.orgId, ctx.orgId)))
+        .limit(1);
+
+      if (!bucket) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Bucket not found",
+        });
+      }
+
+      await ctx.db
+        .update(buckets)
+        .set({ name: input.name })
+        .where(eq(buckets.id, input.id));
+
+      return { id: input.id, name: input.name };
+    }),
+
   delete: orgProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {

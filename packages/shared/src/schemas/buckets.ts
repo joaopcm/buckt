@@ -8,6 +8,10 @@ export const createBucketSchema = z.object({
     .regex(/^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/, "Invalid domain format"),
 });
 
+export const updateBucketSchema = z.object({
+  name: z.string().min(1).max(100),
+});
+
 export const listBucketsSchema = z.object({
   status: z
     .enum(["pending", "provisioning", "active", "failed", "deleting"])
