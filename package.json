@@ -13,6 +13,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.9",
+    "@infisical/cli": "^0.43.69",
     "turbo": "^2",
     "typescript": "^5.7",
     "ultracite": "^7.4.2"
@@ -22,6 +23,9 @@
     "overrides": {
       "@opentelemetry/api": "1.9.1",
       "@types/pg": "8.15.6"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "@infisical/cli"
+    ]
   }
 }
