@@ -33,7 +33,9 @@
         "AWS_ACCESS_KEY_ID",
         "AWS_SECRET_ACCESS_KEY",
         "AWS_REGION",
-        "TRIGGER_SECRET_KEY"
+        "TRIGGER_SECRET_KEY",
+        "STRIPE_SECRET_KEY",
+        "REDIS_URL"
       ]
     },
     "db:generate": {

@@ -1,5 +1,7 @@
 "use client";
 
+import { captureException } from "@sentry/nextjs";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
 export default function ErrorPage({
@@ -9,6 +11,10 @@ export default function ErrorPage({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    captureException(error);
+  }, [error]);
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-8 text-center">
       <h2 className="font-bold text-2xl tracking-tight">
