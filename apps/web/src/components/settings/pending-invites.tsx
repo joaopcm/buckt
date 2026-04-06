@@ -98,7 +98,7 @@ export function PendingInvites({
                         cancelInvite.mutate({ invitationId: inv.id, orgId })
                       }
                       size="sm"
-                      variant="ghost"
+                      variant="destructive"
                     >
                       Cancel
                     </Button>
