@@ -2,7 +2,7 @@ import { buckets, subscription } from "@buckt/db";
 import { createBucketSchema, PLAN_LIMITS, type PlanName } from "@buckt/shared";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
-import { and, count, desc, eq, lt, sum } from "drizzle-orm";
+import { and, count, desc, eq, ilike, lt, sum } from "drizzle-orm";
 import { z } from "zod";
 import { orgProcedure, router } from "../init";
 
@@ -15,24 +15,36 @@ export const bucketsRouter = router({
         status: z
           .enum(["pending", "provisioning", "active", "failed", "deleting"])
           .optional(),
+        search: z.string().optional(),
       })
     )
     .query(async ({ ctx, input }) => {
-      const { cursor, limit, status } = input;
-      const conditions = [eq(buckets.orgId, ctx.orgId)];
+      const { cursor, limit, status, search } = input;
+      const baseConditions = [eq(buckets.orgId, ctx.orgId)];
       if (status) {
-        conditions.push(eq(buckets.status, status));
+        baseConditions.push(eq(buckets.status, status));
       }
+      if (search) {
+        baseConditions.push(ilike(buckets.name, `%${search}%`));
+      }
+
+      const conditions = [...baseConditions];
       if (cursor) {
         conditions.push(lt(buckets.id, cursor));
       }
 
-      const items = await ctx.db
-        .select()
-        .from(buckets)
-        .where(and(...conditions))
-        .orderBy(desc(buckets.createdAt))
-        .limit(limit + 1);
+      const [items, [{ total }]] = await Promise.all([
+        ctx.db
+          .select()
+          .from(buckets)
+          .where(and(...conditions))
+          .orderBy(desc(buckets.createdAt))
+          .limit(limit + 1),
+        ctx.db
+          .select({ total: count() })
+          .from(buckets)
+          .where(and(...baseConditions)),
+      ]);
 
       const hasMore = items.length > limit;
       if (hasMore) {
@@ -42,6 +54,7 @@ export const bucketsRouter = router({
       return {
         items,
         nextCursor: hasMore ? (items.at(-1)?.id ?? null) : null,
+        total,
       };
     }),
 
