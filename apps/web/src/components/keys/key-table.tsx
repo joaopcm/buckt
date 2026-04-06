@@ -202,7 +202,7 @@ function PermissionBadges({ permissions }: { permissions: string[] }) {
               <div className="flex flex-wrap gap-1">
                 {permissions.map((perm) => (
                   <Badge
-                    className="font-mono text-[10px]"
+                    className="border-background/30 font-mono text-[10px] text-background"
                     key={perm}
                     variant="outline"
                   >
