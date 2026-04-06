@@ -100,7 +100,7 @@ export function InviteMemberDialog({
               name="role"
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full capitalize">
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
                   <SelectContent alignItemWithTrigger={false}>

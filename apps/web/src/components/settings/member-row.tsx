@@ -95,7 +95,7 @@ export function MemberRow({
               }
               value={member.role}
             >
-              <SelectTrigger size="sm">
+              <SelectTrigger className="capitalize" size="sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent alignItemWithTrigger={false}>
