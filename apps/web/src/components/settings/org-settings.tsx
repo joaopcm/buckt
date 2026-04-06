@@ -165,11 +165,9 @@ function OrgNameCard({
                 </p>
               )}
             </div>
-            {isDirty && (
-              <Button disabled={rename.isPending} type="submit">
-                {rename.isPending ? "Saving..." : "Save"}
-              </Button>
-            )}
+            <Button disabled={!isDirty || rename.isPending} type="submit">
+              {rename.isPending ? "Saving..." : "Save"}
+            </Button>
           </form>
         )}
         {!(loading || isAdmin) && (
