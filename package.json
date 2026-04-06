@@ -9,10 +9,13 @@
     "db:generate": "turbo db:generate",
     "db:migrate": "turbo db:migrate",
     "check": "ultracite check",
-    "fix": "ultracite fix"
+    "fix": "ultracite fix",
+    "release": "turbo run build --filter=@buckt/sdk && changeset publish"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.9",
+    "@changesets/changelog-github": "^0.6.0",
+    "@changesets/cli": "^2.30.0",
     "@infisical/cli": "^0.43.69",
     "turbo": "^2",
     "typescript": "^5.7",

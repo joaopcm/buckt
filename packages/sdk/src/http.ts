@@ -98,6 +98,15 @@ export class HttpClient {
     return this.handleResponse<T>(res);
   }
 
+  async patch<T>(path: string, body: unknown): Promise<ApiResponse<T>> {
+    const res = await fetch(new URL(path, this.baseUrl).toString(), {
+      method: "PATCH",
+      headers: this.headers({ "Content-Type": "application/json" }),
+      body: JSON.stringify(body),
+    });
+    return this.handleResponse<T>(res);
+  }
+
   async delete<T>(path: string): Promise<ApiResponse<T>> {
     const res = await fetch(new URL(path, this.baseUrl).toString(), {
       method: "DELETE",
