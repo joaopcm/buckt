@@ -1,10 +1,20 @@
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { useRef } from "react";
 
-export function useCursorPagination(defaultLimit = 20) {
-  const [cursor, setCursor] = useQueryState("cursor", parseAsString);
+export function useCursorPagination(opts?: {
+  defaultLimit?: number;
+  cursorKey?: string;
+  limitKey?: string;
+}) {
+  const {
+    defaultLimit = 20,
+    cursorKey = "cursor",
+    limitKey = "limit",
+  } = opts ?? {};
+
+  const [cursor, setCursor] = useQueryState(cursorKey, parseAsString);
   const [limit, setLimit] = useQueryState(
-    "limit",
+    limitKey,
     parseAsInteger.withDefault(defaultLimit)
   );
   const cursorStackRef = useRef<(string | null)[]>([]);

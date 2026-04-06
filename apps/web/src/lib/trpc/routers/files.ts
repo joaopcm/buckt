@@ -1,4 +1,5 @@
 import {
+  CopyObjectCommand,
   DeleteObjectCommand,
   DeleteObjectsCommand,
   HeadObjectCommand,
@@ -297,5 +298,126 @@ export const filesRouter = router({
       }
 
       return { prefix: input.prefix, deleted };
+    }),
+
+  createFolder: orgProcedure
+    .input(z.object({ bucketId: z.string(), key: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const [bucket] = await ctx.db
+        .select()
+        .from(buckets)
+        .where(
+          and(eq(buckets.id, input.bucketId), eq(buckets.orgId, ctx.orgId))
+        )
+        .limit(1);
+
+      if (!bucket) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Bucket not found",
+        });
+      }
+      if (bucket.status !== "active") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Bucket is not active",
+        });
+      }
+
+      const folderKey = input.key.endsWith("/") ? input.key : `${input.key}/`;
+
+      await s3.send(
+        new PutObjectCommand({
+          Bucket: bucket.s3BucketName,
+          Key: folderKey,
+          Body: Buffer.alloc(0),
+          ContentType: "application/x-directory",
+        })
+      );
+
+      return { key: folderKey };
+    }),
+
+  renameFolder: orgProcedure
+    .input(
+      z.object({
+        bucketId: z.string(),
+        oldPrefix: z.string().min(1),
+        newPrefix: z.string().min(1),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const [bucket] = await ctx.db
+        .select()
+        .from(buckets)
+        .where(
+          and(eq(buckets.id, input.bucketId), eq(buckets.orgId, ctx.orgId))
+        )
+        .limit(1);
+
+      if (!bucket) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Bucket not found",
+        });
+      }
+      if (bucket.status !== "active") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Bucket is not active",
+        });
+      }
+
+      const oldPrefix = input.oldPrefix.endsWith("/")
+        ? input.oldPrefix
+        : `${input.oldPrefix}/`;
+      const newPrefix = input.newPrefix.endsWith("/")
+        ? input.newPrefix
+        : `${input.newPrefix}/`;
+
+      let continuationToken: string | undefined;
+      let moved = 0;
+
+      do {
+        const list = await s3.send(
+          new ListObjectsV2Command({
+            Bucket: bucket.s3BucketName,
+            Prefix: oldPrefix,
+            ContinuationToken: continuationToken,
+          })
+        );
+
+        for (const obj of list.Contents ?? []) {
+          if (!obj.Key) {
+            continue;
+          }
+          const newKey = obj.Key.replace(oldPrefix, newPrefix);
+          await s3.send(
+            new CopyObjectCommand({
+              Bucket: bucket.s3BucketName,
+              CopySource: `${bucket.s3BucketName}/${obj.Key}`,
+              Key: newKey,
+            })
+          );
+          moved++;
+        }
+
+        if (list.Contents?.length) {
+          await s3.send(
+            new DeleteObjectsCommand({
+              Bucket: bucket.s3BucketName,
+              Delete: {
+                Objects: list.Contents.map((o) => ({ Key: o.Key ?? "" })),
+              },
+            })
+          );
+        }
+
+        continuationToken = list.IsTruncated
+          ? list.NextContinuationToken
+          : undefined;
+      } while (continuationToken);
+
+      return { oldPrefix, newPrefix, moved };
     }),
 });
