@@ -248,7 +248,7 @@ function EmptyMessage({ search, prefix }: { search: string; prefix: string }) {
 }
 
 const createFolderSchema = z.object({
-  name: z.string().min(1, "Folder name is required"),
+  name: z.string().min(1, "Folder name is required").max(255),
 });
 
 type CreateFolderValues = z.infer<typeof createFolderSchema>;
@@ -398,7 +398,7 @@ function Breadcrumbs({
 }
 
 const renameFolderSchema = z.object({
-  name: z.string().min(1, "Folder name is required"),
+  name: z.string().min(1, "Folder name is required").max(255),
 });
 
 type RenameFolderValues = z.infer<typeof renameFolderSchema>;
@@ -429,7 +429,6 @@ function FolderRow({
     handleSubmit,
     reset,
     formState: { errors },
-    setError,
   } = useForm<RenameFolderValues>({
     resolver: zodResolver(renameFolderSchema),
     defaultValues: { name: "" },
@@ -461,7 +460,6 @@ function FolderRow({
   function onSubmit(values: RenameFolderValues) {
     const trimmed = values.name.trim();
     if (trimmed === name) {
-      setError("name", { message: "Name must be different" });
       return;
     }
     renameFolder.mutate({
