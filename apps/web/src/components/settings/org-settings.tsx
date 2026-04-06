@@ -165,9 +165,6 @@ function OrgNameCard({
                 </p>
               )}
             </div>
-            <p className="font-mono text-muted-foreground text-sm">
-              {org?.slug}
-            </p>
             {isDirty && (
               <Button disabled={rename.isPending} type="submit">
                 {rename.isPending ? "Saving..." : "Save"}
@@ -176,12 +173,7 @@ function OrgNameCard({
           </form>
         )}
         {!(loading || isAdmin) && (
-          <div className="space-y-1">
-            <p className="font-medium">{org?.name}</p>
-            <p className="font-mono text-muted-foreground text-sm">
-              {org?.slug}
-            </p>
-          </div>
+          <p className="font-medium">{org?.name}</p>
         )}
       </CardContent>
     </Card>
