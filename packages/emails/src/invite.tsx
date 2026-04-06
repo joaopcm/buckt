@@ -10,7 +10,6 @@ import {
   Section,
   Text,
 } from "@react-email/components";
-import { pixelBasedPreset, Tailwind } from "@react-email/tailwind";
 
 interface InviteEmailProps {
   acceptUrl: string;
@@ -27,36 +26,121 @@ export function InviteEmail({
 }: InviteEmailProps) {
   return (
     <Html lang="en">
-      <Tailwind config={{ presets: [pixelBasedPreset] }}>
-        <Head />
-        <Preview>
-          {inviterName} invited you to join {orgName}
-        </Preview>
-        <Body className="bg-gray-100 font-sans">
-          <Container className="mx-auto max-w-xl rounded-lg bg-white px-5 py-10">
-            <Heading className="mb-4 font-semibold text-2xl text-gray-900">
-              Join {orgName}
-            </Heading>
-            <Text className="mb-6 text-gray-600 text-sm leading-6">
-              {inviterName} has invited you to join <strong>{orgName}</strong>{" "}
-              as a <strong>{role}</strong>.
-            </Text>
-            <Section className="mb-6 text-center">
-              <Button
-                className="rounded-md bg-gray-950 px-6 py-3 font-semibold text-sm text-white no-underline"
-                href={acceptUrl}
-              >
-                Accept Invitation
-              </Button>
-            </Section>
-            <Hr className="my-6 border-gray-200" />
-            <Text className="m-0 text-gray-400 text-xs">
-              If you weren't expecting this invitation, you can ignore this
-              email.
-            </Text>
-          </Container>
-        </Body>
-      </Tailwind>
+      <Head />
+      <Preview>
+        {inviterName} invited you to join {orgName}
+      </Preview>
+      <Body style={body}>
+        <Container style={container}>
+          <Section style={logoSection}>
+            <table cellPadding="0" cellSpacing="0" role="presentation">
+              <tr>
+                <td style={logoBox}>B</td>
+                <td style={logoText}>buckt</td>
+              </tr>
+            </table>
+          </Section>
+          <Heading style={heading}>Join {orgName}</Heading>
+          <Text style={paragraph}>
+            <strong>{inviterName}</strong> has invited you to join{" "}
+            <strong>{orgName}</strong> as a <strong>{role}</strong>.
+          </Text>
+          <Section style={buttonSection}>
+            <Button href={acceptUrl} style={button}>
+              Accept Invitation
+            </Button>
+          </Section>
+          <Hr style={divider} />
+          <Text style={footer}>
+            If you weren't expecting this invitation, you can safely ignore this
+            email.
+          </Text>
+        </Container>
+      </Body>
     </Html>
   );
 }
+
+const body: React.CSSProperties = {
+  backgroundColor: "#f4f4f5",
+  fontFamily:
+    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+  margin: "0",
+  padding: "40px 0",
+};
+
+const container: React.CSSProperties = {
+  backgroundColor: "#ffffff",
+  border: "1px solid #e4e4e7",
+  borderRadius: "12px",
+  margin: "0 auto",
+  maxWidth: "460px",
+  padding: "48px 40px",
+};
+
+const logoSection: React.CSSProperties = {
+  marginBottom: "32px",
+};
+
+const logoBox: React.CSSProperties = {
+  backgroundColor: "#0a0a0a",
+  color: "#ffffff",
+  fontSize: "13px",
+  fontWeight: 700,
+  height: "28px",
+  lineHeight: "28px",
+  textAlign: "center",
+  width: "28px",
+};
+
+const logoText: React.CSSProperties = {
+  fontSize: "16px",
+  fontWeight: 700,
+  letterSpacing: "-0.025em",
+  paddingLeft: "8px",
+};
+
+const heading: React.CSSProperties = {
+  color: "#0a0a0a",
+  fontSize: "22px",
+  fontWeight: 600,
+  letterSpacing: "-0.02em",
+  lineHeight: "28px",
+  margin: "0 0 12px",
+};
+
+const paragraph: React.CSSProperties = {
+  color: "#52525b",
+  fontSize: "14px",
+  lineHeight: "24px",
+  margin: "0 0 28px",
+};
+
+const buttonSection: React.CSSProperties = {
+  marginBottom: "28px",
+};
+
+const button: React.CSSProperties = {
+  backgroundColor: "#0a0a0a",
+  borderRadius: "6px",
+  color: "#ffffff",
+  display: "inline-block",
+  fontSize: "14px",
+  fontWeight: 600,
+  lineHeight: "1",
+  padding: "12px 28px",
+  textAlign: "center",
+  textDecoration: "none",
+};
+
+const divider: React.CSSProperties = {
+  borderColor: "#e4e4e7",
+  margin: "0 0 20px",
+};
+
+const footer: React.CSSProperties = {
+  color: "#a1a1aa",
+  fontSize: "12px",
+  lineHeight: "18px",
+  margin: "0",
+};
