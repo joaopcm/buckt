@@ -7,11 +7,10 @@ import {
   Hr,
   Html,
   Preview,
-  pixelBasedPreset,
   Section,
-  Tailwind,
   Text,
 } from "@react-email/components";
+import { pixelBasedPreset, Tailwind } from "@react-email/tailwind";
 
 interface InviteEmailProps {
   acceptUrl: string;
