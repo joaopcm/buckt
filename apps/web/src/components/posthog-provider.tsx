@@ -17,7 +17,6 @@ if (typeof window !== "undefined" && posthogKey) {
       maskAllInputs: true,
       maskTextSelector: "[data-ph-mask]",
       sampleRate: 0.1,
-      minimumDurationMilliseconds: 1000,
     },
   });
 }
