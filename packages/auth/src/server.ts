@@ -44,7 +44,7 @@ export function createAuth(
           );
 
           await env.resend.emails.send({
-            from: "Buckt <noreply@buckt.dev>",
+            from: "Buckt <hi@transactional.buckt.dev>",
             to: data.email,
             subject: `Join ${data.organization.name} on Buckt`,
             html,
