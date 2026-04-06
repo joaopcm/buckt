@@ -19,6 +19,7 @@ env:
   AWS_ACCESS_KEY_ID: "AKIAFAKE"
   AWS_SECRET_ACCESS_KEY: "fake-secret-key"
   AWS_REGION: "us-east-1"
+  RESEND_API_KEY: "re_fake"
 
 jobs:
   build:
