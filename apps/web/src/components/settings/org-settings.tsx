@@ -170,9 +170,7 @@ function OrgNameCard({
             </Button>
           </form>
         )}
-        {!(loading || isAdmin) && (
-          <p className="font-medium">{org?.name}</p>
-        )}
+        {!(loading || isAdmin) && <p className="font-medium">{org?.name}</p>}
       </CardContent>
     </Card>
   );
