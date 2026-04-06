@@ -37,10 +37,10 @@ export function CreateBucketForm({ orgId }: { orgId: string }) {
   });
 
   const createBucket = trpc.buckets.create.useMutation({
-    onSuccess: () => {
+    onSuccess: (bucket) => {
       utils.buckets.list.invalidate({ orgId });
       utils.buckets.count.invalidate({ orgId });
-      router.push(`/org/${orgId}/buckets`);
+      router.push(`/org/${orgId}/buckets/${bucket.id}`);
     },
     onError: (error) => {
       toast.error(error.message);
