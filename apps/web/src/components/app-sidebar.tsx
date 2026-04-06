@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Buckets", href: "/buckets", icon: HardDrive },
-  { name: "API Keys", href: "/settings/keys", icon: Key },
+  { name: "API Keys", href: "/keys", icon: Key },
   { name: "Settings", href: "/settings", icon: Settings },
   { name: "Billing", href: "/billing", icon: CreditCard },
 ];
@@ -41,6 +41,7 @@ export function AppSidebar({ orgId }: { orgId: string }) {
 
   const prefetchMap: Record<string, () => void> = {
     "/buckets": () => utils.buckets.list.prefetch({ orgId }),
+    "/keys": () => utils.keys.list.prefetch({ orgId }),
     "/settings": () => {
       utils.org.get.prefetch({ orgId });
       utils.org.members.prefetch({ orgId });
