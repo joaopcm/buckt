@@ -8,7 +8,7 @@ import { render } from "@react-email/components";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { organization } from "better-auth/plugins";
-import { Resend } from "resend";
+import type { Resend } from "resend";
 import Stripe from "stripe";
 
 export function createAuth(
@@ -18,11 +18,10 @@ export function createAuth(
     baseUrl: string;
     stripeSecretKey: string;
     stripeWebhookSecret: string;
-    resendApiKey?: string;
+    resend: Resend;
   }
 ) {
   const stripeClient = new Stripe(env.stripeSecretKey);
-  const resend = env.resendApiKey ? new Resend(env.resendApiKey) : null;
 
   return betterAuth({
     database: drizzleAdapter(db, { provider: "pg", schema }),
@@ -34,10 +33,6 @@ export function createAuth(
     plugins: [
       organization({
         async sendInvitationEmail(data) {
-          if (!resend) {
-            return;
-          }
-
           const acceptUrl = `${env.baseUrl}/invite/${data.invitation.id}`;
           const html = await render(
             InviteEmail({
@@ -48,7 +43,7 @@ export function createAuth(
             })
           );
 
-          await resend.emails.send({
+          await env.resend.emails.send({
             from: "Buckt <noreply@buckt.dev>",
             to: data.email,
             subject: `Join ${data.organization.name} on Buckt`,
