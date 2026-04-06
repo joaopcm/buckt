@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { parseAsString, useQueryState } from "nuqs";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
+import { RenameBucketDialog } from "@/components/buckets/rename-bucket-dialog";
 import { StatusBadge } from "@/components/buckets/status-badge";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { CopyText } from "@/components/copy-text";
@@ -183,6 +184,7 @@ function BucketActions({
 }) {
   const router = useRouter();
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [renameOpen, setRenameOpen] = useState(false);
   const utils = trpc.useUtils();
 
   const deleteBucket = trpc.buckets.delete.useMutation({
@@ -219,6 +221,9 @@ function BucketActions({
           >
             View details
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setRenameOpen(true)}>
+            Rename
+          </DropdownMenuItem>
           {status === "failed" && (
             <DropdownMenuItem
               disabled={retryBucket.isPending}
@@ -237,6 +242,13 @@ function BucketActions({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <RenameBucketDialog
+        bucket={{ id: bucketId, name: bucketName }}
+        onOpenChange={setRenameOpen}
+        open={renameOpen}
+        orgId={orgId}
+      />
 
       <ConfirmDialog
         confirmLabel="Delete"
