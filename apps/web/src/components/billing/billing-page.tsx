@@ -14,19 +14,8 @@ import {
 } from "@/components/ui/tooltip";
 import { useOrgRole } from "@/hooks/use-org-role";
 import { authClient } from "@/lib/auth-client";
-import { formatBytes } from "@/lib/format";
+import { formatBytes, formatDate } from "@/lib/format";
 import { trpc } from "@/lib/trpc/client";
-
-function formatDate(date: string | Date | null | undefined): string {
-  if (!date) {
-    return "";
-  }
-  return new Date(date).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
 
 function formatLimit(value: number): string {
   if (!Number.isFinite(value)) {
