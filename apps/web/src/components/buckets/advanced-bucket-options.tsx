@@ -1,9 +1,10 @@
 "use client";
 
+import { Accordion } from "@base-ui/react/accordion";
+import { ChevronDown, X } from "lucide-react";
 import { useState } from "react";
 import type {
   FieldErrors,
-  UseFormRegister,
   UseFormSetValue,
   UseFormWatch,
 } from "react-hook-form";
@@ -28,6 +29,20 @@ interface CreateBucketValues {
   visibility: "public" | "private";
 }
 
+const REGIONS = [
+  { value: "us-east-1", label: "US East (N. Virginia)" },
+  { value: "us-west-2", label: "US West (Oregon)" },
+  { value: "eu-west-1", label: "Europe (Ireland)" },
+  { value: "eu-central-1", label: "Europe (Frankfurt)" },
+  { value: "ap-southeast-1", label: "Asia Pacific (Singapore)" },
+  { value: "ap-northeast-1", label: "Asia Pacific (Tokyo)" },
+] as const;
+
+const VISIBILITY_OPTIONS = [
+  { value: "public", label: "Public — files served openly via custom domain" },
+  { value: "private", label: "Private — files require authentication" },
+] as const;
+
 const CACHE_PRESETS = [
   { value: "no-cache", label: "No cache" },
   { value: "short", label: "Short (1 hour)" },
@@ -36,20 +51,29 @@ const CACHE_PRESETS = [
   { value: "immutable", label: "Immutable (1 year)" },
 ] as const;
 
+const LIFECYCLE_PRESETS = [
+  { value: 7, label: "7 days" },
+  { value: 30, label: "30 days" },
+  { value: 90, label: "90 days" },
+  { value: 365, label: "1 year" },
+] as const;
+
 interface AdvancedBucketOptionsProps {
+  defaultRegion: string;
   errors: FieldErrors<CreateBucketValues>;
-  register: UseFormRegister<CreateBucketValues>;
   setValue: UseFormSetValue<CreateBucketValues>;
   watch: UseFormWatch<CreateBucketValues>;
 }
 
 export function AdvancedBucketOptions({
+  defaultRegion,
   setValue,
   watch,
   errors,
 }: AdvancedBucketOptionsProps) {
   const [corsInput, setCorsInput] = useState("");
   const corsOrigins = watch("corsOrigins") ?? [];
+  const lifecycleTtlDays = watch("lifecycleTtlDays");
 
   function addCorsOrigin() {
     const trimmed = corsInput.trim();
@@ -61,10 +85,7 @@ export function AdvancedBucketOptions({
     } catch {
       return;
     }
-    if (corsOrigins.includes(trimmed)) {
-      return;
-    }
-    if (corsOrigins.length >= 10) {
+    if (corsOrigins.includes(trimmed) || corsOrigins.length >= 10) {
       return;
     }
     setValue("corsOrigins", [...corsOrigins, trimmed]);
@@ -79,102 +100,192 @@ export function AdvancedBucketOptions({
   }
 
   return (
-    <div className="space-y-4 border-t pt-4">
-      <div className="space-y-2">
-        <Label>Cache preset</Label>
-        <Select
-          defaultValue="standard"
-          onValueChange={(value) =>
-            setValue("cachePreset", value as CreateBucketValues["cachePreset"])
-          }
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {CACHE_PRESETS.map((p) => (
-              <SelectItem key={p.value} value={p.value}>
-                {p.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+    <Accordion.Root>
+      <Accordion.Item>
+        <Accordion.Trigger className="flex w-full items-center gap-1.5 py-2 text-muted-foreground text-sm hover:text-foreground [&[data-panel-open]>svg]:rotate-180">
+          Advanced options
+          <ChevronDown className="size-3.5 transition-transform duration-200" />
+        </Accordion.Trigger>
+        <Accordion.Panel className="space-y-4 overflow-hidden pt-2 pb-1">
+          <div className="space-y-2">
+            <Label>Region</Label>
+            <Select
+              defaultValue={defaultRegion}
+              onValueChange={(value) => setValue("region", value)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a region" />
+              </SelectTrigger>
+              <SelectContent>
+                {REGIONS.map((r) => (
+                  <SelectItem key={r.value} value={r.value}>
+                    {r.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-      <div className="space-y-2">
-        <Label>CORS origins</Label>
-        <div className="flex gap-2">
-          <Input
-            onChange={(e) => setCorsInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                addCorsOrigin();
+          <div className="space-y-2">
+            <Label>Visibility</Label>
+            <Select
+              defaultValue="public"
+              onValueChange={(value) =>
+                setValue(
+                  "visibility",
+                  value as CreateBucketValues["visibility"]
+                )
               }
-            }}
-            placeholder="https://example.com"
-            value={corsInput}
-          />
-          <Button
-            disabled={corsOrigins.length >= 10}
-            onClick={addCorsOrigin}
-            type="button"
-            variant="outline"
-          >
-            Add
-          </Button>
-        </div>
-        {corsOrigins.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {corsOrigins.map((origin) => (
-              <span
-                className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-xs"
-                key={origin}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {VISIBILITY_OPTIONS.map((v) => (
+                  <SelectItem key={v.value} value={v.value}>
+                    {v.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Cache preset</Label>
+            <Select
+              defaultValue="standard"
+              onValueChange={(value) =>
+                setValue(
+                  "cachePreset",
+                  value as CreateBucketValues["cachePreset"]
+                )
+              }
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {CACHE_PRESETS.map((p) => (
+                  <SelectItem key={p.value} value={p.value}>
+                    {p.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>CORS origins</Label>
+            <div className="flex gap-2">
+              <Input
+                onChange={(e) => setCorsInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addCorsOrigin();
+                  }
+                }}
+                placeholder="https://example.com"
+                value={corsInput}
+              />
+              <Button
+                disabled={corsOrigins.length >= 10}
+                onClick={addCorsOrigin}
+                type="button"
+                variant="outline"
               >
-                {origin}
+                Add
+              </Button>
+            </div>
+            {corsOrigins.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {corsOrigins.map((origin) => (
+                  <span
+                    className="inline-flex items-center gap-0.5 border border-input px-1.5 py-0.5 font-mono text-[10px]"
+                    key={origin}
+                  >
+                    {origin}
+                    {/* biome-ignore lint/a11y/useSemanticElements: can't nest <button> in this context */}
+                    <span
+                      className="cursor-pointer text-muted-foreground hover:text-foreground"
+                      onClick={() => removeCorsOrigin(origin)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          removeCorsOrigin(origin);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <X className="size-2.5" />
+                    </span>
+                  </span>
+                ))}
+              </div>
+            )}
+            {errors.corsOrigins && (
+              <p className="text-destructive text-xs">
+                {errors.corsOrigins.message}
+              </p>
+            )}
+            <p className="text-muted-foreground text-xs">
+              Origins allowed to access your files from a browser
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="lifecycleTtlDays">Auto-delete after</Label>
+            <div className="flex">
+              <Input
+                className="rounded-r-none border-r-0"
+                id="lifecycleTtlDays"
+                max={3650}
+                min={1}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setValue("lifecycleTtlDays", val ? Number(val) : null);
+                }}
+                placeholder="Never"
+                type="number"
+                value={lifecycleTtlDays ?? ""}
+              />
+              <span className="inline-flex items-center border border-input bg-muted px-3 text-muted-foreground text-xs">
+                days
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {LIFECYCLE_PRESETS.map((preset) => (
                 <button
-                  className="text-muted-foreground hover:text-foreground"
-                  onClick={() => removeCorsOrigin(origin)}
+                  className={`border px-2 py-0.5 text-xs transition-colors ${
+                    lifecycleTtlDays === preset.value
+                      ? "border-foreground bg-foreground text-background"
+                      : "border-input text-muted-foreground hover:border-foreground hover:text-foreground"
+                  }`}
+                  key={preset.value}
+                  onClick={() => setValue("lifecycleTtlDays", preset.value)}
                   type="button"
                 >
-                  x
+                  {preset.label}
                 </button>
-              </span>
-            ))}
+              ))}
+              {lifecycleTtlDays !== null && lifecycleTtlDays !== undefined && (
+                <button
+                  className="border border-input px-2 py-0.5 text-muted-foreground text-xs hover:border-foreground hover:text-foreground"
+                  onClick={() => setValue("lifecycleTtlDays", null)}
+                  type="button"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            {errors.lifecycleTtlDays && (
+              <p className="text-destructive text-xs">
+                {errors.lifecycleTtlDays.message}
+              </p>
+            )}
           </div>
-        )}
-        {errors.corsOrigins && (
-          <p className="text-destructive text-xs">
-            {errors.corsOrigins.message}
-          </p>
-        )}
-        <p className="text-muted-foreground text-xs">
-          Origins allowed to access your files from a browser
-        </p>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="lifecycleTtlDays">Auto-delete after (days)</Label>
-        <Input
-          id="lifecycleTtlDays"
-          max={3650}
-          min={1}
-          onChange={(e) => {
-            const val = e.target.value;
-            setValue("lifecycleTtlDays", val ? Number(val) : null);
-          }}
-          placeholder="Leave empty to keep files forever"
-          type="number"
-        />
-        {errors.lifecycleTtlDays && (
-          <p className="text-destructive text-xs">
-            {errors.lifecycleTtlDays.message}
-          </p>
-        )}
-        <p className="text-muted-foreground text-xs">
-          Files will be automatically deleted after this many days
-        </p>
-      </div>
-    </div>
+        </Accordion.Panel>
+      </Accordion.Item>
+    </Accordion.Root>
   );
 }
