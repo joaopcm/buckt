@@ -42,6 +42,19 @@ const LIFECYCLE_PRESETS = [
   { value: 365, label: "1 year" },
 ] as const;
 
+const OPTIMIZATION_OPTIONS = [
+  { value: "none", label: "None — files served as uploaded" },
+  { value: "light", label: "Light — minimal compression, visually lossless" },
+  {
+    value: "balanced",
+    label: "Balanced — good compression with minor quality trade-off",
+  },
+  {
+    value: "maximum",
+    label: "Maximum — aggressive compression, some quality loss",
+  },
+] as const;
+
 type CachePresetValue = (typeof CACHE_PRESETS)[number]["value"];
 
 interface BucketSettingsProps {
@@ -52,6 +65,7 @@ interface BucketSettingsProps {
     cacheControlOverride: string | null;
     corsOrigins: string[];
     lifecycleTtlDays: number | null;
+    optimizationMode: string;
   };
   disabled?: boolean;
   orgId: string;
@@ -67,6 +81,7 @@ export function BucketSettings({
       <h2 className="font-semibold text-lg">Settings</h2>
       <VisibilityCard bucket={bucket} disabled={disabled} orgId={orgId} />
       <CachingCard bucket={bucket} disabled={disabled} orgId={orgId} />
+      <OptimizationCard bucket={bucket} disabled={disabled} orgId={orgId} />
       <CorsCard bucket={bucket} disabled={disabled} orgId={orgId} />
       <LifecycleCard bucket={bucket} disabled={disabled} orgId={orgId} />
     </div>
@@ -328,6 +343,79 @@ function CorsCard({
         )}
         <Button
           disabled={disabled || updateSettings.isPending}
+          onClick={handleSave}
+        >
+          {updateSettings.isPending ? "Saving..." : "Save"}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+function OptimizationCard({
+  bucket,
+  disabled,
+  orgId,
+}: {
+  bucket: BucketSettingsProps["bucket"];
+  disabled?: boolean;
+  orgId: string;
+}) {
+  const [mode, setMode] = useState(bucket.optimizationMode);
+  const utils = trpc.useUtils();
+
+  const updateSettings = trpc.buckets.updateSettings.useMutation({
+    onSuccess: () => {
+      utils.buckets.get.invalidate({ orgId, id: bucket.id });
+      toast.success("Optimization updated");
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  function handleSave() {
+    updateSettings.mutate({
+      orgId,
+      id: bucket.id,
+      optimizationMode: mode as "none" | "light" | "balanced" | "maximum",
+    });
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Optimization</CardTitle>
+        <CardDescription>
+          Automatically compress images uploaded to this bucket
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <Select
+          disabled={disabled}
+          items={OPTIMIZATION_OPTIONS}
+          onValueChange={(v) => {
+            if (v) {
+              setMode(v);
+            }
+          }}
+          value={mode}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent align="start" alignItemWithTrigger={false}>
+            {OPTIMIZATION_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button
+          disabled={
+            disabled ||
+            updateSettings.isPending ||
+            mode === bucket.optimizationMode
+          }
           onClick={handleSave}
         >
           {updateSettings.isPending ? "Saving..." : "Save"}
