@@ -130,7 +130,11 @@ export function AdvancedBucketOptions({
                   </span>
                 ),
               }))}
-              onValueChange={(value) => setValue("region", value)}
+              onValueChange={(value) => {
+                if (value) {
+                  setValue("region", value);
+                }
+              }}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a region" />
@@ -151,12 +155,14 @@ export function AdvancedBucketOptions({
             <Select
               defaultValue="public"
               items={VISIBILITY_OPTIONS}
-              onValueChange={(value) =>
-                setValue(
-                  "visibility",
-                  value as CreateBucketValues["visibility"]
-                )
-              }
+              onValueChange={(value) => {
+                if (value) {
+                  setValue(
+                    "visibility",
+                    value as CreateBucketValues["visibility"]
+                  );
+                }
+              }}
             >
               <SelectTrigger className="w-full">
                 <SelectValue />
@@ -176,12 +182,14 @@ export function AdvancedBucketOptions({
             <Select
               defaultValue="standard"
               items={CACHE_PRESETS}
-              onValueChange={(value) =>
-                setValue(
-                  "cachePreset",
-                  value as CreateBucketValues["cachePreset"]
-                )
-              }
+              onValueChange={(value) => {
+                if (value) {
+                  setValue(
+                    "cachePreset",
+                    value as CreateBucketValues["cachePreset"]
+                  );
+                }
+              }}
             >
               <SelectTrigger className="w-full">
                 <SelectValue />
