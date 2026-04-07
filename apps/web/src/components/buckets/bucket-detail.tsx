@@ -8,7 +8,7 @@ import { FileBrowser } from "@/components/buckets/file-browser";
 import { ProvisioningSteps } from "@/components/buckets/provisioning-steps";
 import { StatusBadge } from "@/components/buckets/status-badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { authClient } from "@/lib/auth-client";
+import { useOrgRole } from "@/hooks/use-org-role";
 import { trpc } from "@/lib/trpc/client";
 
 const POLLING_STATUSES = ["pending", "provisioning"];
@@ -20,14 +20,7 @@ export function BucketDetail({
   orgId: string;
   bucketId: string;
 }) {
-  const { data: session } = authClient.useSession();
-  const { data: membersData } = trpc.org.members.useQuery({ orgId });
-
-  const currentMember = membersData?.members?.find(
-    (m: { userId: string }) => m.userId === session?.user?.id
-  );
-  const isAdmin =
-    currentMember?.role === "owner" || currentMember?.role === "admin";
+  const { isAdmin } = useOrgRole(orgId);
 
   const { data: bucket, isPending } = trpc.buckets.get.useQuery(
     { orgId, id: bucketId },
