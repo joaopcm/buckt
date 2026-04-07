@@ -7,6 +7,7 @@ import {
   FolderIcon,
   FolderPlus,
   MoreVertical,
+  RefreshCw,
   Search,
 } from "lucide-react";
 import { parseAsString, useQueryState } from "nuqs";
@@ -105,6 +106,11 @@ export function FileBrowser({
     utils.files.list.invalidate({ orgId, bucketId });
   }
 
+  function handleUploadComplete() {
+    invalidateFiles();
+    utils.buckets.get.invalidate({ orgId, id: bucketId });
+  }
+
   function prefetchFolder(folderPrefix: string) {
     utils.files.list.prefetch({ orgId, bucketId, prefix: folderPrefix });
   }
@@ -139,6 +145,14 @@ export function FileBrowser({
               value={search}
             />
           </div>
+          <Button
+            onClick={invalidateFiles}
+            size="icon"
+            title="Refresh"
+            variant="outline"
+          >
+            <RefreshCw className="size-4" />
+          </Button>
           <CreateFolderButton
             bucketId={bucketId}
             onCreated={invalidateFiles}
@@ -228,7 +242,7 @@ export function FileBrowser({
 
         <FileUpload
           bucketId={bucketId}
-          onUploadComplete={invalidateFiles}
+          onUploadComplete={handleUploadComplete}
           orgId={orgId}
           prefix={prefix}
         />
