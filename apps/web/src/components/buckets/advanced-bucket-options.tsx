@@ -1,7 +1,13 @@
 "use client";
 
 import { Accordion } from "@base-ui/react/accordion";
+import DE from "country-flag-icons/react/3x2/DE";
+import IE from "country-flag-icons/react/3x2/IE";
+import JP from "country-flag-icons/react/3x2/JP";
+import SG from "country-flag-icons/react/3x2/SG";
+import US from "country-flag-icons/react/3x2/US";
 import { ChevronDown, X } from "lucide-react";
+import type { ComponentType, SVGProps } from "react";
 import { useState } from "react";
 import type {
   FieldErrors,
@@ -29,14 +35,18 @@ interface CreateBucketValues {
   visibility: "public" | "private";
 }
 
-const REGIONS = [
-  { value: "us-east-1", label: "US East (N. Virginia)", flag: "🇺🇸" },
-  { value: "us-west-2", label: "US West (Oregon)", flag: "🇺🇸" },
-  { value: "eu-west-1", label: "Europe (Ireland)", flag: "🇮🇪" },
-  { value: "eu-central-1", label: "Europe (Frankfurt)", flag: "🇩🇪" },
-  { value: "ap-southeast-1", label: "Asia Pacific (Singapore)", flag: "🇸🇬" },
-  { value: "ap-northeast-1", label: "Asia Pacific (Tokyo)", flag: "🇯🇵" },
-] as const;
+const REGIONS: ReadonlyArray<{
+  value: string;
+  label: string;
+  Flag: ComponentType<SVGProps<SVGSVGElement>>;
+}> = [
+  { value: "us-east-1", label: "US East (N. Virginia)", Flag: US },
+  { value: "us-west-2", label: "US West (Oregon)", Flag: US },
+  { value: "eu-west-1", label: "Europe (Ireland)", Flag: IE },
+  { value: "eu-central-1", label: "Europe (Frankfurt)", Flag: DE },
+  { value: "ap-southeast-1", label: "Asia Pacific (Singapore)", Flag: SG },
+  { value: "ap-northeast-1", label: "Asia Pacific (Tokyo)", Flag: JP },
+];
 
 const VISIBILITY_OPTIONS = [
   { value: "public", label: "Public — files served openly via custom domain" },
@@ -113,7 +123,12 @@ export function AdvancedBucketOptions({
               defaultValue={defaultRegion}
               items={REGIONS.map((r) => ({
                 value: r.value,
-                label: `${r.flag} ${r.label}`,
+                label: (
+                  <span className="flex items-center gap-2">
+                    <r.Flag className="size-4 shrink-0" />
+                    {r.label}
+                  </span>
+                ),
               }))}
               onValueChange={(value) => setValue("region", value)}
             >
@@ -123,7 +138,8 @@ export function AdvancedBucketOptions({
               <SelectContent>
                 {REGIONS.map((r) => (
                   <SelectItem key={r.value} value={r.value}>
-                    {r.flag} {r.label}
+                    <r.Flag className="size-4 shrink-0" />
+                    {r.label}
                   </SelectItem>
                 ))}
               </SelectContent>
