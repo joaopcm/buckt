@@ -3,11 +3,13 @@ import { stripe } from "@better-auth/stripe";
 import type { Database } from "@buckt/db";
 // biome-ignore lint/performance/noNamespaceImport: drizzle requires namespace import for schema
 import * as schema from "@buckt/db/src/schema";
+import { member } from "@buckt/db/src/schema/organization";
 import { InviteEmail } from "@buckt/emails";
 import { render } from "@react-email/components";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { organization } from "better-auth/plugins";
+import { and, eq } from "drizzle-orm";
 import type { Resend } from "resend";
 import Stripe from "stripe";
 
@@ -72,6 +74,19 @@ export function createAuth(
                 process.env.STRIPE_ENTERPRISE_PRICE_ID || "price_enterprise",
             },
           ],
+          async authorizeReference({ user, referenceId }) {
+            const [m] = await db
+              .select({ role: member.role })
+              .from(member)
+              .where(
+                and(
+                  eq(member.organizationId, referenceId),
+                  eq(member.userId, user.id)
+                )
+              )
+              .limit(1);
+            return m?.role === "owner" || m?.role === "admin";
+          },
         },
         organization: {
           enabled: true,
