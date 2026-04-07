@@ -111,6 +111,7 @@ export function AdvancedBucketOptions({
             <Label>Region</Label>
             <Select
               defaultValue={defaultRegion}
+              items={REGIONS}
               onValueChange={(value) => setValue("region", value)}
             >
               <SelectTrigger className="w-full">
@@ -130,6 +131,7 @@ export function AdvancedBucketOptions({
             <Label>Visibility</Label>
             <Select
               defaultValue="public"
+              items={VISIBILITY_OPTIONS}
               onValueChange={(value) =>
                 setValue(
                   "visibility",
@@ -154,6 +156,7 @@ export function AdvancedBucketOptions({
             <Label>Cache preset</Label>
             <Select
               defaultValue="standard"
+              items={CACHE_PRESETS}
               onValueChange={(value) =>
                 setValue(
                   "cachePreset",
