@@ -1,13 +1,13 @@
 "use client";
 
 import { Accordion } from "@base-ui/react/accordion";
+import type { FlagComponent } from "country-flag-icons/react/3x2";
 import DE from "country-flag-icons/react/3x2/DE";
 import IE from "country-flag-icons/react/3x2/IE";
 import JP from "country-flag-icons/react/3x2/JP";
 import SG from "country-flag-icons/react/3x2/SG";
 import US from "country-flag-icons/react/3x2/US";
 import { ChevronDown, X } from "lucide-react";
-import type { ComponentType, SVGProps } from "react";
 import { useState } from "react";
 import type {
   FieldErrors,
@@ -38,7 +38,7 @@ interface CreateBucketValues {
 const REGIONS: ReadonlyArray<{
   value: string;
   label: string;
-  Flag: ComponentType<SVGProps<SVGSVGElement>>;
+  Flag: FlagComponent;
 }> = [
   { value: "us-east-1", label: "US East (N. Virginia)", Flag: US },
   { value: "us-west-2", label: "US West (Oregon)", Flag: US },
