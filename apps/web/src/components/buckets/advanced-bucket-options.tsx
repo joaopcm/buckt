@@ -30,12 +30,12 @@ interface CreateBucketValues {
 }
 
 const REGIONS = [
-  { value: "us-east-1", label: "US East (N. Virginia)" },
-  { value: "us-west-2", label: "US West (Oregon)" },
-  { value: "eu-west-1", label: "Europe (Ireland)" },
-  { value: "eu-central-1", label: "Europe (Frankfurt)" },
-  { value: "ap-southeast-1", label: "Asia Pacific (Singapore)" },
-  { value: "ap-northeast-1", label: "Asia Pacific (Tokyo)" },
+  { value: "us-east-1", label: "US East (N. Virginia)", flag: "🇺🇸" },
+  { value: "us-west-2", label: "US West (Oregon)", flag: "🇺🇸" },
+  { value: "eu-west-1", label: "Europe (Ireland)", flag: "🇮🇪" },
+  { value: "eu-central-1", label: "Europe (Frankfurt)", flag: "🇩🇪" },
+  { value: "ap-southeast-1", label: "Asia Pacific (Singapore)", flag: "🇸🇬" },
+  { value: "ap-northeast-1", label: "Asia Pacific (Tokyo)", flag: "🇯🇵" },
 ] as const;
 
 const VISIBILITY_OPTIONS = [
@@ -111,7 +111,10 @@ export function AdvancedBucketOptions({
             <Label>Region</Label>
             <Select
               defaultValue={defaultRegion}
-              items={REGIONS}
+              items={REGIONS.map((r) => ({
+                value: r.value,
+                label: `${r.flag} ${r.label}`,
+              }))}
               onValueChange={(value) => setValue("region", value)}
             >
               <SelectTrigger className="w-full">
@@ -120,7 +123,7 @@ export function AdvancedBucketOptions({
               <SelectContent>
                 {REGIONS.map((r) => (
                   <SelectItem key={r.value} value={r.value}>
-                    {r.label}
+                    {r.flag} {r.label}
                   </SelectItem>
                 ))}
               </SelectContent>
