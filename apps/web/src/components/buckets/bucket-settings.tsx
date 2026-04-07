@@ -3,9 +3,14 @@
 import { X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -17,28 +22,17 @@ import {
 } from "@/components/ui/select";
 import { trpc } from "@/lib/trpc/client";
 
+const VISIBILITY_OPTIONS = [
+  { value: "public", label: "Public — files served openly via custom domain" },
+  { value: "private", label: "Private — files require authentication" },
+] as const;
+
 const CACHE_PRESETS = [
-  {
-    value: "no-cache",
-    label: "No cache",
-    header: "no-store, no-cache, must-revalidate",
-  },
-  { value: "short", label: "Short (1 hour)", header: "public, max-age=3600" },
-  {
-    value: "standard",
-    label: "Standard (1 day)",
-    header: "public, max-age=86400",
-  },
-  {
-    value: "aggressive",
-    label: "Aggressive (30 days)",
-    header: "public, max-age=2592000, immutable",
-  },
-  {
-    value: "immutable",
-    label: "Immutable (1 year)",
-    header: "public, max-age=31536000, immutable",
-  },
+  { value: "no-cache", label: "No cache" },
+  { value: "short", label: "Short (1 hour)" },
+  { value: "standard", label: "Standard (1 day)" },
+  { value: "aggressive", label: "Aggressive (30 days)" },
+  { value: "immutable", label: "Immutable (1 year)" },
 ] as const;
 
 const LIFECYCLE_PRESETS = [
@@ -81,7 +75,7 @@ function VisibilityCard({
   bucket: BucketSettingsProps["bucket"];
   orgId: string;
 }) {
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [visibility, setVisibility] = useState(bucket.visibility);
   const utils = trpc.useUtils();
 
   const updateSettings = trpc.buckets.updateSettings.useMutation({
@@ -92,19 +86,8 @@ function VisibilityCard({
     onError: (error) => toast.error(error.message),
   });
 
-  const isPublic = bucket.visibility === "public";
-  const targetVisibility = isPublic ? "private" : "public";
-
-  function handleToggle() {
-    if (isPublic) {
-      setConfirmOpen(true);
-    } else {
-      updateSettings.mutate({
-        orgId,
-        id: bucket.id,
-        visibility: "public",
-      });
-    }
+  function handleSave() {
+    updateSettings.mutate({ orgId, id: bucket.id, visibility });
   }
 
   return (
@@ -113,38 +96,34 @@ function VisibilityCard({
         <CardTitle className="text-base">Visibility</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        <p className="text-muted-foreground text-sm">
-          {isPublic
-            ? "Files are publicly accessible via your custom domain."
-            : "Files require authentication to access."}
-        </p>
-        <Button
-          disabled={updateSettings.isPending}
-          onClick={handleToggle}
-          variant="outline"
+        <Select
+          items={VISIBILITY_OPTIONS}
+          onValueChange={(v) => {
+            if (v) {
+              setVisibility(v as "public" | "private");
+            }
+          }}
+          value={visibility}
         >
-          {updateSettings.isPending
-            ? "Updating..."
-            : `Switch to ${targetVisibility}`}
-        </Button>
-
-        <ConfirmDialog
-          confirmLabel="Make private"
-          confirmValue="make private"
-          description="Files will no longer be publicly accessible. Existing links will stop working."
-          destructive
-          loading={updateSettings.isPending}
-          onConfirm={() =>
-            updateSettings.mutate({
-              orgId,
-              id: bucket.id,
-              visibility: "private",
-            })
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent align="start" alignItemWithTrigger={false}>
+            {VISIBILITY_OPTIONS.map((v) => (
+              <SelectItem key={v.value} value={v.value}>
+                {v.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button
+          disabled={
+            updateSettings.isPending || visibility === bucket.visibility
           }
-          onOpenChange={setConfirmOpen}
-          open={confirmOpen}
-          title="Switch to private"
-        />
+          onClick={handleSave}
+        >
+          {updateSettings.isPending ? "Saving..." : "Save"}
+        </Button>
       </CardContent>
     </Card>
   );
@@ -160,10 +139,6 @@ function CachingCard({
   const [preset, setPreset] = useState<CachePresetValue>(
     bucket.cachePreset as CachePresetValue
   );
-  const [override, setOverride] = useState(bucket.cacheControlOverride ?? "");
-  const [showAdvanced, setShowAdvanced] = useState(
-    bucket.cacheControlOverride !== null
-  );
   const utils = trpc.useUtils();
 
   const updateSettings = trpc.buckets.updateSettings.useMutation({
@@ -174,14 +149,11 @@ function CachingCard({
     onError: (error) => toast.error(error.message),
   });
 
-  const activePreset = CACHE_PRESETS.find((p) => p.value === preset);
-
   function handleSave() {
     updateSettings.mutate({
       orgId,
       id: bucket.id,
       cachePreset: preset,
-      cacheControlOverride: showAdvanced && override ? override : null,
     });
   }
 
@@ -202,7 +174,7 @@ function CachingCard({
             }}
             value={preset}
           >
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent align="start" alignItemWithTrigger={false}>
@@ -213,39 +185,11 @@ function CachingCard({
               ))}
             </SelectContent>
           </Select>
-          {activePreset && (
-            <p className="font-mono text-muted-foreground text-xs">
-              {activePreset.header}
-            </p>
-          )}
         </div>
 
-        <button
-          className="text-muted-foreground text-sm underline"
-          onClick={() => setShowAdvanced(!showAdvanced)}
-          type="button"
-        >
-          {showAdvanced ? "Hide advanced" : "Advanced"}
-        </button>
-
-        {showAdvanced && (
-          <div className="space-y-2">
-            <Label>Custom Cache-Control</Label>
-            <Input
-              onChange={(e) => setOverride(e.target.value)}
-              placeholder="public, max-age=600"
-              value={override}
-            />
-            <p className="text-muted-foreground text-xs">
-              Overrides the preset when set
-            </p>
-          </div>
-        )}
-
         <Button
-          disabled={updateSettings.isPending}
+          disabled={updateSettings.isPending || preset === bucket.cachePreset}
           onClick={handleSave}
-          variant="outline"
         >
           {updateSettings.isPending ? "Saving..." : "Save"}
         </Button>
@@ -302,6 +246,9 @@ function CorsCard({
     <Card>
       <CardHeader>
         <CardTitle className="text-base">CORS</CardTitle>
+        <CardDescription>
+          Origins allowed to access your files from a browser
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex gap-2">
@@ -351,14 +298,7 @@ function CorsCard({
             ))}
           </div>
         )}
-        <p className="text-muted-foreground text-xs">
-          Origins allowed to access your files from a browser
-        </p>
-        <Button
-          disabled={updateSettings.isPending}
-          onClick={handleSave}
-          variant="outline"
-        >
+        <Button disabled={updateSettings.isPending} onClick={handleSave}>
           {updateSettings.isPending ? "Saving..." : "Save"}
         </Button>
       </CardContent>
@@ -442,11 +382,7 @@ function LifecycleCard({
             )}
           </div>
         </div>
-        <Button
-          disabled={updateSettings.isPending}
-          onClick={handleSave}
-          variant="outline"
-        >
+        <Button disabled={updateSettings.isPending} onClick={handleSave}>
           {updateSettings.isPending ? "Saving..." : "Save"}
         </Button>
       </CardContent>
