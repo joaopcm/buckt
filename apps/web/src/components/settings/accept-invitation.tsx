@@ -62,8 +62,8 @@ export function AcceptInvitation({ invitationId }: { invitationId: string }) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button asChild className="w-full">
-            <Link href="/">Go to Home</Link>
+          <Button className="w-full" render={<Link href="/" />}>
+            Go to Home
           </Button>
         </CardContent>
       </Card>
