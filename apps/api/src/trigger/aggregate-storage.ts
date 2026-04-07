@@ -20,13 +20,17 @@ export const aggregateStorage = schedules.task({
     for (const bucket of activeBuckets) {
       try {
         const sizeBytes = await getBucketSizeBytes(bucket.s3BucketName);
-        await db
-          .update(buckets)
-          .set({ storageUsedBytes: sizeBytes })
-          .where(eq(buckets.id, bucket.id));
+        if (sizeBytes > 0) {
+          await db
+            .update(buckets)
+            .set({ storageUsedBytes: sizeBytes })
+            .where(eq(buckets.id, bucket.id));
+        }
+        const effectiveBytes =
+          sizeBytes > 0 ? sizeBytes : (bucket.storageUsedBytes ?? 0);
         orgStorage.set(
           bucket.orgId,
-          (orgStorage.get(bucket.orgId) ?? 0) + sizeBytes
+          (orgStorage.get(bucket.orgId) ?? 0) + effectiveBytes
         );
       } catch (err) {
         console.error(`Failed to get metrics for bucket ${bucket.id}:`, err);

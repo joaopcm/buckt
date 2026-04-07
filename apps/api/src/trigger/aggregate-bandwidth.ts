@@ -1,3 +1,4 @@
+import { gunzipSync } from "node:zlib";
 import { GetObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { buckets, createDb, subscription } from "@buckt/db";
 import { schedules } from "@trigger.dev/sdk/v3";
@@ -44,19 +45,21 @@ async function collectDistributionBandwidth(
       if (!obj.Key) {
         continue;
       }
-      const fileName = obj.Key.replace(logPrefix, "");
-      const distId = fileName.split(".")[0];
-      if (!fileName.includes(dateStr)) {
+      if (!obj.Key.includes(dateStr)) {
         continue;
       }
+
+      const baseName = obj.Key.split("/").pop() ?? "";
+      const distId = baseName.split(".")[0];
 
       const response = await s3.send(
         new GetObjectCommand({ Bucket: logBucket, Key: obj.Key })
       );
-      const body = await response.Body?.transformToString();
-      if (!body) {
+      const rawBytes = await response.Body?.transformToByteArray();
+      if (!rawBytes) {
         continue;
       }
+      const body = gunzipSync(Buffer.from(rawBytes)).toString("utf-8");
 
       const totalBytes = parseBandwidthFromLog(body);
       distributionBandwidth.set(
