@@ -1,6 +1,12 @@
 import { HeadObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { buckets } from "@buckt/db";
-import { CACHE_PRESET_MAP } from "@buckt/shared";
+import {
+  CACHE_PRESET_MAP,
+  MIN_OPTIMIZATION_BYTES,
+  OPTIMIZABLE_CONTENT_TYPES,
+  OPTIMIZATION_MODES,
+} from "@buckt/shared";
+import { tasks } from "@trigger.dev/sdk/v3";
 import { and, eq, sql } from "drizzle-orm";
 import type { Context } from "hono";
 import { db } from "../../lib/db";
@@ -16,6 +22,29 @@ export async function uploadFile(c: Context) {
 
   if (!filePath) {
     return error(c, 400, "File path is required");
+  }
+
+  const optimizationHeader = c.req.header("X-Buckt-Optimization");
+  if (
+    optimizationHeader &&
+    !OPTIMIZATION_MODES.includes(optimizationHeader as never)
+  ) {
+    return error(
+      c,
+      400,
+      "Invalid X-Buckt-Optimization value. Must be: none, light, balanced, or maximum"
+    );
+  }
+
+  if (optimizationHeader && optimizationHeader !== "none") {
+    const plan = c.get("plan") as string;
+    if (plan === "free") {
+      return error(
+        c,
+        402,
+        "Optimization requires a paid plan. Upgrade to enable."
+      );
+    }
   }
 
   const [bucket] = await db
@@ -84,6 +113,24 @@ export async function uploadFile(c: Context) {
       storageUsedBytes: sql`${buckets.storageUsedBytes} + ${size} - ${existingSize}`,
     })
     .where(eq(buckets.id, bucketId));
+
+  const effectiveMode = optimizationHeader ?? bucket.optimizationMode;
+
+  if (
+    effectiveMode !== "none" &&
+    OPTIMIZABLE_CONTENT_TYPES.has(contentType) &&
+    size >= MIN_OPTIMIZATION_BYTES
+  ) {
+    await tasks.trigger("optimize-file", {
+      bucketId: bucket.id,
+      s3BucketName: bucket.s3BucketName,
+      fileKey: filePath,
+      contentType,
+      originalSize: size,
+      mode: effectiveMode,
+      cacheControl,
+    });
+  }
 
   return success(c, {
     key: filePath,
