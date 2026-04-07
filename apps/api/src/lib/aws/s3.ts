@@ -3,11 +3,10 @@ import {
   DeleteBucketCommand,
   DeleteObjectsCommand,
   ListObjectsV2Command,
-  PutBucketPolicyCommand,
   PutBucketWebsiteCommand,
-  PutPublicAccessBlockCommand,
 } from "@aws-sdk/client-s3";
 import { s3 } from "../s3";
+import { setBucketPrivate, setBucketPublic } from "./bucket-settings";
 
 export async function createBucketResources(
   bucketName: string,
@@ -24,47 +23,9 @@ export async function createBucketResources(
   );
 
   if (visibility === "public") {
-    await s3.send(
-      new PutPublicAccessBlockCommand({
-        Bucket: bucketName,
-        PublicAccessBlockConfiguration: {
-          BlockPublicAcls: false,
-          BlockPublicPolicy: false,
-          IgnorePublicAcls: false,
-          RestrictPublicBuckets: false,
-        },
-      })
-    );
-
-    await s3.send(
-      new PutBucketPolicyCommand({
-        Bucket: bucketName,
-        Policy: JSON.stringify({
-          Version: "2012-10-17",
-          Statement: [
-            {
-              Sid: "PublicReadGetObject",
-              Effect: "Allow",
-              Principal: "*",
-              Action: "s3:GetObject",
-              Resource: `arn:aws:s3:::${bucketName}/*`,
-            },
-          ],
-        }),
-      })
-    );
+    await setBucketPublic(bucketName);
   } else {
-    await s3.send(
-      new PutPublicAccessBlockCommand({
-        Bucket: bucketName,
-        PublicAccessBlockConfiguration: {
-          BlockPublicAcls: true,
-          BlockPublicPolicy: true,
-          IgnorePublicAcls: true,
-          RestrictPublicBuckets: true,
-        },
-      })
-    );
+    await setBucketPrivate(bucketName);
   }
 
   return {
