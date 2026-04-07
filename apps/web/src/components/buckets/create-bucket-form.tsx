@@ -1,5 +1,6 @@
 "use client";
 
+import { ALLOWED_REGIONS, type AllowedRegion } from "@buckt/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -36,10 +37,10 @@ const TIMEZONE_REGION_MAP: Record<string, string> = {
   "Australia/Sydney": "ap-southeast-1",
 };
 
-function getClosestRegion(): string {
+function getClosestRegion(): AllowedRegion {
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    return TIMEZONE_REGION_MAP[tz] ?? "us-east-1";
+    return (TIMEZONE_REGION_MAP[tz] as AllowedRegion) ?? "us-east-1";
   } catch {
     return "us-east-1";
   }
@@ -54,7 +55,7 @@ const createBucketSchema = z.object({
       /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/,
       "Invalid domain format (e.g. cdn.example.com)"
     ),
-  region: z.string().default("us-east-1"),
+  region: z.enum(ALLOWED_REGIONS).default("us-east-1"),
   visibility: z.enum(["public", "private"]).default("public"),
   cachePreset: z
     .enum(["no-cache", "short", "standard", "aggressive", "immutable"])
@@ -63,7 +64,7 @@ const createBucketSchema = z.object({
   lifecycleTtlDays: z.number().int().min(1).max(3650).nullable().default(null),
 });
 
-type CreateBucketValues = z.input<typeof createBucketSchema>;
+type CreateBucketValues = z.output<typeof createBucketSchema>;
 
 export function CreateBucketForm({ orgId }: { orgId: string }) {
   const router = useRouter();
@@ -77,7 +78,7 @@ export function CreateBucketForm({ orgId }: { orgId: string }) {
     watch,
     formState: { errors },
   } = useForm<CreateBucketValues>({
-    resolver: zodResolver(createBucketSchema),
+    resolver: zodResolver(createBucketSchema) as never,
     defaultValues: {
       region: defaultRegion,
       visibility: "public",

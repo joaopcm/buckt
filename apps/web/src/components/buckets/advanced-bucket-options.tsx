@@ -31,7 +31,13 @@ interface CreateBucketValues {
   customDomain: string;
   lifecycleTtlDays: number | null;
   name: string;
-  region: string;
+  region:
+    | "us-east-1"
+    | "us-west-2"
+    | "eu-west-1"
+    | "eu-central-1"
+    | "ap-southeast-1"
+    | "ap-northeast-1";
   visibility: "public" | "private";
 }
 
@@ -132,7 +138,7 @@ export function AdvancedBucketOptions({
               }))}
               onValueChange={(value) => {
                 if (value) {
-                  setValue("region", value);
+                  setValue("region", value as CreateBucketValues["region"]);
                 }
               }}
             >
