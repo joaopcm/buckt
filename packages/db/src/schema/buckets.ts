@@ -1,6 +1,7 @@
 import {
   bigint,
   index,
+  integer,
   jsonb,
   pgEnum,
   pgTable,
@@ -16,6 +17,19 @@ export const bucketStatusEnum = pgEnum("bucket_status", [
   "active",
   "failed",
   "deleting",
+]);
+
+export const bucketVisibilityEnum = pgEnum("bucket_visibility", [
+  "public",
+  "private",
+]);
+
+export const cachePresetEnum = pgEnum("cache_preset", [
+  "no-cache",
+  "short",
+  "standard",
+  "aggressive",
+  "immutable",
 ]);
 
 export const buckets = pgTable(
@@ -41,6 +55,11 @@ export const buckets = pgTable(
     bandwidthUsedBytes: bigint("bandwidth_used_bytes", { mode: "number" })
       .default(0)
       .notNull(),
+    visibility: bucketVisibilityEnum("visibility").default("public").notNull(),
+    cachePreset: cachePresetEnum("cache_preset").default("standard").notNull(),
+    cacheControlOverride: text("cache_control_override"),
+    corsOrigins: text("cors_origins").array().default([]).notNull(),
+    lifecycleTtlDays: integer("lifecycle_ttl_days"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()

@@ -46,10 +46,10 @@ describe("PATCH /v1/buckets/:id", () => {
     expect(res.status).toBe(400);
   });
 
-  it("returns 400 for missing name", async () => {
+  it("returns 200 for empty update (no-op)", async () => {
     const bucket = await createActiveBucket(apiKey);
     const res = await req(bucket.id, {});
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(200);
   });
 
   it("returns 401 without auth", async () => {
