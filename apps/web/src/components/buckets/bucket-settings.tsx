@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,15 +14,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ConfirmDialog } from "@/components/confirm-dialog";
 import { trpc } from "@/lib/trpc/client";
 
 const CACHE_PRESETS = [
-  { value: "no-cache", label: "No cache", header: "no-store, no-cache, must-revalidate" },
+  {
+    value: "no-cache",
+    label: "No cache",
+    header: "no-store, no-cache, must-revalidate",
+  },
   { value: "short", label: "Short (1 hour)", header: "public, max-age=3600" },
-  { value: "standard", label: "Standard (1 day)", header: "public, max-age=86400" },
-  { value: "aggressive", label: "Aggressive (30 days)", header: "public, max-age=2592000, immutable" },
-  { value: "immutable", label: "Immutable (1 year)", header: "public, max-age=31536000, immutable" },
+  {
+    value: "standard",
+    label: "Standard (1 day)",
+    header: "public, max-age=86400",
+  },
+  {
+    value: "aggressive",
+    label: "Aggressive (30 days)",
+    header: "public, max-age=2592000, immutable",
+  },
+  {
+    value: "immutable",
+    label: "Immutable (1 year)",
+    header: "public, max-age=31536000, immutable",
+  },
 ] as const;
 
 type CachePresetValue = (typeof CACHE_PRESETS)[number]["value"];
@@ -133,7 +149,9 @@ function CachingCard({
   bucket: BucketSettingsProps["bucket"];
   orgId: string;
 }) {
-  const [preset, setPreset] = useState<CachePresetValue>(bucket.cachePreset as CachePresetValue);
+  const [preset, setPreset] = useState<CachePresetValue>(
+    bucket.cachePreset as CachePresetValue
+  );
   const [override, setOverride] = useState(bucket.cacheControlOverride ?? "");
   const [showAdvanced, setShowAdvanced] = useState(
     bucket.cacheControlOverride !== null
@@ -167,7 +185,14 @@ function CachingCard({
       <CardContent className="space-y-3">
         <div className="space-y-2">
           <Label>Preset</Label>
-          <Select onValueChange={(v) => { if (v) setPreset(v as CachePresetValue); }} value={preset}>
+          <Select
+            onValueChange={(v) => {
+              if (v) {
+                setPreset(v as CachePresetValue);
+              }
+            }}
+            value={preset}
+          >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -241,13 +266,17 @@ function CorsCard({
 
   function addOrigin() {
     const trimmed = input.trim();
-    if (!trimmed) return;
+    if (!trimmed) {
+      return;
+    }
     try {
       new URL(trimmed);
     } catch {
       return;
     }
-    if (origins.includes(trimmed) || origins.length >= 10) return;
+    if (origins.includes(trimmed) || origins.length >= 10) {
+      return;
+    }
     setOrigins([...origins, trimmed]);
     setInput("");
   }
@@ -328,9 +357,7 @@ function LifecycleCard({
   bucket: BucketSettingsProps["bucket"];
   orgId: string;
 }) {
-  const [ttl, setTtl] = useState(
-    bucket.lifecycleTtlDays?.toString() ?? ""
-  );
+  const [ttl, setTtl] = useState(bucket.lifecycleTtlDays?.toString() ?? "");
   const utils = trpc.useUtils();
 
   const updateSettings = trpc.buckets.updateSettings.useMutation({
