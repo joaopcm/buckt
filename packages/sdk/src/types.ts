@@ -27,13 +27,13 @@ export interface Bucket {
   bandwidthUsedBytes: number;
   cacheControlOverride: string | null;
   cachePreset: CachePreset;
-  corsOrigins: string[];
-  lifecycleTtlDays: number | null;
   cloudfrontDistributionId: string | null;
+  corsOrigins: string[];
   createdAt: string;
   customDomain: string;
   dnsRecords: unknown | null;
   id: string;
+  lifecycleTtlDays: number | null;
   name: string;
   orgId: string;
   provisioningJobId: string | null;

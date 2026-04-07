@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import type { FieldErrors, UseFormRegister, UseFormSetValue, UseFormWatch } from "react-hook-form";
+import type {
+  FieldErrors,
+  UseFormRegister,
+  UseFormSetValue,
+  UseFormWatch,
+} from "react-hook-form";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -11,16 +17,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 
 interface CreateBucketValues {
-  name: string;
-  customDomain: string;
-  region: string;
-  visibility: "public" | "private";
   cachePreset: "no-cache" | "short" | "standard" | "aggressive" | "immutable";
   corsOrigins: string[];
+  customDomain: string;
   lifecycleTtlDays: number | null;
+  name: string;
+  region: string;
+  visibility: "public" | "private";
 }
 
 const CACHE_PRESETS = [
@@ -32,10 +37,10 @@ const CACHE_PRESETS = [
 ] as const;
 
 interface AdvancedBucketOptionsProps {
+  errors: FieldErrors<CreateBucketValues>;
   register: UseFormRegister<CreateBucketValues>;
   setValue: UseFormSetValue<CreateBucketValues>;
   watch: UseFormWatch<CreateBucketValues>;
-  errors: FieldErrors<CreateBucketValues>;
 }
 
 export function AdvancedBucketOptions({
@@ -48,14 +53,20 @@ export function AdvancedBucketOptions({
 
   function addCorsOrigin() {
     const trimmed = corsInput.trim();
-    if (!trimmed) return;
+    if (!trimmed) {
+      return;
+    }
     try {
       new URL(trimmed);
     } catch {
       return;
     }
-    if (corsOrigins.includes(trimmed)) return;
-    if (corsOrigins.length >= 10) return;
+    if (corsOrigins.includes(trimmed)) {
+      return;
+    }
+    if (corsOrigins.length >= 10) {
+      return;
+    }
     setValue("corsOrigins", [...corsOrigins, trimmed]);
     setCorsInput("");
   }
@@ -74,10 +85,7 @@ export function AdvancedBucketOptions({
         <Select
           defaultValue="standard"
           onValueChange={(value) =>
-            setValue(
-              "cachePreset",
-              value as CreateBucketValues["cachePreset"]
-            )
+            setValue("cachePreset", value as CreateBucketValues["cachePreset"])
           }
         >
           <SelectTrigger>
