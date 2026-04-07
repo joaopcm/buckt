@@ -115,6 +115,14 @@ export const bucketsRouter = router({
         .limit(1);
 
       const plan = (sub?.plan ?? "free") as PlanName;
+
+      if (input.optimizationMode && input.optimizationMode !== "none" && plan === "free") {
+        throw new TRPCError({
+          code: "PAYMENT_REQUIRED",
+          message: "Optimization requires a paid plan. Upgrade to enable.",
+        });
+      }
+
       const limits = PLAN_LIMITS[plan];
 
       const [{ bucketCount }] = await ctx.db
@@ -159,6 +167,7 @@ export const bucketsRouter = router({
           cachePreset: input.cachePreset,
           corsOrigins: input.corsOrigins,
           lifecycleTtlDays: input.lifecycleTtlDays,
+          optimizationMode: input.optimizationMode,
           status: "pending",
         })
         .returning();
@@ -219,6 +228,7 @@ export const bucketsRouter = router({
           .max(3650)
           .nullable()
           .optional(),
+        optimizationMode: z.enum(["none", "light", "balanced", "maximum"]).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -233,6 +243,27 @@ export const bucketsRouter = router({
           code: "NOT_FOUND",
           message: "Bucket not found",
         });
+      }
+
+      if (input.optimizationMode && input.optimizationMode !== "none") {
+        const [sub] = await ctx.db
+          .select({ plan: subscription.plan })
+          .from(subscription)
+          .where(
+            and(
+              eq(subscription.referenceId, ctx.orgId),
+              eq(subscription.status, "active")
+            )
+          )
+          .limit(1);
+
+        const plan = (sub?.plan ?? "free") as PlanName;
+        if (plan === "free") {
+          throw new TRPCError({
+            code: "PAYMENT_REQUIRED",
+            message: "Optimization requires a paid plan. Upgrade to enable.",
+          });
+        }
       }
 
       const { id, ...updates } = input;
