@@ -7,7 +7,14 @@ import {
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
 import { buckets, subscription } from "@buckt/db";
-import { PLAN_LIMITS, type PlanName } from "@buckt/shared";
+import {
+  CACHE_PRESET_MAP,
+  MIN_OPTIMIZATION_BYTES,
+  OPTIMIZABLE_CONTENT_TYPES,
+  PLAN_LIMITS,
+  type PlanName,
+} from "@buckt/shared";
+import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
 import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -151,12 +158,18 @@ export const filesRouter = router({
         // file doesn't exist yet
       }
 
+      const cacheControl =
+        bucket.cacheControlOverride ??
+        CACHE_PRESET_MAP[bucket.cachePreset as keyof typeof CACHE_PRESET_MAP] ??
+        CACHE_PRESET_MAP.standard;
+
       await s3.send(
         new PutObjectCommand({
           Bucket: bucket.s3BucketName,
           Key: input.key,
           Body: body,
           ContentType: input.contentType,
+          CacheControl: cacheControl,
         })
       );
 
@@ -166,6 +179,22 @@ export const filesRouter = router({
           storageUsedBytes: sql`${buckets.storageUsedBytes} + ${body.length} - ${existingSize}`,
         })
         .where(eq(buckets.id, input.bucketId));
+
+      if (
+        bucket.optimizationMode !== "none" &&
+        OPTIMIZABLE_CONTENT_TYPES.has(input.contentType) &&
+        body.length >= MIN_OPTIMIZATION_BYTES
+      ) {
+        await tasks.trigger("optimize-file", {
+          bucketId: bucket.id,
+          s3BucketName: bucket.s3BucketName,
+          fileKey: input.key,
+          contentType: input.contentType,
+          originalSize: body.length,
+          mode: bucket.optimizationMode,
+          cacheControl,
+        });
+      }
 
       return {
         key: input.key,
