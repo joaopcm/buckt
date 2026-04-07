@@ -80,7 +80,7 @@ const createBucketSchema = z.object({
   lifecycleTtlDays: z.number().int().min(1).max(3650).nullable().default(null),
 });
 
-type CreateBucketValues = z.infer<typeof createBucketSchema>;
+type CreateBucketValues = z.input<typeof createBucketSchema>;
 
 export function CreateBucketForm({ orgId }: { orgId: string }) {
   const router = useRouter();
