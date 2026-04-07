@@ -8,6 +8,7 @@ import { FileBrowser } from "@/components/buckets/file-browser";
 import { ProvisioningSteps } from "@/components/buckets/provisioning-steps";
 import { StatusBadge } from "@/components/buckets/status-badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useOrgRole } from "@/hooks/use-org-role";
 import { trpc } from "@/lib/trpc/client";
 
 const POLLING_STATUSES = ["pending", "provisioning"];
@@ -19,6 +20,8 @@ export function BucketDetail({
   orgId: string;
   bucketId: string;
 }) {
+  const { isAdmin } = useOrgRole(orgId);
+
   const { data: bucket, isPending } = trpc.buckets.get.useQuery(
     { orgId, id: bucketId },
     {
@@ -72,7 +75,7 @@ export function BucketDetail({
             customDomain={bucket.customDomain}
             orgId={orgId}
           />
-          <BucketSettings bucket={bucket} orgId={orgId} />
+          <BucketSettings bucket={bucket} disabled={!isAdmin} orgId={orgId} />
         </>
       )}
 

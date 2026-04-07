@@ -21,28 +21,24 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { authClient } from "@/lib/auth-client";
+import { useOrgRole } from "@/hooks/use-org-role";
 import { trpc } from "@/lib/trpc/client";
 
 type RenameValues = z.infer<typeof renameOrgSchema>;
 
 export function OrgSettings({ orgId }: { orgId: string }) {
   const [inviteOpen, setInviteOpen] = useState(false);
-  const { data: session } = authClient.useSession();
+  const {
+    userId: currentUserId,
+    role: currentUserRole,
+    isAdmin,
+  } = useOrgRole(orgId);
 
   const { data: org, isPending: orgLoading } = trpc.org.get.useQuery({
     orgId,
   });
   const { data: membersData, isPending: membersLoading } =
     trpc.org.members.useQuery({ orgId });
-
-  const currentUserId = session?.user?.id ?? "";
-  const currentMember = membersData?.members?.find(
-    (m: { userId: string }) => m.userId === currentUserId
-  );
-
-  const currentUserRole = currentMember?.role ?? "member";
-  const isAdmin = currentUserRole === "owner" || currentUserRole === "admin";
 
   return (
     <div className="space-y-6">
