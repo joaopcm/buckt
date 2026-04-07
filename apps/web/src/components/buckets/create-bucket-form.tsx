@@ -1,6 +1,10 @@
 "use client";
 
-import { ALLOWED_REGIONS, type AllowedRegion } from "@buckt/shared";
+import {
+  ALLOWED_REGIONS,
+  type AllowedRegion,
+  OPTIMIZATION_MODES,
+} from "@buckt/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -62,6 +66,7 @@ const createBucketSchema = z.object({
     .default("standard"),
   corsOrigins: z.array(z.string().url()).max(10).default([]),
   lifecycleTtlDays: z.number().int().min(1).max(3650).nullable().default(null),
+  optimizationMode: z.enum(OPTIMIZATION_MODES).default("none"),
 });
 
 type CreateBucketValues = z.output<typeof createBucketSchema>;
@@ -85,6 +90,7 @@ export function CreateBucketForm({ orgId }: { orgId: string }) {
       cachePreset: "standard",
       corsOrigins: [],
       lifecycleTtlDays: null,
+      optimizationMode: "none",
     },
   });
 
