@@ -112,7 +112,7 @@ export function AdvancedBucketOptions({
   return (
     <Accordion.Root>
       <Accordion.Item>
-        <Accordion.Trigger className="flex w-full cursor-pointer items-center gap-1.5 py-2 text-muted-foreground text-sm hover:text-foreground">
+        <Accordion.Trigger className="flex w-full cursor-pointer items-center gap-1.5 py-2 text-muted-foreground text-sm hover:text-foreground [&[data-panel-open]>svg]:rotate-180">
           Advanced options
           <ChevronDown className="size-3.5" />
         </Accordion.Trigger>
