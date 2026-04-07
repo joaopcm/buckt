@@ -8,6 +8,7 @@ import { FileBrowser } from "@/components/buckets/file-browser";
 import { ProvisioningSteps } from "@/components/buckets/provisioning-steps";
 import { StatusBadge } from "@/components/buckets/status-badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { authClient } from "@/lib/auth-client";
 import { trpc } from "@/lib/trpc/client";
 
 const POLLING_STATUSES = ["pending", "provisioning"];
@@ -19,6 +20,15 @@ export function BucketDetail({
   orgId: string;
   bucketId: string;
 }) {
+  const { data: session } = authClient.useSession();
+  const { data: membersData } = trpc.org.members.useQuery({ orgId });
+
+  const currentMember = membersData?.members?.find(
+    (m: { userId: string }) => m.userId === session?.user?.id
+  );
+  const isAdmin =
+    currentMember?.role === "owner" || currentMember?.role === "admin";
+
   const { data: bucket, isPending } = trpc.buckets.get.useQuery(
     { orgId, id: bucketId },
     {
@@ -72,7 +82,7 @@ export function BucketDetail({
             customDomain={bucket.customDomain}
             orgId={orgId}
           />
-          <BucketSettings bucket={bucket} orgId={orgId} />
+          <BucketSettings bucket={bucket} disabled={!isAdmin} orgId={orgId} />
         </>
       )}
 

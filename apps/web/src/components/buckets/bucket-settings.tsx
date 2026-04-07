@@ -53,26 +53,33 @@ interface BucketSettingsProps {
     corsOrigins: string[];
     lifecycleTtlDays: number | null;
   };
+  disabled?: boolean;
   orgId: string;
 }
 
-export function BucketSettings({ bucket, orgId }: BucketSettingsProps) {
+export function BucketSettings({
+  bucket,
+  disabled,
+  orgId,
+}: BucketSettingsProps) {
   return (
     <div className="space-y-6">
       <h2 className="font-semibold text-lg">Settings</h2>
-      <VisibilityCard bucket={bucket} orgId={orgId} />
-      <CachingCard bucket={bucket} orgId={orgId} />
-      <CorsCard bucket={bucket} orgId={orgId} />
-      <LifecycleCard bucket={bucket} orgId={orgId} />
+      <VisibilityCard bucket={bucket} disabled={disabled} orgId={orgId} />
+      <CachingCard bucket={bucket} disabled={disabled} orgId={orgId} />
+      <CorsCard bucket={bucket} disabled={disabled} orgId={orgId} />
+      <LifecycleCard bucket={bucket} disabled={disabled} orgId={orgId} />
     </div>
   );
 }
 
 function VisibilityCard({
   bucket,
+  disabled,
   orgId,
 }: {
   bucket: BucketSettingsProps["bucket"];
+  disabled?: boolean;
   orgId: string;
 }) {
   const [visibility, setVisibility] = useState(bucket.visibility);
@@ -97,6 +104,7 @@ function VisibilityCard({
       </CardHeader>
       <CardContent className="space-y-3">
         <Select
+          disabled={disabled}
           items={VISIBILITY_OPTIONS}
           onValueChange={(v) => {
             if (v) {
@@ -118,7 +126,9 @@ function VisibilityCard({
         </Select>
         <Button
           disabled={
-            updateSettings.isPending || visibility === bucket.visibility
+            disabled ||
+            updateSettings.isPending ||
+            visibility === bucket.visibility
           }
           onClick={handleSave}
         >
@@ -131,9 +141,11 @@ function VisibilityCard({
 
 function CachingCard({
   bucket,
+  disabled,
   orgId,
 }: {
   bucket: BucketSettingsProps["bucket"];
+  disabled?: boolean;
   orgId: string;
 }) {
   const [preset, setPreset] = useState<CachePresetValue>(
@@ -166,6 +178,7 @@ function CachingCard({
         <div className="space-y-2">
           <Label>Preset</Label>
           <Select
+            disabled={disabled}
             items={CACHE_PRESETS}
             onValueChange={(v) => {
               if (v) {
@@ -188,7 +201,11 @@ function CachingCard({
         </div>
 
         <Button
-          disabled={updateSettings.isPending || preset === bucket.cachePreset}
+          disabled={
+            disabled ||
+            updateSettings.isPending ||
+            preset === bucket.cachePreset
+          }
           onClick={handleSave}
         >
           {updateSettings.isPending ? "Saving..." : "Save"}
@@ -200,9 +217,11 @@ function CachingCard({
 
 function CorsCard({
   bucket,
+  disabled,
   orgId,
 }: {
   bucket: BucketSettingsProps["bucket"];
+  disabled?: boolean;
   orgId: string;
 }) {
   const [origins, setOrigins] = useState(bucket.corsOrigins);
@@ -253,6 +272,7 @@ function CorsCard({
       <CardContent className="space-y-3">
         <div className="flex gap-2">
           <Input
+            disabled={disabled}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
@@ -264,7 +284,7 @@ function CorsCard({
             value={input}
           />
           <Button
-            disabled={origins.length >= 10}
+            disabled={disabled || origins.length >= 10}
             onClick={addOrigin}
             type="button"
             variant="outline"
@@ -282,15 +302,23 @@ function CorsCard({
                 {origin}
                 {/* biome-ignore lint/a11y/useSemanticElements: nested interactive context */}
                 <span
-                  className="cursor-pointer text-muted-foreground hover:text-foreground"
-                  onClick={() => removeOrigin(origin)}
+                  className={
+                    disabled
+                      ? "text-muted-foreground/50"
+                      : "cursor-pointer text-muted-foreground hover:text-foreground"
+                  }
+                  onClick={() => {
+                    if (!disabled) {
+                      removeOrigin(origin);
+                    }
+                  }}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
+                    if (!disabled && (e.key === "Enter" || e.key === " ")) {
                       removeOrigin(origin);
                     }
                   }}
                   role="button"
-                  tabIndex={0}
+                  tabIndex={disabled ? -1 : 0}
                 >
                   <X className="size-2.5" />
                 </span>
@@ -298,7 +326,10 @@ function CorsCard({
             ))}
           </div>
         )}
-        <Button disabled={updateSettings.isPending} onClick={handleSave}>
+        <Button
+          disabled={disabled || updateSettings.isPending}
+          onClick={handleSave}
+        >
           {updateSettings.isPending ? "Saving..." : "Save"}
         </Button>
       </CardContent>
@@ -308,9 +339,11 @@ function CorsCard({
 
 function LifecycleCard({
   bucket,
+  disabled,
   orgId,
 }: {
   bucket: BucketSettingsProps["bucket"];
+  disabled?: boolean;
   orgId: string;
 }) {
   const [ttl, setTtl] = useState(bucket.lifecycleTtlDays?.toString() ?? "");
@@ -345,6 +378,7 @@ function LifecycleCard({
           <div className="flex">
             <Input
               className="rounded-r-none border-r-0"
+              disabled={disabled}
               max={3650}
               min={1}
               onChange={(e) => setTtl(e.target.value)}
@@ -363,7 +397,8 @@ function LifecycleCard({
                   ttlNumber === preset.value
                     ? "border-foreground bg-foreground text-background"
                     : "border-input text-muted-foreground hover:border-foreground hover:text-foreground"
-                }`}
+                } ${disabled ? "pointer-events-none opacity-50" : ""}`}
+                disabled={disabled}
                 key={preset.value}
                 onClick={() => setTtl(String(preset.value))}
                 type="button"
@@ -373,7 +408,8 @@ function LifecycleCard({
             ))}
             {ttl && (
               <button
-                className="border border-input px-2 py-0.5 text-muted-foreground text-xs hover:border-foreground hover:text-foreground"
+                className={`border border-input px-2 py-0.5 text-muted-foreground text-xs hover:border-foreground hover:text-foreground ${disabled ? "pointer-events-none opacity-50" : ""}`}
+                disabled={disabled}
                 onClick={() => setTtl("")}
                 type="button"
               >
@@ -382,7 +418,10 @@ function LifecycleCard({
             )}
           </div>
         </div>
-        <Button disabled={updateSettings.isPending} onClick={handleSave}>
+        <Button
+          disabled={disabled || updateSettings.isPending}
+          onClick={handleSave}
+        >
           {updateSettings.isPending ? "Saving..." : "Save"}
         </Button>
       </CardContent>
