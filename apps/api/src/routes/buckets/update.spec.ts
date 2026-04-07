@@ -1,10 +1,17 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import app from "../../app";
 import {
   cleanDb,
   createActiveBucket,
   createTestApiKey,
 } from "../../lib/test-helpers";
+
+vi.mock("../../lib/aws/bucket-settings", () => ({
+  setBucketPublic: vi.fn().mockResolvedValue(undefined),
+  setBucketPrivate: vi.fn().mockResolvedValue(undefined),
+  setBucketCors: vi.fn().mockResolvedValue(undefined),
+  setBucketLifecycle: vi.fn().mockResolvedValue(undefined),
+}));
 
 describe("PATCH /v1/buckets/:id", () => {
   let apiKey: string;
@@ -71,5 +78,96 @@ describe("PATCH /v1/buckets/:id", () => {
     const { rawKey } = await createTestApiKey({ orgId: "other-org" });
     const res = await req(bucket.id, { name: "Hijack" }, rawKey);
     expect(res.status).toBe(404);
+  });
+
+  it("updates visibility", async () => {
+    const bucket = await createActiveBucket(apiKey);
+    const res = await req(bucket.id, { visibility: "private" });
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data.visibility).toBe("private");
+  });
+
+  it("updates cache preset", async () => {
+    const bucket = await createActiveBucket(apiKey);
+    const res = await req(bucket.id, { cachePreset: "aggressive" });
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data.cachePreset).toBe("aggressive");
+  });
+
+  it("updates cache control override", async () => {
+    const bucket = await createActiveBucket(apiKey);
+    const res = await req(bucket.id, {
+      cacheControlOverride: "public, max-age=600",
+    });
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data.cacheControlOverride).toBe("public, max-age=600");
+  });
+
+  it("clears cache control override with null", async () => {
+    const bucket = await createActiveBucket(apiKey);
+    await req(bucket.id, { cacheControlOverride: "public, max-age=600" });
+    const res = await req(bucket.id, { cacheControlOverride: null });
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data.cacheControlOverride).toBeNull();
+  });
+
+  it("updates CORS origins", async () => {
+    const bucket = await createActiveBucket(apiKey);
+    const res = await req(bucket.id, {
+      corsOrigins: ["https://app.test.com", "https://staging.test.com"],
+    });
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data.corsOrigins).toEqual([
+      "https://app.test.com",
+      "https://staging.test.com",
+    ]);
+  });
+
+  it("updates lifecycle TTL", async () => {
+    const bucket = await createActiveBucket(apiKey);
+    const res = await req(bucket.id, { lifecycleTtlDays: 90 });
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data.lifecycleTtlDays).toBe(90);
+  });
+
+  it("clears lifecycle TTL with null", async () => {
+    const bucket = await createActiveBucket(apiKey);
+    await req(bucket.id, { lifecycleTtlDays: 30 });
+    const res = await req(bucket.id, { lifecycleTtlDays: null });
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data.lifecycleTtlDays).toBeNull();
+  });
+
+  it("updates multiple settings at once", async () => {
+    const bucket = await createActiveBucket(apiKey);
+    const res = await req(bucket.id, {
+      visibility: "private",
+      cachePreset: "no-cache",
+      lifecycleTtlDays: 7,
+    });
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data.visibility).toBe("private");
+    expect(json.data.cachePreset).toBe("no-cache");
+    expect(json.data.lifecycleTtlDays).toBe(7);
+  });
+
+  it("rejects invalid CORS origin URL", async () => {
+    const bucket = await createActiveBucket(apiKey);
+    const res = await req(bucket.id, { corsOrigins: ["not-a-url"] });
+    expect(res.status).toBe(400);
+  });
+
+  it("rejects lifecycle TTL over 3650", async () => {
+    const bucket = await createActiveBucket(apiKey);
+    const res = await req(bucket.id, { lifecycleTtlDays: 9999 });
+    expect(res.status).toBe(400);
   });
 });
