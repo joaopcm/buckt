@@ -47,6 +47,10 @@ export function AppSidebar({ orgId }: { orgId: string }) {
       utils.org.members.prefetch({ orgId });
       utils.org.invitations.prefetch({ orgId });
     },
+    "/billing": () => {
+      utils.billing.subscription.prefetch({ orgId });
+      utils.billing.usage.prefetch({ orgId });
+    },
   };
 
   useEffect(() => {
