@@ -135,7 +135,7 @@ export function AdvancedBucketOptions({
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a region" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent align="start" alignItemWithTrigger={false}>
                 {REGIONS.map((r) => (
                   <SelectItem key={r.value} value={r.value}>
                     <r.Flag className="size-4 shrink-0" />
@@ -161,7 +161,7 @@ export function AdvancedBucketOptions({
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent align="start" alignItemWithTrigger={false}>
                 {VISIBILITY_OPTIONS.map((v) => (
                   <SelectItem key={v.value} value={v.value}>
                     {v.label}
@@ -186,7 +186,7 @@ export function AdvancedBucketOptions({
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent align="start" alignItemWithTrigger={false}>
                 {CACHE_PRESETS.map((p) => (
                   <SelectItem key={p.value} value={p.value}>
                     {p.label}
