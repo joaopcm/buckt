@@ -45,6 +45,7 @@ export function AppSidebar({ orgId }: { orgId: string }) {
     "/settings": () => {
       utils.org.get.prefetch({ orgId });
       utils.org.members.prefetch({ orgId });
+      utils.org.invitations.prefetch({ orgId });
     },
   };
 

@@ -10,5 +10,4 @@ const nextConfig: NextConfig = {
 
 export default withSentryConfig(nextConfig, {
   silent: !process.env.SENTRY_AUTH_TOKEN,
-  disableLogger: true,
 });
