@@ -1,5 +1,6 @@
 import { HeadObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { buckets } from "@buckt/db";
+import { CACHE_PRESET_MAP } from "@buckt/shared";
 import { and, eq, sql } from "drizzle-orm";
 import type { Context } from "hono";
 import { db } from "../../lib/db";
@@ -62,12 +63,18 @@ export async function uploadFile(c: Context) {
     // file doesn't exist yet
   }
 
+  const cacheControl =
+    bucket.cacheControlOverride ??
+    CACHE_PRESET_MAP[bucket.cachePreset as keyof typeof CACHE_PRESET_MAP] ??
+    CACHE_PRESET_MAP.standard;
+
   await s3.send(
     new PutObjectCommand({
       Bucket: bucket.s3BucketName,
       Key: filePath,
       Body: Buffer.from(body),
       ContentType: contentType,
+      CacheControl: cacheControl,
     })
   );
 
