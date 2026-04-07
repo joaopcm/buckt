@@ -58,10 +58,7 @@ export const buckets = pgTable(
     visibility: bucketVisibilityEnum("visibility").default("public").notNull(),
     cachePreset: cachePresetEnum("cache_preset").default("standard").notNull(),
     cacheControlOverride: text("cache_control_override"),
-    corsOrigins: text("cors_origins")
-      .array()
-      .default([])
-      .notNull(),
+    corsOrigins: text("cors_origins").array().default([]).notNull(),
     lifecycleTtlDays: integer("lifecycle_ttl_days"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
