@@ -43,3 +43,16 @@ export const CACHE_PRESET_MAP = {
 export type CachePreset = keyof typeof CACHE_PRESET_MAP;
 
 export type BucketVisibility = "public" | "private";
+
+export const OPTIMIZATION_MODES = ["none", "light", "balanced", "maximum"] as const;
+export type OptimizationMode = (typeof OPTIMIZATION_MODES)[number];
+
+export const OPTIMIZABLE_CONTENT_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/avif",
+  "image/gif",
+]);
+
+export const MIN_OPTIMIZATION_BYTES = 10_240;
