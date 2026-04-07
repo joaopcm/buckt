@@ -81,6 +81,93 @@ describe("POST /api/buckets", () => {
     expect(json.error.message).toContain("Plan limit reached");
   });
 
+  it("creates a bucket with custom region", async () => {
+    const res = await req({
+      name: "EU Bucket",
+      customDomain: "eu.test.com",
+      region: "eu-west-1",
+    });
+    expect(res.status).toBe(201);
+    const json = await res.json();
+    expect(json.data.region).toBe("eu-west-1");
+  });
+
+  it("defaults region to us-east-1", async () => {
+    const res = await req({
+      name: "Default Region",
+      customDomain: "default.test.com",
+    });
+    expect(res.status).toBe(201);
+    const json = await res.json();
+    expect(json.data.region).toBe("us-east-1");
+  });
+
+  it("rejects invalid region", async () => {
+    const res = await req({
+      name: "Bad Region",
+      customDomain: "bad.test.com",
+      region: "us-north-99",
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it("creates a private bucket", async () => {
+    const res = await req({
+      name: "Private",
+      customDomain: "private.test.com",
+      visibility: "private",
+    });
+    expect(res.status).toBe(201);
+    const json = await res.json();
+    expect(json.data.visibility).toBe("private");
+  });
+
+  it("creates a bucket with cache preset", async () => {
+    const res = await req({
+      name: "Cached",
+      customDomain: "cached.test.com",
+      cachePreset: "aggressive",
+    });
+    expect(res.status).toBe(201);
+    const json = await res.json();
+    expect(json.data.cachePreset).toBe("aggressive");
+  });
+
+  it("creates a bucket with CORS origins", async () => {
+    const res = await req({
+      name: "CORS",
+      customDomain: "cors.test.com",
+      corsOrigins: ["https://app.test.com"],
+    });
+    expect(res.status).toBe(201);
+    const json = await res.json();
+    expect(json.data.corsOrigins).toEqual(["https://app.test.com"]);
+  });
+
+  it("creates a bucket with lifecycle TTL", async () => {
+    const res = await req({
+      name: "Lifecycle",
+      customDomain: "lifecycle.test.com",
+      lifecycleTtlDays: 30,
+    });
+    expect(res.status).toBe(201);
+    const json = await res.json();
+    expect(json.data.lifecycleTtlDays).toBe(30);
+  });
+
+  it("defaults settings when not specified", async () => {
+    const res = await req({
+      name: "Defaults",
+      customDomain: "defaults.test.com",
+    });
+    expect(res.status).toBe(201);
+    const json = await res.json();
+    expect(json.data.visibility).toBe("public");
+    expect(json.data.cachePreset).toBe("standard");
+    expect(json.data.corsOrigins).toEqual([]);
+    expect(json.data.lifecycleTtlDays).toBeNull();
+  });
+
   it("generates a lowercase S3 bucket name even with mixed-case orgId", async () => {
     const mixedCaseOrgId = "qnSBsTU6QXyhFuWC";
     const { rawKey } = await createTestApiKey({ orgId: mixedCaseOrgId });
