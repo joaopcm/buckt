@@ -97,9 +97,7 @@ export async function setBucketLifecycle(
 ) {
   if (ttlDays === null) {
     try {
-      await s3.send(
-        new DeleteBucketLifecycleCommand({ Bucket: bucketName })
-      );
+      await s3.send(new DeleteBucketLifecycleCommand({ Bucket: bucketName }));
     } catch {
       // Lifecycle config may not exist
     }
