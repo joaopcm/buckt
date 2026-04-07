@@ -86,13 +86,15 @@ export class HttpClient {
   async put<T>(
     path: string,
     body: BodyInit,
-    contentType?: string
+    contentType?: string,
+    extraHeaders?: Record<string, string>
   ): Promise<ApiResponse<T>> {
     const res = await fetch(new URL(path, this.baseUrl).toString(), {
       method: "PUT",
-      headers: this.headers(
-        contentType ? { "Content-Type": contentType } : undefined
-      ),
+      headers: this.headers({
+        ...(contentType ? { "Content-Type": contentType } : undefined),
+        ...extraHeaders,
+      }),
       body,
     });
     return this.handleResponse<T>(res);

@@ -39,5 +39,6 @@ export type {
   BucktOptions,
   CursorMeta,
   FileInfo,
+  OptimizationMode,
   Permission,
 } from "./types";
