@@ -154,6 +154,11 @@ export const bucketsRouter = router({
           slug,
           s3BucketName,
           customDomain: input.customDomain,
+          region: input.region,
+          visibility: input.visibility,
+          cachePreset: input.cachePreset,
+          corsOrigins: input.corsOrigins,
+          lifecycleTtlDays: input.lifecycleTtlDays,
           status: "pending",
         })
         .returning();
@@ -192,6 +197,53 @@ export const bucketsRouter = router({
         .where(eq(buckets.id, input.id));
 
       return { id: input.id, name: input.name };
+    }),
+
+  updateSettings: orgProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        visibility: z.enum(["public", "private"]).optional(),
+        cachePreset: z
+          .enum(["no-cache", "short", "standard", "aggressive", "immutable"])
+          .optional(),
+        cacheControlOverride: z.string().max(256).nullable().optional(),
+        corsOrigins: z
+          .array(z.string().url("Invalid origin URL"))
+          .max(10)
+          .optional(),
+        lifecycleTtlDays: z
+          .number()
+          .int()
+          .min(1)
+          .max(3650)
+          .nullable()
+          .optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const [bucket] = await ctx.db
+        .select()
+        .from(buckets)
+        .where(and(eq(buckets.id, input.id), eq(buckets.orgId, ctx.orgId)))
+        .limit(1);
+
+      if (!bucket) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Bucket not found",
+        });
+      }
+
+      const { id, ...updates } = input;
+
+      const [updated] = await ctx.db
+        .update(buckets)
+        .set(updates)
+        .where(eq(buckets.id, id))
+        .returning();
+
+      return updated;
     }),
 
   delete: orgProcedure
