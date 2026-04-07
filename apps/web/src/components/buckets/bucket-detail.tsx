@@ -1,6 +1,7 @@
 "use client";
 
 import { BucketActions } from "@/components/buckets/bucket-actions";
+import { BucketSettings } from "@/components/buckets/bucket-settings";
 import { BucketUsage } from "@/components/buckets/bucket-usage";
 import { DnsRecords } from "@/components/buckets/dns-records";
 import { FileBrowser } from "@/components/buckets/file-browser";
@@ -71,6 +72,7 @@ export function BucketDetail({
             customDomain={bucket.customDomain}
             orgId={orgId}
           />
+          <BucketSettings bucket={bucket} orgId={orgId} />
         </>
       )}
 
