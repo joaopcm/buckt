@@ -13,7 +13,15 @@ export async function createBucket(c: Context) {
     return error(c, 400, parsed.error.issues[0].message);
   }
 
-  const { name, customDomain } = parsed.data;
+  const {
+    name,
+    customDomain,
+    region,
+    visibility,
+    cachePreset,
+    corsOrigins,
+    lifecycleTtlDays,
+  } = parsed.data;
   const orgId = c.get("orgId");
   const planLimits = c.get("planLimits");
   const slug = customDomain.replace(/\./g, "-");
@@ -50,6 +58,11 @@ export async function createBucket(c: Context) {
       slug,
       s3BucketName,
       customDomain,
+      region,
+      visibility,
+      cachePreset,
+      corsOrigins,
+      lifecycleTtlDays,
       status: "pending",
     })
     .returning();
