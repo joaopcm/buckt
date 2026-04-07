@@ -36,8 +36,8 @@ export interface Bucket {
   dnsRecords: unknown | null;
   id: string;
   lifecycleTtlDays: number | null;
-  optimizationMode: OptimizationMode;
   name: string;
+  optimizationMode: OptimizationMode;
   orgId: string;
   provisioningJobId: string | null;
   region: string;

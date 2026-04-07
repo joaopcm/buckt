@@ -54,7 +54,11 @@ export async function createBucket(c: Context) {
   if (optimizationMode !== undefined && optimizationMode !== "none") {
     const plan = c.get("plan") as string;
     if (plan === "free") {
-      return error(c, 402, "Optimization requires a paid plan. Upgrade to enable.");
+      return error(
+        c,
+        402,
+        "Optimization requires a paid plan. Upgrade to enable."
+      );
     }
   }
 

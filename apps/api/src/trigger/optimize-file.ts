@@ -21,12 +21,12 @@ const s3 = new S3Client({
 
 interface OptimizeFilePayload {
   bucketId: string;
-  s3BucketName: string;
-  fileKey: string;
-  contentType: string;
-  originalSize: number;
-  mode: Exclude<OptimizationMode, "none">;
   cacheControl: string;
+  contentType: string;
+  fileKey: string;
+  mode: Exclude<OptimizationMode, "none">;
+  originalSize: number;
+  s3BucketName: string;
 }
 
 const QUALITY_MAP = {

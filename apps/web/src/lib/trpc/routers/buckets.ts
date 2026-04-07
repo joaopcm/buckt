@@ -116,7 +116,11 @@ export const bucketsRouter = router({
 
       const plan = (sub?.plan ?? "free") as PlanName;
 
-      if (input.optimizationMode && input.optimizationMode !== "none" && plan === "free") {
+      if (
+        input.optimizationMode &&
+        input.optimizationMode !== "none" &&
+        plan === "free"
+      ) {
         throw new TRPCError({
           code: "PAYMENT_REQUIRED",
           message: "Optimization requires a paid plan. Upgrade to enable.",
@@ -228,7 +232,9 @@ export const bucketsRouter = router({
           .max(3650)
           .nullable()
           .optional(),
-        optimizationMode: z.enum(["none", "light", "balanced", "maximum"]).optional(),
+        optimizationMode: z
+          .enum(["none", "light", "balanced", "maximum"])
+          .optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
