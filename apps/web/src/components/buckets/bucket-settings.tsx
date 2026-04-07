@@ -1,5 +1,6 @@
 "use client";
 
+import { X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -38,6 +39,13 @@ const CACHE_PRESETS = [
     label: "Immutable (1 year)",
     header: "public, max-age=31536000, immutable",
   },
+] as const;
+
+const LIFECYCLE_PRESETS = [
+  { value: 7, label: "7 days" },
+  { value: 30, label: "30 days" },
+  { value: 90, label: "90 days" },
+  { value: 365, label: "1 year" },
 ] as const;
 
 type CachePresetValue = (typeof CACHE_PRESETS)[number]["value"];
@@ -186,6 +194,7 @@ function CachingCard({
         <div className="space-y-2">
           <Label>Preset</Label>
           <Select
+            items={CACHE_PRESETS}
             onValueChange={(v) => {
               if (v) {
                 setPreset(v as CachePresetValue);
@@ -196,7 +205,7 @@ function CachingCard({
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent align="start" alignItemWithTrigger={false}>
               {CACHE_PRESETS.map((p) => (
                 <SelectItem key={p.value} value={p.value}>
                   {p.label}
@@ -317,20 +326,27 @@ function CorsCard({
           </Button>
         </div>
         {origins.length > 0 && (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1">
             {origins.map((origin) => (
               <span
-                className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-xs"
+                className="inline-flex items-center gap-0.5 border border-input px-1.5 py-0.5 font-mono text-[10px]"
                 key={origin}
               >
                 {origin}
-                <button
-                  className="text-muted-foreground hover:text-foreground"
+                {/* biome-ignore lint/a11y/useSemanticElements: nested interactive context */}
+                <span
+                  className="cursor-pointer text-muted-foreground hover:text-foreground"
                   onClick={() => removeOrigin(origin)}
-                  type="button"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      removeOrigin(origin);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
                 >
-                  x
-                </button>
+                  <X className="size-2.5" />
+                </span>
               </span>
             ))}
           </div>
@@ -376,6 +392,8 @@ function LifecycleCard({
     });
   }
 
+  const ttlNumber = ttl ? Number(ttl) : null;
+
   return (
     <Card>
       <CardHeader>
@@ -383,29 +401,46 @@ function LifecycleCard({
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="space-y-2">
-          <Label>Auto-delete after (days)</Label>
-          <div className="flex gap-2">
+          <Label>Auto-delete after</Label>
+          <div className="flex">
             <Input
+              className="rounded-r-none border-r-0"
               max={3650}
               min={1}
               onChange={(e) => setTtl(e.target.value)}
-              placeholder="Leave empty to keep forever"
+              placeholder="Never"
               type="number"
               value={ttl}
             />
+            <span className="inline-flex items-center border border-input bg-muted px-3 text-muted-foreground text-xs">
+              days
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {LIFECYCLE_PRESETS.map((preset) => (
+              <button
+                className={`border px-2 py-0.5 text-xs transition-colors ${
+                  ttlNumber === preset.value
+                    ? "border-foreground bg-foreground text-background"
+                    : "border-input text-muted-foreground hover:border-foreground hover:text-foreground"
+                }`}
+                key={preset.value}
+                onClick={() => setTtl(String(preset.value))}
+                type="button"
+              >
+                {preset.label}
+              </button>
+            ))}
             {ttl && (
-              <Button
+              <button
+                className="border border-input px-2 py-0.5 text-muted-foreground text-xs hover:border-foreground hover:text-foreground"
                 onClick={() => setTtl("")}
                 type="button"
-                variant="outline"
               >
                 Clear
-              </Button>
+              </button>
             )}
           </div>
-          <p className="text-muted-foreground text-xs">
-            Files are automatically deleted after this many days
-          </p>
         </div>
         <Button
           disabled={updateSettings.isPending}

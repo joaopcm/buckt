@@ -67,12 +67,12 @@ export function BucketDetail({
             bandwidthUsedBytes={bucket.bandwidthUsedBytes}
             storageUsedBytes={bucket.storageUsedBytes}
           />
-          <BucketSettings bucket={bucket} orgId={orgId} />
           <FileBrowser
             bucketId={bucket.id}
             customDomain={bucket.customDomain}
             orgId={orgId}
           />
+          <BucketSettings bucket={bucket} orgId={orgId} />
         </>
       )}
 
