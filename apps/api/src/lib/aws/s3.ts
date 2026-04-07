@@ -11,7 +11,8 @@ import { s3 } from "../s3";
 
 export async function createBucketResources(
   bucketName: string,
-  region: string
+  region: string,
+  visibility: "public" | "private" = "public"
 ) {
   await s3.send(new CreateBucketCommand({ Bucket: bucketName }));
 
@@ -22,35 +23,49 @@ export async function createBucketResources(
     })
   );
 
-  await s3.send(
-    new PutPublicAccessBlockCommand({
-      Bucket: bucketName,
-      PublicAccessBlockConfiguration: {
-        BlockPublicAcls: false,
-        BlockPublicPolicy: false,
-        IgnorePublicAcls: false,
-        RestrictPublicBuckets: false,
-      },
-    })
-  );
+  if (visibility === "public") {
+    await s3.send(
+      new PutPublicAccessBlockCommand({
+        Bucket: bucketName,
+        PublicAccessBlockConfiguration: {
+          BlockPublicAcls: false,
+          BlockPublicPolicy: false,
+          IgnorePublicAcls: false,
+          RestrictPublicBuckets: false,
+        },
+      })
+    );
 
-  await s3.send(
-    new PutBucketPolicyCommand({
-      Bucket: bucketName,
-      Policy: JSON.stringify({
-        Version: "2012-10-17",
-        Statement: [
-          {
-            Sid: "PublicReadGetObject",
-            Effect: "Allow",
-            Principal: "*",
-            Action: "s3:GetObject",
-            Resource: `arn:aws:s3:::${bucketName}/*`,
-          },
-        ],
-      }),
-    })
-  );
+    await s3.send(
+      new PutBucketPolicyCommand({
+        Bucket: bucketName,
+        Policy: JSON.stringify({
+          Version: "2012-10-17",
+          Statement: [
+            {
+              Sid: "PublicReadGetObject",
+              Effect: "Allow",
+              Principal: "*",
+              Action: "s3:GetObject",
+              Resource: `arn:aws:s3:::${bucketName}/*`,
+            },
+          ],
+        }),
+      })
+    );
+  } else {
+    await s3.send(
+      new PutPublicAccessBlockCommand({
+        Bucket: bucketName,
+        PublicAccessBlockConfiguration: {
+          BlockPublicAcls: true,
+          BlockPublicPolicy: true,
+          IgnorePublicAcls: true,
+          RestrictPublicBuckets: true,
+        },
+      })
+    );
+  }
 
   return {
     websiteEndpoint: `${bucketName}.s3-website-${region}.amazonaws.com`,
