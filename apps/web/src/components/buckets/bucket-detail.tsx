@@ -1,6 +1,7 @@
 "use client";
 
 import { BucketActions } from "@/components/buckets/bucket-actions";
+import { BucketSettings } from "@/components/buckets/bucket-settings";
 import { BucketUsage } from "@/components/buckets/bucket-usage";
 import { DnsRecords } from "@/components/buckets/dns-records";
 import { FileBrowser } from "@/components/buckets/file-browser";
@@ -66,6 +67,7 @@ export function BucketDetail({
             bandwidthUsedBytes={bucket.bandwidthUsedBytes}
             storageUsedBytes={bucket.storageUsedBytes}
           />
+          <BucketSettings bucket={bucket} orgId={orgId} />
           <FileBrowser
             bucketId={bucket.id}
             customDomain={bucket.customDomain}
