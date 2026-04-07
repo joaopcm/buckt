@@ -38,6 +38,13 @@ export async function updateBucket(c: Context) {
     return success(c, bucket);
   }
 
+  if (updates.optimizationMode !== undefined && updates.optimizationMode !== "none") {
+    const plan = c.get("plan") as string;
+    if (plan === "free") {
+      return error(c, 402, "Optimization requires a paid plan. Upgrade to enable.");
+    }
+  }
+
   if (
     updates.visibility !== undefined &&
     updates.visibility !== bucket.visibility

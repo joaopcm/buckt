@@ -77,6 +77,7 @@ app.patch(
   "/v1/buckets/:id",
   requireAuth("buckets:write"),
   rateLimit,
+  requirePlan(),
   updateBucket
 );
 app.delete(
