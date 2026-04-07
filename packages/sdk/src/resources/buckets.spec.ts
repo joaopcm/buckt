@@ -76,4 +76,60 @@ describe("BucketsClient", () => {
 
     await expect(client.buckets.delete("1")).resolves.toBeUndefined();
   });
+
+  it("creates a bucket with settings", async () => {
+    const bucket = {
+      id: "1",
+      name: "Test",
+      customDomain: "test.com",
+      status: "pending",
+      region: "eu-west-1",
+      visibility: "private",
+      cachePreset: "aggressive",
+      corsOrigins: ["https://app.test.com"],
+      lifecycleTtlDays: 30,
+    };
+    vi.stubGlobal(
+      "fetch",
+      mockFetch(201, { data: bucket, error: null, meta: null })
+    );
+
+    const result = await client.buckets.create({
+      name: "Test",
+      customDomain: "test.com",
+      region: "eu-west-1",
+      visibility: "private",
+      cachePreset: "aggressive",
+      corsOrigins: ["https://app.test.com"],
+      lifecycleTtlDays: 30,
+    });
+    expect(result.visibility).toBe("private");
+    expect(result.cachePreset).toBe("aggressive");
+    expect(result.region).toBe("eu-west-1");
+  });
+
+  it("updates bucket settings", async () => {
+    const bucket = {
+      id: "1",
+      name: "Test",
+      visibility: "private",
+      cachePreset: "short",
+      cacheControlOverride: null,
+      corsOrigins: ["https://app.test.com"],
+      lifecycleTtlDays: 90,
+    };
+    vi.stubGlobal(
+      "fetch",
+      mockFetch(200, { data: bucket, error: null, meta: null })
+    );
+
+    const result = await client.buckets.update("1", {
+      visibility: "private",
+      cachePreset: "short",
+      corsOrigins: ["https://app.test.com"],
+      lifecycleTtlDays: 90,
+    });
+    expect(result.visibility).toBe("private");
+    expect(result.lifecycleTtlDays).toBe(90);
+  });
 });

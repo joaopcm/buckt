@@ -1,5 +1,11 @@
 import type { HttpClient } from "../http";
-import type { Bucket, BucketStatus, CursorMeta } from "../types";
+import type {
+  Bucket,
+  BucketStatus,
+  BucketVisibility,
+  CachePreset,
+  CursorMeta,
+} from "../types";
 
 export class BucketsClient {
   private readonly http: HttpClient;
@@ -8,7 +14,15 @@ export class BucketsClient {
     this.http = http;
   }
 
-  async create(opts: { name: string; customDomain: string }): Promise<Bucket> {
+  async create(opts: {
+    name: string;
+    customDomain: string;
+    region?: string;
+    visibility?: BucketVisibility;
+    cachePreset?: CachePreset;
+    corsOrigins?: string[];
+    lifecycleTtlDays?: number | null;
+  }): Promise<Bucket> {
     const { data } = await this.http.post<Bucket>("/v1/buckets", opts);
     return data;
   }
@@ -31,7 +45,17 @@ export class BucketsClient {
     return data;
   }
 
-  async update(id: string, opts: { name: string }): Promise<Bucket> {
+  async update(
+    id: string,
+    opts: {
+      name?: string;
+      visibility?: BucketVisibility;
+      cachePreset?: CachePreset;
+      cacheControlOverride?: string | null;
+      corsOrigins?: string[];
+      lifecycleTtlDays?: number | null;
+    }
+  ): Promise<Bucket> {
     const { data } = await this.http.patch<Bucket>(`/v1/buckets/${id}`, opts);
     return data;
   }
