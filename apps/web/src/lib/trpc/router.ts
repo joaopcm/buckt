@@ -1,10 +1,12 @@
 import { router } from "./init";
+import { billingRouter } from "./routers/billing";
 import { bucketsRouter } from "./routers/buckets";
 import { filesRouter } from "./routers/files";
 import { keysRouter } from "./routers/keys";
 import { orgRouter } from "./routers/org";
 
 export const appRouter = router({
+  billing: billingRouter,
   buckets: bucketsRouter,
   files: filesRouter,
   keys: keysRouter,

@@ -7,3 +7,14 @@ export function formatBytes(bytes: number): string {
   const value = bytes / 1024 ** i;
   return `${value.toFixed(value < 10 ? 1 : 0)} ${units[i]}`;
 }
+
+export function formatDate(date: string | Date | null | undefined): string {
+  if (!date) {
+    return "";
+  }
+  return new Date(date).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}

@@ -8,5 +8,6 @@ dist/
 *.tfstate.backup
 .terraform/
 docs/superpowers/
+.superpowers/
 .vscode/
 .serena/
