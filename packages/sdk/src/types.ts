@@ -22,6 +22,8 @@ export type CachePreset =
   | "aggressive"
   | "immutable";
 
+export type OptimizationMode = "none" | "light" | "balanced" | "maximum";
+
 export interface Bucket {
   acmCertArn: string | null;
   bandwidthUsedBytes: number;
@@ -35,6 +37,7 @@ export interface Bucket {
   id: string;
   lifecycleTtlDays: number | null;
   name: string;
+  optimizationMode: OptimizationMode;
   orgId: string;
   provisioningJobId: string | null;
   region: string;

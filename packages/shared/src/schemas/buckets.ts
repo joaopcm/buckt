@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ALLOWED_REGIONS } from "../plans";
+import { ALLOWED_REGIONS, OPTIMIZATION_MODES } from "../plans";
 
 export const createBucketSchema = z.object({
   name: z.string().min(1).max(100),
@@ -17,6 +17,7 @@ export const createBucketSchema = z.object({
     .max(10, "Maximum 10 CORS origins")
     .default([]),
   lifecycleTtlDays: z.number().int().min(1).max(3650).nullable().default(null),
+  optimizationMode: z.enum(OPTIMIZATION_MODES).default("none"),
 });
 
 export const updateBucketSchema = z.object({
@@ -31,6 +32,7 @@ export const updateBucketSchema = z.object({
     .max(10, "Maximum 10 CORS origins")
     .optional(),
   lifecycleTtlDays: z.number().int().min(1).max(3650).nullable().optional(),
+  optimizationMode: z.enum(OPTIMIZATION_MODES).optional(),
 });
 
 export const listBucketsSchema = z.object({

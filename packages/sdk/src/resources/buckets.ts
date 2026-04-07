@@ -5,6 +5,7 @@ import type {
   BucketVisibility,
   CachePreset,
   CursorMeta,
+  OptimizationMode,
 } from "../types";
 
 export class BucketsClient {
@@ -22,6 +23,7 @@ export class BucketsClient {
     cachePreset?: CachePreset;
     corsOrigins?: string[];
     lifecycleTtlDays?: number | null;
+    optimizationMode?: OptimizationMode;
   }): Promise<Bucket> {
     const { data } = await this.http.post<Bucket>("/v1/buckets", opts);
     return data;
@@ -54,6 +56,7 @@ export class BucketsClient {
       cacheControlOverride?: string | null;
       corsOrigins?: string[];
       lifecycleTtlDays?: number | null;
+      optimizationMode?: OptimizationMode;
     }
   ): Promise<Bucket> {
     const { data } = await this.http.patch<Bucket>(`/v1/buckets/${id}`, opts);

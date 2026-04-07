@@ -31,6 +31,7 @@ interface CreateBucketValues {
   customDomain: string;
   lifecycleTtlDays: number | null;
   name: string;
+  optimizationMode: "none" | "light" | "balanced" | "maximum";
   region:
     | "us-east-1"
     | "us-west-2"
@@ -65,6 +66,19 @@ const CACHE_PRESETS = [
   { value: "standard", label: "Standard (1 day)" },
   { value: "aggressive", label: "Aggressive (30 days)" },
   { value: "immutable", label: "Immutable (1 year)" },
+] as const;
+
+const OPTIMIZATION_OPTIONS = [
+  { value: "none", label: "None — files served as uploaded" },
+  { value: "light", label: "Light — minimal compression, visually lossless" },
+  {
+    value: "balanced",
+    label: "Balanced — good compression with minor quality trade-off",
+  },
+  {
+    value: "maximum",
+    label: "Maximum — aggressive compression, some quality loss",
+  },
 ] as const;
 
 const LIFECYCLE_PRESETS = [
@@ -208,6 +222,36 @@ export function AdvancedBucketOptions({
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Optimization</Label>
+            <Select
+              defaultValue="none"
+              items={OPTIMIZATION_OPTIONS}
+              onValueChange={(value) => {
+                if (value) {
+                  setValue(
+                    "optimizationMode",
+                    value as CreateBucketValues["optimizationMode"]
+                  );
+                }
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent align="start" alignItemWithTrigger={false}>
+                {OPTIMIZATION_OPTIONS.map((o) => (
+                  <SelectItem key={o.value} value={o.value}>
+                    {o.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-muted-foreground text-xs">
+              Automatically compress images uploaded to this bucket
+            </p>
           </div>
 
           <div className="space-y-2">

@@ -21,6 +21,7 @@ export async function createBucket(c: Context) {
     cachePreset,
     corsOrigins,
     lifecycleTtlDays,
+    optimizationMode,
   } = parsed.data;
   const orgId = c.get("orgId");
   const planLimits = c.get("planLimits");
@@ -50,6 +51,17 @@ export async function createBucket(c: Context) {
     return error(c, 409, "Domain already in use");
   }
 
+  if (optimizationMode !== undefined && optimizationMode !== "none") {
+    const plan = c.get("plan") as string;
+    if (plan === "free") {
+      return error(
+        c,
+        402,
+        "Optimization requires a paid plan. Upgrade to enable."
+      );
+    }
+  }
+
   const [bucket] = await db
     .insert(buckets)
     .values({
@@ -63,6 +75,7 @@ export async function createBucket(c: Context) {
       cachePreset,
       corsOrigins,
       lifecycleTtlDays,
+      optimizationMode,
       status: "pending",
     })
     .returning();

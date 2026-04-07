@@ -1,5 +1,5 @@
 import type { HttpClient } from "../http";
-import type { CursorMeta, FileInfo } from "../types";
+import type { CursorMeta, FileInfo, OptimizationMode } from "../types";
 
 export class FilesClient {
   private readonly http: HttpClient;
@@ -12,12 +12,18 @@ export class FilesClient {
     bucketId: string,
     path: string,
     body: BodyInit,
-    contentType?: string
+    contentType?: string,
+    options?: { optimization?: OptimizationMode }
   ): Promise<FileInfo> {
+    const extraHeaders: Record<string, string> = {};
+    if (options?.optimization) {
+      extraHeaders["X-Buckt-Optimization"] = options.optimization;
+    }
     const { data } = await this.http.put<FileInfo>(
       `/v1/buckets/${bucketId}/files/${path}`,
       body,
-      contentType
+      contentType,
+      extraHeaders
     );
     return data;
   }
