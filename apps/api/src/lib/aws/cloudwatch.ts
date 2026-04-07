@@ -1,45 +1,26 @@
-import {
-  CloudWatchClient,
-  GetMetricDataCommand,
-} from "@aws-sdk/client-cloudwatch";
-import { env } from "../../env";
-
-const cloudwatch = new CloudWatchClient({
-  region: env.AWS_REGION,
-  credentials: {
-    accessKeyId: env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
-  },
-});
+import { ListObjectsV2Command } from "@aws-sdk/client-s3";
+import { s3 } from "../s3";
 
 export async function getBucketSizeBytes(bucketName: string): Promise<number> {
-  const now = new Date();
-  const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+  let totalBytes = 0;
+  let continuationToken: string | undefined;
 
-  const result = await cloudwatch.send(
-    new GetMetricDataCommand({
-      StartTime: twoDaysAgo,
-      EndTime: now,
-      MetricDataQueries: [
-        {
-          Id: "bucketSize",
-          MetricStat: {
-            Metric: {
-              Namespace: "AWS/S3",
-              MetricName: "BucketSizeBytes",
-              Dimensions: [
-                { Name: "BucketName", Value: bucketName },
-                { Name: "StorageType", Value: "StandardStorage" },
-              ],
-            },
-            Period: 86_400,
-            Stat: "Average",
-          },
-        },
-      ],
-    })
-  );
+  do {
+    const result = await s3.send(
+      new ListObjectsV2Command({
+        Bucket: bucketName,
+        ContinuationToken: continuationToken,
+      })
+    );
 
-  const values = result.MetricDataResults?.[0]?.Values ?? [];
-  return values[0] ?? 0;
+    for (const obj of result.Contents ?? []) {
+      totalBytes += obj.Size ?? 0;
+    }
+
+    continuationToken = result.IsTruncated
+      ? result.NextContinuationToken
+      : undefined;
+  } while (continuationToken);
+
+  return totalBytes;
 }
