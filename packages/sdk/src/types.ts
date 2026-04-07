@@ -13,9 +13,22 @@ export type Permission =
   | "files:write"
   | "files:delete";
 
+export type BucketVisibility = "public" | "private";
+
+export type CachePreset =
+  | "no-cache"
+  | "short"
+  | "standard"
+  | "aggressive"
+  | "immutable";
+
 export interface Bucket {
   acmCertArn: string | null;
   bandwidthUsedBytes: number;
+  cacheControlOverride: string | null;
+  cachePreset: CachePreset;
+  corsOrigins: string[];
+  lifecycleTtlDays: number | null;
   cloudfrontDistributionId: string | null;
   createdAt: string;
   customDomain: string;
@@ -30,6 +43,7 @@ export interface Bucket {
   status: BucketStatus;
   storageUsedBytes: number;
   updatedAt: string;
+  visibility: BucketVisibility;
 }
 
 export interface ApiKey {
