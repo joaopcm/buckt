@@ -75,7 +75,7 @@ export function PendingInvites({
               id: string;
               email: string;
               role: string;
-              createdAt: Date;
+              createdAt: string;
             }) => (
               <div className="flex items-center justify-between" key={inv.id}>
                 <div className="flex items-center gap-3">
