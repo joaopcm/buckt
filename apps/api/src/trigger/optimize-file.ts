@@ -1,23 +1,12 @@
-import {
-  GetObjectCommand,
-  PutObjectCommand,
-  S3Client,
-} from "@aws-sdk/client-s3";
+import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { buckets, createDb } from "@buckt/db";
 import type { OptimizationMode } from "@buckt/shared";
 import { logger, task } from "@trigger.dev/sdk/v3";
 import { eq, sql } from "drizzle-orm";
 import sharp from "sharp";
+import { s3 } from "../lib/s3";
 
 const db = createDb(process.env.DATABASE_PUBLIC_URL ?? "");
-
-const s3 = new S3Client({
-  region: process.env.AWS_REGION ?? "us-east-1",
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID ?? "",
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ?? "",
-  },
-});
 
 interface OptimizeFilePayload {
   bucketId: string;
