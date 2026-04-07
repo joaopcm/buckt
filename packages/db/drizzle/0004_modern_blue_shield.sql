@@ -1,0 +1,2 @@
+CREATE TYPE "public"."optimization_mode" AS ENUM('none', 'light', 'balanced', 'maximum');--> statement-breakpoint
+ALTER TABLE "buckets" ADD COLUMN "optimization_mode" "optimization_mode" DEFAULT 'none' NOT NULL;

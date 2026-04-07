@@ -32,6 +32,13 @@ export const cachePresetEnum = pgEnum("cache_preset", [
   "immutable",
 ]);
 
+export const optimizationModeEnum = pgEnum("optimization_mode", [
+  "none",
+  "light",
+  "balanced",
+  "maximum",
+]);
+
 export const buckets = pgTable(
   "buckets",
   {
@@ -60,6 +67,9 @@ export const buckets = pgTable(
     cacheControlOverride: text("cache_control_override"),
     corsOrigins: text("cors_origins").array().default([]).notNull(),
     lifecycleTtlDays: integer("lifecycle_ttl_days"),
+    optimizationMode: optimizationModeEnum("optimization_mode")
+      .default("none")
+      .notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
