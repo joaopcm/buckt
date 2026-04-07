@@ -26,9 +26,13 @@ export async function updateBucket(c: Context) {
     return error(c, 404, "Bucket not found");
   }
 
+  if (Object.keys(parsed.data).length === 0) {
+    return success(c, bucket);
+  }
+
   const [updated] = await db
     .update(buckets)
-    .set({ name: parsed.data.name })
+    .set(parsed.data)
     .where(eq(buckets.id, id))
     .returning();
 
