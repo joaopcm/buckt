@@ -260,7 +260,7 @@ function BucketActions({
             onClick={() => setDeleteOpen(true)}
             variant="destructive"
           >
-            Delete bucket
+            Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -286,7 +286,7 @@ function BucketActions({
         onConfirm={() => deleteBucket.mutate({ orgId, id: bucketId })}
         onOpenChange={setDeleteOpen}
         open={deleteOpen}
-        title="Delete bucket"
+        title="Delete"
       />
     </>
   );

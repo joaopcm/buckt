@@ -510,7 +510,7 @@ function FolderRow({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" side="bottom">
             <DropdownMenuItem onClick={() => onNavigate(folder)}>
-              Open folder
+              Open
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
@@ -518,14 +518,14 @@ function FolderRow({
                 setRenameOpen(true);
               }}
             >
-              Rename folder
+              Rename
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => setDeleteOpen(true)}
               variant="destructive"
             >
-              Delete folder
+              Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -540,7 +540,7 @@ function FolderRow({
           open={renameOpen}
         >
           <DialogContent>
-            <DialogTitle>Rename folder</DialogTitle>
+            <DialogTitle>Rename</DialogTitle>
             <DialogDescription>
               Rename <strong className="text-foreground">{name}</strong> — all
               files inside will be moved to the new location.
@@ -589,7 +589,7 @@ function FolderRow({
           }
           onOpenChange={setDeleteOpen}
           open={deleteOpen}
-          title="Delete folder"
+          title="Delete"
         />
       </TableCell>
     </TableRow>
