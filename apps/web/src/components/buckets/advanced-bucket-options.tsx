@@ -1,12 +1,6 @@
 "use client";
 
 import { Accordion } from "@base-ui/react/accordion";
-import type { FlagComponent } from "country-flag-icons/react/3x2";
-import DE from "country-flag-icons/react/3x2/DE";
-import IE from "country-flag-icons/react/3x2/IE";
-import JP from "country-flag-icons/react/3x2/JP";
-import SG from "country-flag-icons/react/3x2/SG";
-import US from "country-flag-icons/react/3x2/US";
 import { ChevronDown, X } from "lucide-react";
 import { useState } from "react";
 import type {
@@ -24,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { REGIONS } from "@/lib/regions";
 
 interface CreateBucketValues {
   cachePreset: "no-cache" | "short" | "standard" | "aggressive" | "immutable";
@@ -41,19 +36,6 @@ interface CreateBucketValues {
     | "ap-northeast-1";
   visibility: "public" | "private";
 }
-
-const REGIONS: ReadonlyArray<{
-  value: string;
-  label: string;
-  Flag: FlagComponent;
-}> = [
-  { value: "us-east-1", label: "US East (N. Virginia)", Flag: US },
-  { value: "us-west-2", label: "US West (Oregon)", Flag: US },
-  { value: "eu-west-1", label: "Europe (Ireland)", Flag: IE },
-  { value: "eu-central-1", label: "Europe (Frankfurt)", Flag: DE },
-  { value: "ap-southeast-1", label: "Asia Pacific (Singapore)", Flag: SG },
-  { value: "ap-northeast-1", label: "Asia Pacific (Tokyo)", Flag: JP },
-];
 
 const VISIBILITY_OPTIONS = [
   { value: "public", label: "Public — files served openly via custom domain" },

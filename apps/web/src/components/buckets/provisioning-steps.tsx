@@ -83,6 +83,12 @@ export function ProvisioningSteps({
   return (
     <div className="space-y-4">
       <Step
+        description="We're creating your S3 bucket, SSL certificate, and CDN distribution. This usually takes a minute or two."
+        status={step === 0 ? "active" : "done"}
+        title="Setting up your bucket"
+      />
+
+      <Step
         description="Add the following DNS records to your provider. The CNAME proves domain ownership for the SSL certificate. The CAA record authorizes Amazon to issue it."
         status={step === 0 ? "pending" : stepStatus(step, 1)}
         title="Add DNS records"

@@ -54,6 +54,7 @@ import { useCursorPagination } from "@/hooks/use-cursor-pagination";
 import { useDebounce } from "@/hooks/use-debounce";
 import { formatBytes } from "@/lib/format";
 import { trpc } from "@/lib/trpc/client";
+import { cn } from "@/lib/utils";
 import { FileUpload } from "./file-upload";
 
 const TRAILING_SLASH = /\/$/;
@@ -94,7 +95,7 @@ export function FileBrowser({
     ? `${prefix}${debouncedSearch}`
     : prefix || undefined;
 
-  const { data, isPending } = trpc.files.list.useQuery({
+  const { data, isPending, isFetching } = trpc.files.list.useQuery({
     orgId,
     bucketId,
     prefix: searchPrefix,
@@ -146,12 +147,13 @@ export function FileBrowser({
             />
           </div>
           <Button
+            disabled={isFetching}
             onClick={invalidateFiles}
             size="icon"
             title="Refresh"
             variant="outline"
           >
-            <RefreshCw className="size-4" />
+            <RefreshCw className={cn("size-4", isFetching && "animate-spin")} />
           </Button>
           <CreateFolderButton
             bucketId={bucketId}

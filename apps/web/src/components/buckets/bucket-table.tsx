@@ -31,6 +31,7 @@ import {
 import { useCursorPagination } from "@/hooks/use-cursor-pagination";
 import { useDebounce } from "@/hooks/use-debounce";
 import { formatBytes } from "@/lib/format";
+import { getRegion } from "@/lib/regions";
 import { trpc } from "@/lib/trpc/client";
 
 export function BucketTable({ orgId }: { orgId: string }) {
@@ -102,7 +103,9 @@ export function BucketTable({ orgId }: { orgId: string }) {
                 <TableHead>Name</TableHead>
                 <TableHead>Domain</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Region</TableHead>
                 <TableHead>Storage</TableHead>
+                <TableHead>Bandwidth</TableHead>
                 <TableHead>Created</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
@@ -130,8 +133,14 @@ export function BucketTable({ orgId }: { orgId: string }) {
                   <TableCell>
                     <StatusBadge status={bucket.status} />
                   </TableCell>
+                  <TableCell>
+                    <RegionCell region={bucket.region} />
+                  </TableCell>
                   <TableCell className="text-muted-foreground text-xs">
                     {formatBytes(bucket.storageUsedBytes ?? 0)}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground text-xs">
+                    {formatBytes(bucket.bandwidthUsedBytes ?? 0)}
                   </TableCell>
                   <TableCell>
                     <DateDisplay
@@ -168,6 +177,19 @@ export function BucketTable({ orgId }: { orgId: string }) {
         </>
       ) : null}
     </div>
+  );
+}
+
+function RegionCell({ region }: { region: string }) {
+  const r = getRegion(region);
+  if (!r) {
+    return <span className="text-muted-foreground text-xs">{region}</span>;
+  }
+  return (
+    <span className="flex items-center gap-1.5 text-xs">
+      <r.Flag className="size-4 shrink-0" />
+      <span className="text-muted-foreground">{r.label}</span>
+    </span>
   );
 }
 
