@@ -228,7 +228,7 @@ export const orgRouter = router({
     const result = await auth.api.updateOrganization({
       headers: ctx.headers,
       body: {
-        data: { logo: null },
+        data: { logo: "" },
         organizationId: ctx.orgId,
       },
     });
