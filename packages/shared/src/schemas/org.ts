@@ -23,3 +23,14 @@ export const updateRoleSchema = z.object({
   memberId: z.string().min(1),
   role: z.enum(ORG_ROLES),
 });
+
+export const updateOrgLogoSchema = z.object({
+  image: z.string().min(1),
+  contentType: z.enum([
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+    "image/svg+xml",
+  ]),
+});
