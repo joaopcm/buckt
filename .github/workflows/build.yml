@@ -22,7 +22,6 @@ env:
   RESEND_API_KEY: "re_fake"
   BUCKT_API_KEY: "bkt_fake"
   BUCKT_CDN_BUCKET_ID: "fake-bucket-id"
-  NEXT_PUBLIC_BUCKT_CDN_URL: "https://cdn-staging.buckt.dev"
 
 jobs:
   build:

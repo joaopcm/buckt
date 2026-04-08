@@ -167,18 +167,22 @@ export const orgRouter = router({
         "image/svg+xml": "svg",
       };
       const ext = extMap[input.contentType] ?? "png";
+      const bucketId = env.BUCKT_CDN_BUCKET_ID;
 
-      const org = await auth.api.getFullOrganization({
-        headers: ctx.headers,
-        query: { organizationId: ctx.orgId },
-      });
+      const [org, cdnBucket] = await Promise.all([
+        auth.api.getFullOrganization({
+          headers: ctx.headers,
+          query: { organizationId: ctx.orgId },
+        }),
+        buckt.buckets.get(bucketId),
+      ]);
+
       if (org?.logo) {
         try {
-          const cdnBase = env.NEXT_PUBLIC_BUCKT_CDN_URL;
           const url = new URL(org.logo);
-          if (url.origin === new URL(cdnBase).origin) {
+          if (url.hostname === cdnBucket.customDomain) {
             const oldPath = url.pathname.slice(1);
-            await buckt.files.delete(env.BUCKT_CDN_BUCKET_ID, oldPath);
+            await buckt.files.delete(bucketId, oldPath);
           }
         } catch {
           // old file cleanup is best-effort
@@ -186,14 +190,9 @@ export const orgRouter = router({
       }
 
       const path = `organizations/${ctx.orgId}/avatars/avatar.${ext}`;
-      await buckt.files.upload(
-        env.BUCKT_CDN_BUCKET_ID,
-        path,
-        buffer,
-        input.contentType
-      );
+      await buckt.files.upload(bucketId, path, buffer, input.contentType);
 
-      const logoUrl = `${env.NEXT_PUBLIC_BUCKT_CDN_URL}/${path}?v=${Date.now()}`;
+      const logoUrl = `https://${cdnBucket.customDomain}/${path}?v=${Date.now()}`;
       const result = await auth.api.updateOrganization({
         headers: ctx.headers,
         body: {
@@ -205,16 +204,18 @@ export const orgRouter = router({
     }),
 
   removeLogo: adminProcedure.mutation(async ({ ctx }) => {
-    const org = await auth.api.getFullOrganization({
-      headers: ctx.headers,
-      query: { organizationId: ctx.orgId },
-    });
+    const [org, cdnBucket] = await Promise.all([
+      auth.api.getFullOrganization({
+        headers: ctx.headers,
+        query: { organizationId: ctx.orgId },
+      }),
+      buckt.buckets.get(env.BUCKT_CDN_BUCKET_ID),
+    ]);
 
     if (org?.logo) {
       try {
-        const cdnBase = env.NEXT_PUBLIC_BUCKT_CDN_URL;
         const url = new URL(org.logo);
-        if (url.origin === new URL(cdnBase).origin) {
+        if (url.hostname === cdnBucket.customDomain) {
           const filePath = url.pathname.slice(1);
           await buckt.files.delete(env.BUCKT_CDN_BUCKET_ID, filePath);
         }

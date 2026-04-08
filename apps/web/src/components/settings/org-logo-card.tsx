@@ -12,10 +12,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { getInitials } from "@/lib/get-initials";
 import { trpc } from "@/lib/trpc/client";
 
-const WHITESPACE = /\s+/;
-const NON_ALPHANUMERIC = /[^a-zA-Z0-9]/;
 const MAX_FILE_SIZE = 2 * 1024 * 1024;
 const ACCEPTED_TYPES = new Set([
   "image/jpeg",
@@ -24,16 +23,6 @@ const ACCEPTED_TYPES = new Set([
   "image/gif",
   "image/svg+xml",
 ]);
-
-function getInitials(name: string) {
-  return name
-    .split(WHITESPACE)
-    .map((w) => w.replace(NON_ALPHANUMERIC, "").charAt(0))
-    .filter(Boolean)
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
 
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
