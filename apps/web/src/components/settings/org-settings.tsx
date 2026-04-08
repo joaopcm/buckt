@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOrgRole } from "@/hooks/use-org-role";
+import { authClient } from "@/lib/auth-client";
 import { trpc } from "@/lib/trpc/client";
 
 type RenameValues = z.infer<typeof renameOrgSchema>;
@@ -114,6 +115,7 @@ function OrgNameCard({
   isAdmin: boolean;
 }) {
   const utils = trpc.useUtils();
+  const { refetch: refetchOrgs } = authClient.useListOrganizations();
 
   const {
     register,
@@ -129,6 +131,7 @@ function OrgNameCard({
     onSuccess: (updated) => {
       toast.success("Organization renamed");
       utils.org.get.invalidate({ orgId });
+      refetchOrgs();
       if (updated) {
         reset({ name: updated.name });
       }
