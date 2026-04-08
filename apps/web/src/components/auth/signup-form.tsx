@@ -42,22 +42,8 @@ export function SignupForm() {
       return;
     }
 
-    const slug = values.orgName
-      .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/[^a-z0-9-]/g, "");
-    const { error: orgError } = await authClient.organization.create({
-      name: values.orgName,
-      slug,
-    });
-
-    if (orgError) {
-      toast.error(orgError.message ?? "Failed to create organization");
-      return;
-    }
-
-    router.push("/");
-    router.refresh();
+    localStorage.setItem("buckt_pending_org", values.orgName);
+    router.push(`/verify-email?email=${encodeURIComponent(values.email)}`);
   }
 
   return (
