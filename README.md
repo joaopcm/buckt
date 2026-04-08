@@ -64,10 +64,6 @@ buckt/
 │   ├── auth/         # Better Auth config
 │   ├── shared/       # Zod validators, plan limits, types
 │   └── emails/       # React Email templates
-├── infra/
-│   └── modules/
-│       ├── bucket/   # S3 bucket Terraform module
-│       └── cdn/      # CloudFront + ACM Terraform module
 └── docker-compose.yml
 ```
 
