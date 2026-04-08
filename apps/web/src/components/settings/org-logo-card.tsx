@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { formatBytes } from "@/lib/format";
 import { getInitials } from "@/lib/get-initials";
 import { trpc } from "@/lib/trpc/client";
 
@@ -81,7 +82,7 @@ export function OrgLogoCard({
       return;
     }
     if (file.size > MAX_FILE_SIZE) {
-      toast.error("Image must be under 2MB");
+      toast.error(`Image must be under ${formatBytes(MAX_FILE_SIZE)}`);
       return;
     }
 

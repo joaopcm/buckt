@@ -12,6 +12,7 @@ import { z } from "zod";
 import { env } from "@/env";
 import { auth } from "@/lib/auth";
 import { buckt } from "@/lib/buckt";
+import { formatBytes } from "@/lib/format";
 import {
   adminProcedure,
   orgProcedure,
@@ -155,7 +156,7 @@ export const orgRouter = router({
       if (buffer.length > MAX_SIZE) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Image must be under 2MB",
+          message: `Image must be under ${formatBytes(MAX_SIZE)}`,
         });
       }
 
