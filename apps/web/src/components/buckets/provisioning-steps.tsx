@@ -1,4 +1,4 @@
-import { Check, Circle, Loader2 } from "lucide-react";
+import { Check, Circle, Loader2, Zap } from "lucide-react";
 import { CopyText } from "@/components/copy-text";
 import {
   Card,
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/table";
 
 interface DnsRecord {
+  applied?: boolean;
   name: string;
   type: string;
   value: string;
@@ -79,25 +80,61 @@ export function ProvisioningSteps({
   const validationRecords = dnsRecords.filter((r) => r.value !== PLACEHOLDER);
   const domainRecord = dnsRecords.find((r) => r.value === PLACEHOLDER);
   const rootDomain = domain.split(".").slice(-2).join(".");
+  const validationApplied = validationRecords.some((r) => r.applied);
+
+  function dnsStepStatus(): StepStatus {
+    if (validationApplied) {
+      return "done";
+    }
+    if (step === 0) {
+      return "pending";
+    }
+    return stepStatus(step, 1);
+  }
+
+  function domainStepDescription(): string {
+    if (step < 2) {
+      return "Once the certificate is validated, we'll create a CDN distribution and show you the final DNS record to add.";
+    }
+    if (domainRecord?.applied) {
+      return "Domain CNAME was configured automatically via Domain Connect.";
+    }
+    return "Add this CNAME record to point your domain to the CDN.";
+  }
+
+  function domainStepStatus(): StepStatus {
+    if (step < 2) {
+      return "pending";
+    }
+    return domainRecord?.applied ? "done" : "active";
+  }
 
   return (
     <div className="space-y-4">
       <Step
-        description="Add the following DNS records to your provider. The CNAME proves domain ownership for the SSL certificate. The CAA record authorizes Amazon to issue it."
-        status={step === 0 ? "pending" : stepStatus(step, 1)}
+        description={
+          validationApplied
+            ? "DNS records were configured automatically via Domain Connect."
+            : "Add the following DNS records to your provider. The CNAME proves domain ownership for the SSL certificate. The CAA record authorizes Amazon to issue it."
+        }
+        status={dnsStepStatus()}
         title="Add DNS records"
       >
-        {validationRecords.length > 0 && (
-          <DnsTable
-            records={[
-              ...validationRecords,
-              {
-                name: rootDomain,
-                type: "CAA",
-                value: '0 issue "amazon.com"',
-              },
-            ]}
-          />
+        {validationApplied ? (
+          <AppliedAutomatically />
+        ) : (
+          validationRecords.length > 0 && (
+            <DnsTable
+              records={[
+                ...validationRecords,
+                {
+                  name: rootDomain,
+                  type: "CAA",
+                  value: '0 issue "amazon.com"',
+                },
+              ]}
+            />
+          )
         )}
       </Step>
 
@@ -112,16 +149,27 @@ export function ProvisioningSteps({
       />
 
       <Step
-        description={
-          step >= 2
-            ? "Add this CNAME record to point your domain to the CDN."
-            : "Once the certificate is validated, we'll create a CDN distribution and show you the final DNS record to add."
-        }
-        status={step >= 2 ? "active" : "pending"}
+        description={domainStepDescription()}
+        status={domainStepStatus()}
         title="Point your domain"
       >
-        {step >= 2 && domainRecord && <DnsTable records={[domainRecord]} />}
+        {step >= 2 &&
+          domainRecord &&
+          (domainRecord.applied ? (
+            <AppliedAutomatically />
+          ) : (
+            <DnsTable records={[domainRecord]} />
+          ))}
       </Step>
+    </div>
+  );
+}
+
+function AppliedAutomatically() {
+  return (
+    <div className="flex items-center gap-2 text-green-600 text-xs">
+      <Zap className="size-3.5" />
+      Applied automatically via Domain Connect
     </div>
   );
 }

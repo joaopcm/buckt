@@ -6,6 +6,7 @@ import {
   OPTIMIZATION_MODES,
 } from "@buckt/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Check, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -15,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useDebounce } from "@/hooks/use-debounce";
 import { trpc } from "@/lib/trpc/client";
 
 const TIMEZONE_REGION_MAP: Record<string, string> = {
@@ -71,6 +73,8 @@ const createBucketSchema = z.object({
 
 type CreateBucketValues = z.output<typeof createBucketSchema>;
 
+const DOMAIN_REGEX = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/;
+
 export function CreateBucketForm({ orgId }: { orgId: string }) {
   const router = useRouter();
   const utils = trpc.useUtils();
@@ -94,6 +98,15 @@ export function CreateBucketForm({ orgId }: { orgId: string }) {
     },
   });
 
+  const domainValue = watch("customDomain") ?? "";
+  const debouncedDomain = useDebounce(domainValue, 500);
+  const isValidDomain = DOMAIN_REGEX.test(debouncedDomain);
+
+  const dcCheck = trpc.domainConnect.check.useQuery(
+    { domain: debouncedDomain },
+    { enabled: isValidDomain }
+  );
+
   const createBucket = trpc.buckets.create.useMutation({
     onSuccess: (bucket) => {
       utils.buckets.list.invalidate({ orgId });
@@ -106,7 +119,13 @@ export function CreateBucketForm({ orgId }: { orgId: string }) {
   });
 
   function onSubmit(values: CreateBucketValues) {
-    createBucket.mutate({ ...values, orgId });
+    createBucket.mutate({
+      ...values,
+      orgId,
+      domainConnectProvider: dcCheck.data?.supported
+        ? dcCheck.data.providerHost
+        : undefined,
+    });
   }
 
   return (
@@ -136,9 +155,26 @@ export function CreateBucketForm({ orgId }: { orgId: string }) {
                 {errors.customDomain.message}
               </p>
             )}
-            <p className="text-muted-foreground text-xs">
-              The domain where your files will be served
-            </p>
+            {isValidDomain && dcCheck.isFetching && (
+              <p className="flex items-center gap-1.5 text-muted-foreground text-xs">
+                <Loader2 className="size-3 animate-spin" />
+                Checking DNS provider...
+              </p>
+            )}
+            {isValidDomain && dcCheck.data?.supported && (
+              <p className="flex items-center gap-1.5 text-green-600 text-xs">
+                <Check className="size-3" />
+                {dcCheck.data.providerName} supports automatic DNS setup
+              </p>
+            )}
+            {!(
+              (isValidDomain && dcCheck.data?.supported) ||
+              dcCheck.isFetching
+            ) && (
+              <p className="text-muted-foreground text-xs">
+                The domain where your files will be served
+              </p>
+            )}
           </div>
 
           <AdvancedBucketOptions

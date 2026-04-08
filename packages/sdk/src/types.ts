@@ -34,6 +34,7 @@ export interface Bucket {
   createdAt: string;
   customDomain: string;
   dnsRecords: unknown | null;
+  domainConnectProvider: string | null;
   id: string;
   lifecycleTtlDays: number | null;
   name: string;

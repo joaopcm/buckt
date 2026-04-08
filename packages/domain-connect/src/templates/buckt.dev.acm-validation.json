@@ -1,0 +1,28 @@
+{
+  "providerId": "buckt.dev",
+  "providerName": "Buckt",
+  "serviceId": "acm-validation",
+  "serviceName": "Buckt SSL Certificate Validation",
+  "version": 1,
+  "logoUrl": "https://buckt.dev/logo.png",
+  "description": "Configures DNS records for AWS ACM certificate validation for Buckt CDN.",
+  "variableDescription": "Certificate validation CNAME record for SSL provisioning.",
+  "syncPubKeyDomain": "buckt.dev",
+  "syncRedirectDomain": "app.buckt.dev",
+  "shared": false,
+  "multiInstance": true,
+  "records": [
+    {
+      "type": "CNAME",
+      "host": "%certValidationName%",
+      "pointsTo": "%certValidationValue%",
+      "ttl": 3600
+    },
+    {
+      "type": "CAA",
+      "host": "@",
+      "data": "0 issue \"amazon.com\"",
+      "ttl": 3600
+    }
+  ]
+}

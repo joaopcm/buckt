@@ -13,6 +13,7 @@
     "@base-ui/react": "^1.3.0",
     "@buckt/auth": "workspace:*",
     "@buckt/db": "workspace:*",
+    "@buckt/domain-connect": "workspace:*",
     "@buckt/sdk": "workspace:*",
     "@buckt/shared": "workspace:*",
     "@hookform/resolvers": "^5.2.2",

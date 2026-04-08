@@ -22,6 +22,7 @@ export async function createBucket(c: Context) {
     corsOrigins,
     lifecycleTtlDays,
     optimizationMode,
+    domainConnectProvider,
   } = parsed.data;
   const orgId = c.get("orgId");
   const planLimits = c.get("planLimits");
@@ -76,6 +77,7 @@ export async function createBucket(c: Context) {
       corsOrigins,
       lifecycleTtlDays,
       optimizationMode,
+      domainConnectProvider,
       status: "pending",
     })
     .returning();

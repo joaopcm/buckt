@@ -17,6 +17,7 @@
     "@aws-sdk/client-cloudwatch": "^3.1023.0",
     "@aws-sdk/client-s3": "^3.1023.0",
     "@buckt/db": "workspace:*",
+    "@buckt/domain-connect": "workspace:*",
     "@buckt/shared": "workspace:*",
     "@hono/node-server": "^1",
     "@infisical/sdk": "^5.0.0",
