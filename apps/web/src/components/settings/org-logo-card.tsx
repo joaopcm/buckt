@@ -43,7 +43,7 @@ export function OrgLogoCard({
   isAdmin,
 }: {
   orgId: string;
-  org: { name: string; logo: string | null } | null | undefined;
+  org: { name: string; logo?: string | null } | null | undefined;
   isAdmin: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
