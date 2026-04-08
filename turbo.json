@@ -18,7 +18,9 @@
         "AWS_ACCESS_KEY_ID",
         "AWS_SECRET_ACCESS_KEY",
         "AWS_REGION",
-        "RESEND_API_KEY"
+        "RESEND_API_KEY",
+        "BUCKT_API_KEY",
+        "BUCKT_CDN_BUCKET_ID"
       ],
       "outputs": ["dist/**", ".next/**"]
     },
