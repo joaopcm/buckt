@@ -5,12 +5,41 @@ import {
   renameOrgSchema,
   updateRoleSchema,
 } from "@buckt/shared";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
-import { adminProcedure, orgProcedure, ownerProcedure, router } from "../init";
+import {
+  adminProcedure,
+  orgProcedure,
+  ownerProcedure,
+  protectedProcedure,
+  router,
+} from "../init";
 
 export const orgRouter = router({
+  plans: protectedProcedure
+    .input(z.object({ orgIds: z.array(z.string()).min(1) }))
+    .query(async ({ ctx, input }) => {
+      const subs = await ctx.db
+        .select({
+          orgId: subscription.referenceId,
+          plan: subscription.plan,
+        })
+        .from(subscription)
+        .where(
+          and(
+            inArray(subscription.referenceId, input.orgIds),
+            eq(subscription.status, "active")
+          )
+        );
+
+      const planMap: Record<string, PlanName> = {};
+      for (const sub of subs) {
+        planMap[sub.orgId] = sub.plan as PlanName;
+      }
+      return planMap;
+    }),
+
   plan: orgProcedure.query(async ({ ctx }) => {
     const [sub] = await ctx.db
       .select({ plan: subscription.plan })
