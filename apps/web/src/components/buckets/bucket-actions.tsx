@@ -87,7 +87,7 @@ export function BucketActions({ orgId, bucket }: BucketActionsProps) {
         onConfirm={() => deleteBucket.mutate({ orgId, id: bucket.id })}
         onOpenChange={setDeleteOpen}
         open={deleteOpen}
-        title="Delete bucket"
+        title="Delete"
       />
     </div>
   );

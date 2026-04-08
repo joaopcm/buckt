@@ -72,7 +72,7 @@ export function RenameBucketDialog({
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent>
-        <DialogTitle>Rename bucket</DialogTitle>
+        <DialogTitle>Rename</DialogTitle>
         <DialogDescription>
           Change the display name for this bucket.
         </DialogDescription>
