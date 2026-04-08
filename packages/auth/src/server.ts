@@ -4,7 +4,7 @@ import type { Database } from "@buckt/db";
 // biome-ignore lint/performance/noNamespaceImport: drizzle requires namespace import for schema
 import * as schema from "@buckt/db/src/schema";
 import { member } from "@buckt/db/src/schema/organization";
-import { InviteEmail } from "@buckt/emails";
+import { InviteEmail, ResetPasswordEmail } from "@buckt/emails";
 import { render } from "@react-email/components";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
@@ -31,6 +31,16 @@ export function createAuth(
     baseURL: env.baseUrl,
     emailAndPassword: {
       enabled: true,
+      resetPasswordTokenExpiresIn: 900,
+      async sendResetPassword({ user, url }) {
+        const html = await render(ResetPasswordEmail({ resetUrl: url }));
+        await env.resend.emails.send({
+          from: "Buckt <hi@transactional.buckt.dev>",
+          to: user.email,
+          subject: "Reset your Buckt password",
+          html,
+        });
+      },
     },
     plugins: [
       organization({
