@@ -144,9 +144,14 @@ export function applyAcmValidationRecords(
     return Promise.resolve({ applied: false });
   }
 
+  const ACM_SUFFIX = ".acm-validations.aws.";
+  const value = certRecord.value.endsWith(ACM_SUFFIX)
+    ? certRecord.value.slice(0, -ACM_SUFFIX.length)
+    : certRecord.value;
+
   return applyWithRefresh(bucket, config, "acm-validation", {
     certValidationName: certRecord.name,
-    certValidationValue: certRecord.value,
+    certValidationValue: value,
   });
 }
 
