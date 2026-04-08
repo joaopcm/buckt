@@ -1,6 +1,6 @@
 # @buckt/db
 
-Drizzle ORM schema and database client for PostgreSQL 17. Uses UUIDv7 for primary keys.
+Drizzle ORM schema and database client for PostgreSQL 18. Uses UUIDv7 for primary keys.
 
 ## Schema
 

@@ -35,7 +35,7 @@ graph LR
 | API | Hono |
 | Dashboard | Next.js 16, shadcn/ui, tRPC |
 | Auth | Better Auth (orgs, Stripe, API keys) |
-| Database | PostgreSQL 17, Drizzle ORM |
+| Database | PostgreSQL 18, Drizzle ORM |
 | Cache / Rate Limiting | Redis (ioredis) |
 | Job Queue | Trigger.dev v4 |
 | Infrastructure | AWS SDK (S3, CloudFront, ACM, CloudWatch) |
