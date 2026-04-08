@@ -5,7 +5,7 @@ import "./src/env.ts";
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  transpilePackages: ["@t3-oss/env-nextjs", "@t3-oss/env-core"],
+  transpilePackages: ["@buckt/sdk", "@t3-oss/env-nextjs", "@t3-oss/env-core"],
 };
 
 export default withSentryConfig(nextConfig, {
