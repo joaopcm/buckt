@@ -342,7 +342,12 @@ function CorsCard({
           </div>
         )}
         <Button
-          disabled={disabled || updateSettings.isPending}
+          disabled={
+            disabled ||
+            updateSettings.isPending ||
+            JSON.stringify([...origins].sort()) ===
+              JSON.stringify([...bucket.corsOrigins].sort())
+          }
           onClick={handleSave}
         >
           {updateSettings.isPending ? "Saving..." : "Save"}
@@ -507,7 +512,11 @@ function LifecycleCard({
           </div>
         </div>
         <Button
-          disabled={disabled || updateSettings.isPending}
+          disabled={
+            disabled ||
+            updateSettings.isPending ||
+            ttl === (bucket.lifecycleTtlDays?.toString() ?? "")
+          }
           onClick={handleSave}
         >
           {updateSettings.isPending ? "Saving..." : "Save"}

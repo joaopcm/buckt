@@ -10,7 +10,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import { OrgSwitcher } from "@/components/org-switcher";
 import {
   Sidebar,
   SidebarContent,
@@ -37,7 +37,6 @@ export function AppSidebar({ orgId }: { orgId: string }) {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const utils = trpc.useUtils();
-  const { data: plan } = trpc.org.plan.useQuery({ orgId });
 
   const prefetchMap: Record<string, () => void> = {
     "/buckets": () => utils.buckets.list.prefetch({ orgId }),
@@ -70,21 +69,8 @@ export function AppSidebar({ orgId }: { orgId: string }) {
 
   return (
     <Sidebar>
-      <div className="flex h-14 shrink-0 items-center border-b px-4">
-        <Link
-          className="flex items-center gap-2"
-          href={`/org/${orgId}/dashboard`}
-        >
-          <div className="flex h-7 w-7 items-center justify-center bg-primary font-bold text-primary-foreground text-xs">
-            B
-          </div>
-          <span className="font-bold text-base tracking-tight">buckt</span>
-        </Link>
-        {plan && (
-          <Badge className="ml-auto text-[10px] uppercase" variant="outline">
-            {plan}
-          </Badge>
-        )}
+      <div className="flex h-14 shrink-0 items-center border-b px-2">
+        <OrgSwitcher orgId={orgId} />
       </div>
 
       <SidebarContent>

@@ -112,6 +112,12 @@ export function ProvisioningSteps({
   return (
     <div className="space-y-4">
       <Step
+        description="We're creating your S3 bucket, SSL certificate, and CDN distribution. This usually takes a minute or two."
+        status={step === 0 ? "active" : "done"}
+        title="Setting up your bucket"
+      />
+
+      <Step
         description={
           validationApplied
             ? "DNS records were configured automatically via Domain Connect."
