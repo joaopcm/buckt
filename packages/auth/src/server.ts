@@ -53,11 +53,14 @@ export function createAuth(
       autoSignInAfterVerification: true,
       expiresIn: 86_400,
       async sendVerificationEmail({ user, url }) {
-        const callbackURL = encodeURIComponent(
+        const parsed = new URL(url);
+        parsed.searchParams.set(
+          "callbackURL",
           `${env.baseUrl}/verify-email/callback`
         );
-        const verificationUrl = `${url}&callbackURL=${callbackURL}`;
-        const html = await render(VerifyEmailEmail({ verificationUrl }));
+        const html = await render(
+          VerifyEmailEmail({ verificationUrl: parsed.toString() })
+        );
         await env.resend.emails.send({
           from: "Buckt <hi@transactional.buckt.dev>",
           to: user.email,
