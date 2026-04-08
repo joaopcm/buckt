@@ -190,10 +190,10 @@ export const orgRouter = router({
         }
       }
 
-      const path = `organizations/${ctx.orgId}/avatars/avatar.${ext}`;
+      const path = `organizations/${ctx.orgId}/avatars/${crypto.randomUUID()}.${ext}`;
       await buckt.files.upload(bucketId, path, buffer, input.contentType);
 
-      const logoUrl = `https://${cdnBucket.customDomain}/${path}?v=${Date.now()}`;
+      const logoUrl = `https://${cdnBucket.customDomain}/${path}`;
       const result = await auth.api.updateOrganization({
         headers: ctx.headers,
         body: {
