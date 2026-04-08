@@ -20,6 +20,9 @@ env:
   AWS_SECRET_ACCESS_KEY: "fake-secret-key"
   AWS_REGION: "us-east-1"
   RESEND_API_KEY: "re_fake"
+  BUCKT_API_KEY: "bkt_fake"
+  BUCKT_CDN_BUCKET_ID: "fake-bucket-id"
+  NEXT_PUBLIC_BUCKT_CDN_URL: "https://cdn-staging.buckt.dev"
 
 jobs:
   build:
