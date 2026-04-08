@@ -1,8 +1,11 @@
 "use client";
 
+import { createOrgSchema } from "@buckt/shared";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import type { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,6 +20,11 @@ import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
 import { setOrgCookie } from "@/lib/org-cookie";
 
+const SLUG_WHITESPACE = /\s+/g;
+const SLUG_NON_ALPHANUMERIC = /[^a-z0-9-]/g;
+
+type CreateOrgValues = z.infer<typeof createOrgSchema>;
+
 export function CreateOrgDialog({
   open,
   onOpenChange,
@@ -25,27 +33,25 @@ export function CreateOrgDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const router = useRouter();
-  const [name, setName] = useState("");
-  const [isPending, setIsPending] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<CreateOrgValues>({
+    resolver: zodResolver(createOrgSchema),
+  });
 
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!name.trim()) {
-      return;
-    }
-
-    setIsPending(true);
-    const slug = name
+  async function onSubmit(values: CreateOrgValues) {
+    const slug = values.name
       .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/[^a-z0-9-]/g, "");
+      .replace(SLUG_WHITESPACE, "-")
+      .replace(SLUG_NON_ALPHANUMERIC, "");
 
     const { data, error } = await authClient.organization.create({
-      name: name.trim(),
+      name: values.name,
       slug,
     });
-
-    setIsPending(false);
 
     if (error) {
       toast.error(error.message ?? "Failed to create organization");
@@ -53,7 +59,7 @@ export function CreateOrgDialog({
     }
 
     setOrgCookie(data.id);
-    setName("");
+    reset();
     onOpenChange(false);
     router.push(`/org/${data.id}/dashboard`);
     router.refresh();
@@ -63,7 +69,7 @@ export function CreateOrgDialog({
     <Dialog
       onOpenChange={(next) => {
         if (!next) {
-          setName("");
+          reset();
         }
         onOpenChange(next);
       }}
@@ -74,22 +80,24 @@ export function CreateOrgDialog({
         <DialogDescription>
           Add a new organization to manage your buckets and team.
         </DialogDescription>
-        <form className="space-y-4" onSubmit={onSubmit}>
+        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-2">
             <Label htmlFor="org-name">Name</Label>
             <Input
               id="org-name"
-              onChange={(e) => setName(e.target.value)}
               placeholder="Acme Corp"
-              value={name}
+              {...register("name")}
             />
+            {errors.name && (
+              <p className="text-destructive text-xs">{errors.name.message}</p>
+            )}
           </div>
           <DialogFooter>
             <DialogClose render={<Button type="button" variant="outline" />}>
               Cancel
             </DialogClose>
-            <Button disabled={isPending || !name.trim()} type="submit">
-              {isPending ? "Creating..." : "Create"}
+            <Button disabled={isSubmitting} type="submit">
+              {isSubmitting ? "Creating..." : "Create"}
             </Button>
           </DialogFooter>
         </form>
