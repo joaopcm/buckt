@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import type { z } from "zod";
 import { InviteMemberDialog } from "@/components/settings/invite-member-dialog";
 import { MemberRow } from "@/components/settings/member-row";
+import { OrgLogoCard } from "@/components/settings/org-logo-card";
 import { PendingInvites } from "@/components/settings/pending-invites";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,6 +43,8 @@ export function OrgSettings({ orgId }: { orgId: string }) {
 
   return (
     <div className="space-y-6">
+      <OrgLogoCard isAdmin={isAdmin} org={org} orgId={orgId} />
+
       <OrgNameCard
         isAdmin={isAdmin}
         loading={orgLoading}

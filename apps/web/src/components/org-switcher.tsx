@@ -17,21 +17,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { authClient } from "@/lib/auth-client";
+import { getInitials } from "@/lib/get-initials";
 import { setOrgCookie } from "@/lib/org-cookie";
 import { trpc } from "@/lib/trpc/client";
-
-const WHITESPACE = /\s+/;
-const NON_ALPHANUMERIC = /[^a-zA-Z0-9]/;
-
-function getInitials(name: string) {
-  return name
-    .split(WHITESPACE)
-    .map((w) => w.replace(NON_ALPHANUMERIC, "").charAt(0))
-    .filter(Boolean)
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
 
 export function OrgSwitcher({ orgId }: { orgId: string }) {
   const router = useRouter();
