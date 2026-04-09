@@ -1,0 +1,31 @@
+packages/domain-connect/src/state.ts
+  ceb87f30bbd7239a 6
+packages/domain-connect/src/sync.ts
+  ceb87f30bbd7239a 10,25-28
+apps/web/src/components/buckets/provisioning-steps.tsx
+  ceb87f30bbd7239a 228
+apps/web/src/app/api/domain-connect/callback/route.ts
+  ceb87f30bbd7239a 26-27
+apps/web/src/lib/trpc/routers/domain-connect.ts
+  ceb87f30bbd7239a 30-31,34,126,130,139
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.6",
+  "base_commit_sha": "98f554e68f5fc82a237a2966843990fc2565484c",
+  "prompts": {
+    "ceb87f30bbd7239a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "073dc84f-eebb-4518-b726-e851383287a0",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 15,
+      "total_deletions": 7,
+      "accepted_lines": 15,
+      "overriden_lines": 0
+    }
+  }
+}
