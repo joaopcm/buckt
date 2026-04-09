@@ -13,6 +13,7 @@ import { render } from "@react-email/components";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { organization } from "better-auth/plugins";
+import { haveIBeenPwned } from "better-auth/plugins/haveibeenpwned";
 import { and, eq } from "drizzle-orm";
 import type { Resend } from "resend";
 import Stripe from "stripe";
@@ -133,6 +134,7 @@ export function createAuth(
         references: "organization",
         defaultPrefix: "bkt",
       }),
+      haveIBeenPwned(),
     ],
   });
 }
