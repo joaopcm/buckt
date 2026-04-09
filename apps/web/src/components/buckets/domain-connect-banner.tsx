@@ -10,7 +10,7 @@ import {
 
 export function DomainConnectBanner() {
   return (
-    <Card className="border-blue-500/20 bg-blue-500/5">
+    <Card className="bg-blue-500/10 ring-blue-500/20">
       <CardHeader>
         <div className="flex items-center gap-2">
           <Zap className="size-4 text-blue-600" />
