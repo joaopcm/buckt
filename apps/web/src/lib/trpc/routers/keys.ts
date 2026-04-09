@@ -3,7 +3,7 @@ import { createKeySchema } from "@buckt/shared";
 import { TRPCError } from "@trpc/server";
 import { and, count, desc, eq, ilike, lt } from "drizzle-orm";
 import { z } from "zod";
-import { generateApiKey } from "@/lib/hash";
+import { generateApiKey } from "@/utils/hash";
 import { orgProcedure, router } from "../init";
 
 export const keysRouter = router({

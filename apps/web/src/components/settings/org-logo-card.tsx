@@ -12,9 +12,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { formatBytes } from "@/lib/format";
-import { getInitials } from "@/lib/get-initials";
 import { trpc } from "@/lib/trpc/client";
+import { formatBytes } from "@/utils/format";
+import { getInitials } from "@/utils/get-initials";
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024;
 const ACCEPTED_TYPES = new Set([

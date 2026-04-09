@@ -52,9 +52,9 @@ import {
 } from "@/components/ui/table";
 import { useCursorPagination } from "@/hooks/use-cursor-pagination";
 import { useDebounce } from "@/hooks/use-debounce";
-import { formatBytes } from "@/lib/format";
 import { trpc } from "@/lib/trpc/client";
-import { cn } from "@/lib/utils";
+import { formatBytes } from "@/utils/format";
+import { cn } from "@/utils/utils";
 import { FileUpload } from "./file-upload";
 
 const TRAILING_SLASH = /\/$/;

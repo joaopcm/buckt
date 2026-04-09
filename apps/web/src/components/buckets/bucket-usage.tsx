@@ -1,6 +1,6 @@
 import { Activity, Database } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatBytes } from "@/lib/format";
+import { formatBytes } from "@/utils/format";
 
 export function BucketUsage({
   storageUsedBytes,

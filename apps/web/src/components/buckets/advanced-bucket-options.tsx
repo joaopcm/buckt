@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { REGIONS } from "@/lib/regions";
+import { REGIONS } from "@/utils/regions";
 
 interface CreateBucketValues {
   cachePreset: "no-cache" | "short" | "standard" | "aggressive" | "immutable";

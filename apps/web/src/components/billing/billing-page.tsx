@@ -14,8 +14,8 @@ import {
 } from "@/components/ui/tooltip";
 import { useOrgRole } from "@/hooks/use-org-role";
 import { authClient } from "@/lib/auth-client";
-import { formatBytes, formatDate } from "@/lib/format";
 import { trpc } from "@/lib/trpc/client";
+import { formatBytes, formatDate } from "@/utils/format";
 
 function formatLimit(value: number): string {
   if (!Number.isFinite(value)) {

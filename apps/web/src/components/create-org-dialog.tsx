@@ -18,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
-import { setOrgCookie } from "@/lib/org-cookie";
+import { setOrgCookie } from "@/utils/org-cookie";
 
 const SLUG_WHITESPACE = /\s+/g;
 const SLUG_NON_ALPHANUMERIC = /[^a-z0-9-]/g;

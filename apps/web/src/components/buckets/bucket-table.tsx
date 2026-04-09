@@ -30,9 +30,9 @@ import {
 } from "@/components/ui/table";
 import { useCursorPagination } from "@/hooks/use-cursor-pagination";
 import { useDebounce } from "@/hooks/use-debounce";
-import { formatBytes } from "@/lib/format";
-import { getRegion } from "@/lib/regions";
 import { trpc } from "@/lib/trpc/client";
+import { formatBytes } from "@/utils/format";
+import { getRegion } from "@/utils/regions";
 
 export function BucketTable({ orgId }: { orgId: string }) {
   const [search, setSearch] = useQueryState("q", parseAsString.withDefault(""));
