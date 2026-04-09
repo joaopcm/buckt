@@ -8,7 +8,6 @@ import { db } from "@/lib/db";
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const stateParam = searchParams.get("state");
-  const serviceId = searchParams.get("serviceId");
   const error = searchParams.get("error");
 
   if (!stateParam) {
@@ -24,8 +23,8 @@ export async function GET(request: NextRequest) {
     return redirectToBucket(stateParam, "error");
   }
 
-  if (serviceId) {
-    await markRecordsAsApplied(state.bucketId, serviceId);
+  if (state.serviceId) {
+    await markRecordsAsApplied(state.bucketId, state.serviceId);
   }
 
   return redirectToBucket(stateParam, "success");

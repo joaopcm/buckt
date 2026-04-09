@@ -3,6 +3,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 interface SignedState {
   bucketId: string;
   orgId: string;
+  serviceId?: string;
   timestamp: number;
 }
 

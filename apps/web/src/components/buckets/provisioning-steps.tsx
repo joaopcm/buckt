@@ -225,7 +225,7 @@ function ApplyButton({
       disabled={buildSyncUrl.isPending}
       onClick={() => buildSyncUrl.mutate({ orgId, bucketId, serviceId })}
       size="sm"
-      variant="outline"
+      variant="secondary"
     >
       {buildSyncUrl.isPending ? (
         <Loader2 className="mr-1.5 size-3 animate-spin" />
