@@ -7,6 +7,7 @@ interface BuildSyncUrlParams {
   redirectUri: string;
   serviceId: string;
   signingPrivateKey: string;
+  state?: string;
   urlSyncUX: string;
   variables: Record<string, string>;
 }
@@ -20,6 +21,10 @@ export function buildSignedSyncUrl(params: BuildSyncUrlParams): string {
     url.searchParams.set("host", params.host);
   }
   url.searchParams.set("redirect_uri", params.redirectUri);
+
+  if (params.state) {
+    url.searchParams.set("state", params.state);
+  }
 
   for (const [key, value] of Object.entries(params.variables)) {
     url.searchParams.set(key, value);

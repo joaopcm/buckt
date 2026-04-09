@@ -27,9 +27,11 @@ export const domainConnectRouter = router({
         return { supported: false as const };
       }
 
+      const name = result.providerName ?? "your DNS provider";
+
       return {
         supported: true as const,
-        providerName: result.providerName ?? "your DNS provider",
+        providerName: name.charAt(0).toUpperCase() + name.slice(1),
         providerHost: result.providerHost ?? "",
         mode: result.mode ?? "sync",
       };
@@ -121,11 +123,11 @@ export const domainConnectRouter = router({
       }
 
       const state = createSignedState(
-        { bucketId: bucket.id, orgId: ctx.orgId },
+        { bucketId: bucket.id, orgId: ctx.orgId, serviceId: input.serviceId },
         env.BETTER_AUTH_SECRET
       );
 
-      const redirectUri = `${env.BETTER_AUTH_URL}/api/domain-connect/callback?state=${state}&serviceId=${input.serviceId}`;
+      const redirectUri = `${env.BETTER_AUTH_URL}/api/domain-connect/callback`;
 
       const syncUrl = buildSignedSyncUrl({
         urlSyncUX: discovery.urlSyncUX,
@@ -134,6 +136,7 @@ export const domainConnectRouter = router({
         domain: rootDomain,
         host,
         redirectUri,
+        state,
         variables,
         signingPrivateKey: env.DOMAIN_CONNECT_SIGNING_PRIVATE_KEY,
       });
