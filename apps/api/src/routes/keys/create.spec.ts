@@ -56,4 +56,25 @@ describe("POST /api/keys", () => {
     const res = await req({ name: "Bad Perms", permissions: ["admin:all"] });
     expect(res.status).toBe(400);
   });
+
+  it("creates a key with bucketIds", async () => {
+    const res = await req({
+      name: "Scoped Key",
+      permissions: ["buckets:read"],
+      bucketIds: ["bucket-1"],
+    });
+    expect(res.status).toBe(201);
+    const json = await res.json();
+    expect(json.data.bucketIds).toEqual(["bucket-1"]);
+  });
+
+  it("creates a key without bucketIds (unscoped)", async () => {
+    const res = await req({
+      name: "Unscoped Key",
+      permissions: ["buckets:read"],
+    });
+    expect(res.status).toBe(201);
+    const json = await res.json();
+    expect(json.data.bucketIds).toBeNull();
+  });
 });

@@ -170,4 +170,13 @@ describe("PATCH /v1/buckets/:id", () => {
     const res = await req(bucket.id, { lifecycleTtlDays: 9999 });
     expect(res.status).toBe(400);
   });
+
+  it("returns 404 for bucket outside scope", async () => {
+    const bucket = await createActiveBucket(apiKey);
+    const { rawKey: scopedKey } = await createTestApiKey({
+      bucketIds: ["other-id"],
+    });
+    const res = await req(bucket.id, { name: "New Name" }, scopedKey);
+    expect(res.status).toBe(404);
+  });
 });

@@ -50,4 +50,16 @@ describe("DELETE /api/buckets/:id", () => {
     const res = await deleteBucket("non-existent-id");
     expect(res.status).toBe(404);
   });
+
+  it("returns 404 for bucket outside scope", async () => {
+    const bucket = await createBucket("Scoped", "scoped.test.com");
+    const { rawKey: scopedKey } = await createTestApiKey({
+      bucketIds: ["other-id"],
+    });
+    const res = await app.request(`/v1/buckets/${bucket.id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${scopedKey}` },
+    });
+    expect(res.status).toBe(404);
+  });
 });

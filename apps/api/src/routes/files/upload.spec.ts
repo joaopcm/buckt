@@ -116,4 +116,19 @@ describe("PUT /api/buckets/:id/files/*", () => {
     const json = await res.json();
     expect(json.error.message).toContain("Storage limit exceeded");
   });
+
+  it("returns 404 for bucket outside scope", async () => {
+    const { rawKey: scopedKey } = await createTestApiKey({
+      bucketIds: ["other-id"],
+    });
+    const res = await app.request(`/v1/buckets/${bucketId}/files/test.txt`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${scopedKey}`,
+        "Content-Type": "text/plain",
+      },
+      body: "data",
+    });
+    expect(res.status).toBe(404);
+  });
 });
