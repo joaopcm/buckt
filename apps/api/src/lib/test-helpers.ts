@@ -11,6 +11,7 @@ export const TEST_ORG_ID = "test-org-001";
 export async function createTestApiKey(opts?: {
   orgId?: string;
   permissions?: Permission[];
+  bucketIds?: string[] | null;
 }) {
   const orgId = opts?.orgId ?? TEST_ORG_ID;
   const permissions = opts?.permissions ?? [...PERMISSIONS];
@@ -18,7 +19,14 @@ export async function createTestApiKey(opts?: {
 
   const [apiKey] = await db
     .insert(apiKeys)
-    .values({ orgId, name: "test-key", hashedKey, prefix, permissions })
+    .values({
+      orgId,
+      name: "test-key",
+      hashedKey,
+      prefix,
+      permissions,
+      bucketIds: opts?.bucketIds ?? null,
+    })
     .returning();
 
   return { apiKey, rawKey: key };

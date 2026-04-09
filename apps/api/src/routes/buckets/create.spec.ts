@@ -186,4 +186,15 @@ describe("POST /api/buckets", () => {
     const json = await res.json();
     expect(json.data.s3BucketName).toBe("buckt-qnsbstu6-cdn-example-com");
   });
+
+  it("allows scoped keys to create buckets", async () => {
+    const { rawKey: scopedKey } = await createTestApiKey({
+      bucketIds: ["some-id"],
+    });
+    const res = await req(
+      { name: "Scoped Create", customDomain: "scoped.test.com" },
+      scopedKey
+    );
+    expect(res.status).toBe(201);
+  });
 });

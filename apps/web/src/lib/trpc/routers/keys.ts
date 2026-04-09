@@ -1,7 +1,7 @@
-import { apiKeys } from "@buckt/db";
+import { apiKeys, buckets } from "@buckt/db";
 import { createKeySchema } from "@buckt/shared";
 import { TRPCError } from "@trpc/server";
-import { and, count, desc, eq, ilike, lt } from "drizzle-orm";
+import { and, count, desc, eq, ilike, inArray, lt } from "drizzle-orm";
 import { z } from "zod";
 import { generateApiKey } from "@/utils/hash";
 import { orgProcedure, router } from "../init";
@@ -34,6 +34,7 @@ export const keysRouter = router({
             name: apiKeys.name,
             prefix: apiKeys.prefix,
             permissions: apiKeys.permissions,
+            bucketIds: apiKeys.bucketIds,
             lastUsedAt: apiKeys.lastUsedAt,
             expiresAt: apiKeys.expiresAt,
             createdAt: apiKeys.createdAt,
@@ -63,7 +64,25 @@ export const keysRouter = router({
   create: orgProcedure
     .input(createKeySchema)
     .mutation(async ({ ctx, input }) => {
-      const { name, permissions, expiresAt } = input;
+      const { name, permissions, expiresAt, bucketIds } = input;
+
+      if (bucketIds && bucketIds.length > 0) {
+        const validBuckets = await ctx.db
+          .select({ id: buckets.id })
+          .from(buckets)
+          .where(
+            and(eq(buckets.orgId, ctx.orgId), inArray(buckets.id, bucketIds))
+          );
+        const validIds = new Set(validBuckets.map((b) => b.id));
+        const invalidIds = bucketIds.filter((id) => !validIds.has(id));
+        if (invalidIds.length > 0) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: `Invalid bucket IDs: ${invalidIds.join(", ")}`,
+          });
+        }
+      }
+
       const { key, prefix, hashedKey } = generateApiKey();
 
       const [apiKey] = await ctx.db
@@ -75,6 +94,7 @@ export const keysRouter = router({
           prefix,
           permissions,
           expiresAt: expiresAt ?? null,
+          bucketIds: bucketIds ?? null,
         })
         .returning();
 
@@ -87,6 +107,7 @@ export const keysRouter = router({
         id: z.string(),
         name: z.string().min(1).max(100),
         permissions: z.array(z.string()).min(1),
+        bucketIds: z.array(z.string()).nullable().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -103,9 +124,35 @@ export const keysRouter = router({
         });
       }
 
+      if (input.bucketIds && input.bucketIds.length > 0) {
+        const validBuckets = await ctx.db
+          .select({ id: buckets.id })
+          .from(buckets)
+          .where(
+            and(
+              eq(buckets.orgId, ctx.orgId),
+              inArray(buckets.id, input.bucketIds)
+            )
+          );
+        const validIds = new Set(validBuckets.map((b) => b.id));
+        const invalidIds = input.bucketIds.filter((id) => !validIds.has(id));
+        if (invalidIds.length > 0) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: `Invalid bucket IDs: ${invalidIds.join(", ")}`,
+          });
+        }
+      }
+
       const [updated] = await ctx.db
         .update(apiKeys)
-        .set({ name: input.name, permissions: input.permissions })
+        .set({
+          name: input.name,
+          permissions: input.permissions,
+          ...(input.bucketIds !== undefined && {
+            bucketIds: input.bucketIds,
+          }),
+        })
         .where(eq(apiKeys.id, input.id))
         .returning();
 

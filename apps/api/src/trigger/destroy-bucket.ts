@@ -1,6 +1,6 @@
 import { buckets, createDb } from "@buckt/db";
 import { logger, task, wait } from "@trigger.dev/sdk/v3";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { deleteCertificate } from "../lib/aws/acm";
 import { deleteDistribution, disableDistribution } from "../lib/aws/cloudfront";
 import { deleteBucketResources } from "../lib/aws/s3";
@@ -59,6 +59,19 @@ export const destroyBucket = task({
     }
 
     await db.delete(buckets).where(eq(buckets.id, bucketId));
+
+    await db.execute(sql`
+      UPDATE api_keys
+      SET bucket_ids = COALESCE(
+        (SELECT jsonb_agg(elem)
+         FROM jsonb_array_elements(bucket_ids) AS elem
+         WHERE elem::text != ${JSON.stringify(bucketId)}),
+        '[]'::jsonb
+      )
+      WHERE bucket_ids IS NOT NULL
+        AND bucket_ids @> ${JSON.stringify([bucketId])}::jsonb
+    `);
+
     logger.info("Bucket destroyed", { bucketId });
   },
 });

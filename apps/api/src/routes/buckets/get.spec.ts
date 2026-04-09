@@ -51,4 +51,28 @@ describe("GET /api/buckets/:id", () => {
     });
     expect(res.status).toBe(404);
   });
+
+  it("returns 404 for bucket outside scope", async () => {
+    const bucket = await createBucket("Scoped", "scoped.test.com");
+
+    const { rawKey: scopedKey } = await createTestApiKey({
+      bucketIds: ["other-id"],
+    });
+    const res = await app.request(`/v1/buckets/${bucket.id}`, {
+      headers: { Authorization: `Bearer ${scopedKey}` },
+    });
+    expect(res.status).toBe(404);
+  });
+
+  it("returns bucket within scope", async () => {
+    const bucket = await createBucket("InScope", "inscope.test.com");
+
+    const { rawKey: scopedKey } = await createTestApiKey({
+      bucketIds: [bucket.id],
+    });
+    const res = await app.request(`/v1/buckets/${bucket.id}`, {
+      headers: { Authorization: `Bearer ${scopedKey}` },
+    });
+    expect(res.status).toBe(200);
+  });
 });

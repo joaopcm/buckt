@@ -9,6 +9,7 @@ import {
 import { tasks } from "@trigger.dev/sdk/v3";
 import { and, eq, sql } from "drizzle-orm";
 import type { Context } from "hono";
+import { isBucketInScope } from "../../lib/bucket-scope";
 import { db } from "../../lib/db";
 import { error, success } from "../../lib/response";
 import { s3 } from "../../lib/s3";
@@ -18,6 +19,10 @@ const FILE_PATH_RE = /^.*?\/files\//;
 export async function uploadFile(c: Context) {
   const orgId = c.get("orgId");
   const bucketId = c.req.param("bucketId") as string;
+
+  if (!isBucketInScope(c, bucketId)) {
+    return error(c, 404, "Bucket not found");
+  }
   const filePath = c.req.path.replace(FILE_PATH_RE, "");
 
   if (!filePath) {

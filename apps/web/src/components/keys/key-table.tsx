@@ -6,6 +6,7 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { DateDisplay } from "@/components/date-display";
+import { BucketSelect } from "@/components/keys/bucket-select";
 import { PermissionSelect } from "@/components/keys/permission-select";
 import { Pagination } from "@/components/pagination";
 import { Badge } from "@/components/ui/badge";
@@ -146,6 +147,7 @@ export function KeyTable({ orgId }: { orgId: string }) {
                   </TableCell>
                   <TableCell>
                     <KeyActions
+                      keyBucketIds={apiKey.bucketIds as string[] | null}
                       keyId={apiKey.id}
                       keyName={apiKey.name}
                       keyPermissions={apiKey.permissions as string[]}
@@ -223,16 +225,21 @@ function KeyActions({
   keyId,
   keyName,
   keyPermissions,
+  keyBucketIds,
 }: {
   orgId: string;
   keyId: string;
   keyName: string;
   keyPermissions: string[];
+  keyBucketIds: string[] | null;
 }) {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editName, setEditName] = useState(keyName);
   const [editPermissions, setEditPermissions] = useState(keyPermissions);
+  const [editBucketIds, setEditBucketIds] = useState<string[] | null>(
+    keyBucketIds
+  );
   const utils = trpc.useUtils();
 
   const deleteKey = trpc.keys.delete.useMutation({
@@ -268,6 +275,7 @@ function KeyActions({
             onClick={() => {
               setEditName(keyName);
               setEditPermissions(keyPermissions);
+              setEditBucketIds(keyBucketIds);
               setEditOpen(true);
             }}
           >
@@ -289,6 +297,7 @@ function KeyActions({
           if (!next) {
             setEditName(keyName);
             setEditPermissions(keyPermissions);
+            setEditBucketIds(keyBucketIds);
           }
         }}
         open={editOpen}
@@ -305,6 +314,7 @@ function KeyActions({
                   id: keyId,
                   name: editName.trim(),
                   permissions: editPermissions,
+                  bucketIds: editBucketIds,
                 });
               }
             }}
@@ -324,6 +334,14 @@ function KeyActions({
                 <PermissionSelect
                   onChange={setEditPermissions}
                   value={editPermissions}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Bucket scope</Label>
+                <BucketSelect
+                  onChange={setEditBucketIds}
+                  orgId={orgId}
+                  value={editBucketIds}
                 />
               </div>
             </div>

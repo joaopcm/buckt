@@ -79,4 +79,26 @@ describe("GET /api/buckets", () => {
     const json = await res.json();
     expect(json.data).toHaveLength(0);
   });
+
+  it("returns only scoped buckets for scoped keys", async () => {
+    const resA = await createBucket("Bucket A", "a.test.com");
+    const jsonA = await resA.json();
+    await createBucket("Bucket B", "b.test.com");
+
+    const { rawKey: scopedKey } = await createTestApiKey({
+      bucketIds: [jsonA.data.id],
+    });
+    const res = await list("", scopedKey);
+    const json = await res.json();
+    expect(json.data).toHaveLength(1);
+  });
+
+  it("returns empty for scoped key with empty bucketIds", async () => {
+    await createBucket("Bucket A", "a.test.com");
+
+    const { rawKey: scopedKey } = await createTestApiKey({ bucketIds: [] });
+    const res = await list("", scopedKey);
+    const json = await res.json();
+    expect(json.data).toHaveLength(0);
+  });
 });

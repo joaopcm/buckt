@@ -80,4 +80,15 @@ describe("GET /api/buckets/:id/files/*", () => {
     });
     expect(res.status).toBe(404);
   });
+
+  it("returns 404 for bucket outside scope", async () => {
+    const { rawKey: scopedKey } = await createTestApiKey({
+      bucketIds: ["other-id"],
+    });
+    const res = await app.request(`/v1/buckets/${bucketId}/files/test.txt`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${scopedKey}` },
+    });
+    expect(res.status).toBe(404);
+  });
 });

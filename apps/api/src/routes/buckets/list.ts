@@ -1,7 +1,8 @@
 import { buckets } from "@buckt/db";
 import { listBucketsSchema } from "@buckt/shared";
-import { and, asc, eq, gt } from "drizzle-orm";
+import { and, asc, eq, gt, inArray } from "drizzle-orm";
 import type { Context } from "hono";
+import { getScopedBucketIds } from "../../lib/bucket-scope";
 import { db } from "../../lib/db";
 import { error, success } from "../../lib/response";
 
@@ -14,7 +15,15 @@ export async function listBuckets(c: Context) {
 
   const { status, cursor, limit } = query.data;
 
+  const scopedIds = getScopedBucketIds(c);
+  if (scopedIds !== null && scopedIds.length === 0) {
+    return success(c, [], { nextCursor: null, limit });
+  }
+
   const conditions = [eq(buckets.orgId, orgId)];
+  if (scopedIds !== null) {
+    conditions.push(inArray(buckets.id, scopedIds));
+  }
   if (status) {
     conditions.push(eq(buckets.status, status));
   }

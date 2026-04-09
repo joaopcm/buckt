@@ -17,4 +17,5 @@ export const createKeySchema = z.object({
   name: z.string().min(1).max(100),
   permissions: z.array(z.enum(PERMISSIONS)).min(1),
   expiresAt: z.coerce.date().optional(),
+  bucketIds: z.array(z.string()).optional(),
 });

@@ -51,6 +51,7 @@ export interface Bucket {
 }
 
 export interface ApiKey {
+  bucketIds: string[] | null;
   createdAt: string;
   expiresAt: string | null;
   id: string;
