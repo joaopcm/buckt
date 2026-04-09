@@ -1,0 +1,61 @@
+apps/api/src/trigger/destroy-bucket.ts
+  77a577207e61c832 3,62-74
+apps/api/src/routes/files/get.ts
+  77a577207e61c832 5,15-18
+apps/web/src/components/keys/bucket-select.tsx
+  77a577207e61c832 1-38,40,42-117
+packages/shared/src/schemas/keys.ts
+  77a577207e61c832 20
+apps/api/src/routes/buckets/get.ts
+  77a577207e61c832 4,12-14
+packages/sdk/src/types.ts
+  77a577207e61c832 54
+apps/api/src/routes/buckets/list.ts
+  77a577207e61c832 3,5,18-22,24-26
+apps/api/src/lib/bucket-scope.ts
+  77a577207e61c832 1-4,6,8-13
+packages/db/src/schema/api-keys.ts
+  77a577207e61c832 22
+apps/api/src/middleware/auth.ts
+  77a577207e61c832 14,87
+apps/api/src/routes/files/delete.ts
+  77a577207e61c832 5,15-18
+apps/api/src/routes/buckets/delete.ts
+  77a577207e61c832 4,13-15
+apps/web/src/components/keys/create-key-form.tsx
+  77a577207e61c832 12,32,49,63-67,112-126
+apps/api/src/routes/keys/create.ts
+  77a577207e61c832 1,3,16,18-30,42
+apps/api/src/routes/buckets/update.ts
+  77a577207e61c832 11,19-21
+apps/web/src/lib/trpc/routers/keys.ts
+  77a577207e61c832 1,4,37,67-85,97,110,127-146,149-155
+apps/web/src/components/keys/key-table.tsx
+  77a577207e61c832 9,150,228,234,240-242,278,300,317,339-346
+apps/api/src/routes/files/list.ts
+  77a577207e61c832 6,15-17
+apps/api/src/routes/files/upload.ts
+  77a577207e61c832 12,22-25
+packages/sdk/src/resources/keys.ts
+  77a577207e61c832 20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.6",
+  "base_commit_sha": "347cf18ab4cb1905713f9148d1fef3fd74f92cb9",
+  "prompts": {
+    "77a577207e61c832": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "abd7d652-5746-4057-8dd4-4e2c22c973c3",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 303,
+      "total_deletions": 16,
+      "accepted_lines": 305,
+      "overriden_lines": 3
+    }
+  }
+}
