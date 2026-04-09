@@ -1,0 +1,43 @@
+apps/api/src/routes/files/list.spec.ts
+  77a577207e61c832 93-103
+apps/api/src/routes/buckets/update.spec.ts
+  77a577207e61c832 173-181
+apps/api/src/routes/files/delete.spec.ts
+  77a577207e61c832 76-86
+apps/api/src/routes/buckets/get.spec.ts
+  77a577207e61c832 54-77
+apps/api/src/routes/files/get.spec.ts
+  77a577207e61c832 83-93
+apps/api/src/lib/test-helpers.ts
+  77a577207e61c832 14,22-29
+apps/api/src/routes/buckets/delete.spec.ts
+  77a577207e61c832 53-64
+apps/api/src/routes/buckets/list.spec.ts
+  77a577207e61c832 82-103
+apps/api/src/routes/buckets/create.spec.ts
+  77a577207e61c832 189-199
+apps/api/src/routes/keys/create.spec.ts
+  77a577207e61c832 59-79
+apps/api/src/routes/files/upload.spec.ts
+  77a577207e61c832 119-133
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.6",
+  "base_commit_sha": "a7cea850045c075120be23d132dcbd71fcbb6e3a",
+  "prompts": {
+    "77a577207e61c832": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "abd7d652-5746-4057-8dd4-4e2c22c973c3",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 156,
+      "total_deletions": 1,
+      "accepted_lines": 156,
+      "overriden_lines": 0
+    }
+  }
+}
