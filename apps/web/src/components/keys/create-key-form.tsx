@@ -29,7 +29,7 @@ const createKeyFormSchema = z.object({
   permissions: z
     .array(z.enum(PERMISSIONS))
     .min(1, "Select at least one permission"),
-  bucketIds: z.array(z.string()).nullable().default(null),
+  bucketIds: z.array(z.string()).nullable(),
 });
 
 type CreateKeyValues = z.infer<typeof createKeyFormSchema>;
