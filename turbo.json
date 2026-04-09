@@ -19,12 +19,15 @@
         "AWS_SECRET_ACCESS_KEY",
         "AWS_REGION",
         "RESEND_API_KEY",
+        "BUCKT_API_KEY",
+        "BUCKT_CDN_BUCKET_ID",
         "DOMAIN_CONNECT_SIGNING_PRIVATE_KEY",
         "DOMAIN_CONNECT_PROVIDER_ID"
       ],
       "outputs": ["dist/**", ".next/**"]
     },
     "dev": {
+      "dependsOn": ["^build"],
       "cache": false,
       "persistent": true
     },

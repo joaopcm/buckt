@@ -16,6 +16,8 @@ export const env = createEnv({
     AWS_ACCESS_KEY_ID: z.string().min(1),
     AWS_SECRET_ACCESS_KEY: z.string().min(1),
     AWS_REGION: z.string().default("us-east-1"),
+    BUCKT_API_KEY: z.string().min(1),
+    BUCKT_CDN_BUCKET_ID: z.string().min(1),
     RESEND_API_KEY: z.string().min(1),
     SENTRY_DSN: z.string().url().optional(),
     AXIOM_TOKEN: z.string().optional(),

@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import type { z } from "zod";
 import { InviteMemberDialog } from "@/components/settings/invite-member-dialog";
 import { MemberRow } from "@/components/settings/member-row";
+import { OrgLogoCard } from "@/components/settings/org-logo-card";
 import { PendingInvites } from "@/components/settings/pending-invites";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOrgRole } from "@/hooks/use-org-role";
+import { authClient } from "@/lib/auth-client";
 import { trpc } from "@/lib/trpc/client";
 
 type RenameValues = z.infer<typeof renameOrgSchema>;
@@ -42,6 +44,8 @@ export function OrgSettings({ orgId }: { orgId: string }) {
 
   return (
     <div className="space-y-6">
+      <OrgLogoCard isAdmin={isAdmin} org={org} orgId={orgId} />
+
       <OrgNameCard
         isAdmin={isAdmin}
         loading={orgLoading}
@@ -114,6 +118,7 @@ function OrgNameCard({
   isAdmin: boolean;
 }) {
   const utils = trpc.useUtils();
+  const { refetch: refetchOrgs } = authClient.useListOrganizations();
 
   const {
     register,
@@ -129,6 +134,7 @@ function OrgNameCard({
     onSuccess: (updated) => {
       toast.success("Organization renamed");
       utils.org.get.invalidate({ orgId });
+      refetchOrgs();
       if (updated) {
         reset({ name: updated.name });
       }

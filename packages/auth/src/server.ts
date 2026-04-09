@@ -4,7 +4,11 @@ import type { Database } from "@buckt/db";
 // biome-ignore lint/performance/noNamespaceImport: drizzle requires namespace import for schema
 import * as schema from "@buckt/db/src/schema";
 import { member } from "@buckt/db/src/schema/organization";
-import { InviteEmail, ResetPasswordEmail } from "@buckt/emails";
+import {
+  InviteEmail,
+  ResetPasswordEmail,
+  VerifyEmailEmail,
+} from "@buckt/emails";
 import { render } from "@react-email/components";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
@@ -31,6 +35,8 @@ export function createAuth(
     baseURL: env.baseUrl,
     emailAndPassword: {
       enabled: true,
+      requireEmailVerification: true,
+      autoSignIn: false,
       resetPasswordTokenExpiresIn: 900,
       async sendResetPassword({ user, url }) {
         const html = await render(ResetPasswordEmail({ resetUrl: url }));
@@ -38,6 +44,27 @@ export function createAuth(
           from: "Buckt <hi@transactional.buckt.dev>",
           to: user.email,
           subject: "Reset your Buckt password",
+          html,
+        });
+      },
+    },
+    emailVerification: {
+      sendOnSignUp: true,
+      autoSignInAfterVerification: true,
+      expiresIn: 86_400,
+      async sendVerificationEmail({ user, url }) {
+        const parsed = new URL(url);
+        parsed.searchParams.set(
+          "callbackURL",
+          `${env.baseUrl}/verify-email/callback`
+        );
+        const html = await render(
+          VerifyEmailEmail({ verificationUrl: parsed.toString() })
+        );
+        await env.resend.emails.send({
+          from: "Buckt <hi@transactional.buckt.dev>",
+          to: user.email,
+          subject: "Verify your Buckt email",
           html,
         });
       },

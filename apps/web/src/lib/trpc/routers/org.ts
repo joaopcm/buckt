@@ -3,11 +3,16 @@ import type { PlanName } from "@buckt/shared";
 import {
   inviteMemberSchema,
   renameOrgSchema,
+  updateOrgLogoSchema,
   updateRoleSchema,
 } from "@buckt/shared";
+import { TRPCError } from "@trpc/server";
 import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
+import { env } from "@/env";
 import { auth } from "@/lib/auth";
+import { buckt } from "@/lib/buckt";
+import { formatBytes } from "@/lib/format";
 import {
   adminProcedure,
   orgProcedure,
@@ -142,4 +147,91 @@ export const orgRouter = router({
       });
       return result;
     }),
+
+  updateLogo: adminProcedure
+    .input(updateOrgLogoSchema)
+    .mutation(async ({ ctx, input }) => {
+      const buffer = Buffer.from(input.image, "base64");
+      const MAX_SIZE = 2 * 1024 * 1024;
+      if (buffer.length > MAX_SIZE) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Image must be under ${formatBytes(MAX_SIZE)}`,
+        });
+      }
+
+      const extMap: Record<string, string> = {
+        "image/jpeg": "jpg",
+        "image/png": "png",
+        "image/webp": "webp",
+        "image/gif": "gif",
+        "image/svg+xml": "svg",
+      };
+      const ext = extMap[input.contentType] ?? "png";
+      const bucketId = env.BUCKT_CDN_BUCKET_ID;
+
+      const [org, cdnBucket] = await Promise.all([
+        auth.api.getFullOrganization({
+          headers: ctx.headers,
+          query: { organizationId: ctx.orgId },
+        }),
+        buckt.buckets.get(bucketId),
+      ]);
+
+      if (org?.logo) {
+        try {
+          const url = new URL(org.logo);
+          if (url.hostname === cdnBucket.customDomain) {
+            const oldPath = url.pathname.slice(1);
+            await buckt.files.delete(bucketId, oldPath);
+          }
+        } catch {
+          // old file cleanup is best-effort
+        }
+      }
+
+      const path = `organizations/${ctx.orgId}/avatars/${crypto.randomUUID()}.${ext}`;
+      await buckt.files.upload(bucketId, path, buffer, input.contentType);
+
+      const logoUrl = `https://${cdnBucket.customDomain}/${path}`;
+      const result = await auth.api.updateOrganization({
+        headers: ctx.headers,
+        body: {
+          data: { logo: logoUrl },
+          organizationId: ctx.orgId,
+        },
+      });
+      return result;
+    }),
+
+  removeLogo: adminProcedure.mutation(async ({ ctx }) => {
+    const [org, cdnBucket] = await Promise.all([
+      auth.api.getFullOrganization({
+        headers: ctx.headers,
+        query: { organizationId: ctx.orgId },
+      }),
+      buckt.buckets.get(env.BUCKT_CDN_BUCKET_ID),
+    ]);
+
+    if (org?.logo) {
+      try {
+        const url = new URL(org.logo);
+        if (url.hostname === cdnBucket.customDomain) {
+          const filePath = url.pathname.slice(1);
+          await buckt.files.delete(env.BUCKT_CDN_BUCKET_ID, filePath);
+        }
+      } catch {
+        // file cleanup is best-effort
+      }
+    }
+
+    const result = await auth.api.updateOrganization({
+      headers: ctx.headers,
+      body: {
+        data: { logo: "" },
+        organizationId: ctx.orgId,
+      },
+    });
+    return result;
+  }),
 });
