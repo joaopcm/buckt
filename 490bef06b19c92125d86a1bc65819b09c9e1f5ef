@@ -1,0 +1,25 @@
+apps/web/src/components/buckets/provisioning-steps.tsx
+  ceb87f30bbd7239a 228
+apps/web/src/components/buckets/domain-connect-banner.tsx
+  ceb87f30bbd7239a 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.6",
+  "base_commit_sha": "490bef06b19c92125d86a1bc65819b09c9e1f5ef",
+  "prompts": {
+    "ceb87f30bbd7239a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "073dc84f-eebb-4518-b726-e851383287a0",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 2,
+      "total_deletions": 2,
+      "accepted_lines": 2,
+      "overriden_lines": 0
+    }
+  }
+}
