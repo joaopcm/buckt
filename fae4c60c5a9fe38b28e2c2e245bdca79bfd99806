@@ -1,0 +1,35 @@
+apps/api/src/middleware/plan.spec.ts
+  77a577207e61c832 5
+apps/api/src/middleware/rate-limit.ts
+  77a577207e61c832 6
+apps/api/src/utils/test-helpers.ts
+  77a577207e61c832 7
+apps/api/src/utils/rate-limit-store.ts
+  77a577207e61c832 1
+apps/api/src/middleware/auth.ts
+  77a577207e61c832 7
+apps/api/src/middleware/rate-limit.spec.ts
+  77a577207e61c832 5-6
+apps/api/src/middleware/auth.spec.ts
+  77a577207e61c832 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.6",
+  "base_commit_sha": "fae4c60c5a9fe38b28e2c2e245bdca79bfd99806",
+  "prompts": {
+    "77a577207e61c832": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "abd7d652-5746-4057-8dd4-4e2c22c973c3",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 9,
+      "total_deletions": 9,
+      "accepted_lines": 8,
+      "overriden_lines": 0
+    }
+  }
+}
