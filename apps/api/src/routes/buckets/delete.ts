@@ -1,10 +1,10 @@
 import { buckets } from "@buckt/db";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { isBucketInScope } from "../../lib/bucket-scope";
 import { db } from "../../lib/db";
-import { error, success } from "../../lib/response";
 import { destroyBucket } from "../../trigger/destroy-bucket";
+import { isBucketInScope } from "../../utils/bucket-scope";
+import { error, success } from "../../utils/response";
 
 export async function deleteBucket(c: Context) {
   const orgId = c.get("orgId");

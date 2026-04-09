@@ -2,7 +2,7 @@ import { apiKeys } from "@buckt/db";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
 import { db } from "../../lib/db";
-import { error, success } from "../../lib/response";
+import { error, success } from "../../utils/response";
 
 export async function deleteKey(c: Context) {
   const orgId = c.get("orgId");

@@ -3,10 +3,10 @@ import { buckets } from "@buckt/db";
 import { listFilesSchema } from "@buckt/shared";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { isBucketInScope } from "../../lib/bucket-scope";
 import { db } from "../../lib/db";
-import { error, success } from "../../lib/response";
 import { s3 } from "../../lib/s3";
+import { isBucketInScope } from "../../utils/bucket-scope";
+import { error, success } from "../../utils/response";
 
 export async function listFiles(c: Context) {
   const orgId = c.get("orgId");

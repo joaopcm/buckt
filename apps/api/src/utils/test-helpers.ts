@@ -4,7 +4,7 @@ import { PERMISSIONS } from "@buckt/shared";
 import { eq, sql } from "drizzle-orm";
 import app from "../app";
 import { db } from "../lib/db";
-import { generateApiKey } from "../lib/hash";
+import { generateApiKey } from "./hash";
 
 export const TEST_ORG_ID = "test-org-001";
 

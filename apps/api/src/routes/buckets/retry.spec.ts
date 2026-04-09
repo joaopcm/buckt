@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
 import app from "../../app";
 import { db } from "../../lib/db";
-import { cleanDb, createTestApiKey } from "../../lib/test-helpers";
+import { cleanDb, createTestApiKey } from "../../utils/test-helpers";
 
 describe("POST /api/buckets/:id/retry", () => {
   let apiKey: string;

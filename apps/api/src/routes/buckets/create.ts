@@ -3,8 +3,8 @@ import { createBucketSchema } from "@buckt/shared";
 import { eq, sql } from "drizzle-orm";
 import type { Context } from "hono";
 import { db } from "../../lib/db";
-import { error } from "../../lib/response";
 import { provisionBucket } from "../../trigger/provision-bucket";
+import { error } from "../../utils/response";
 
 export async function createBucket(c: Context) {
   const body = await c.req.json();

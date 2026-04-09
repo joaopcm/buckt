@@ -2,8 +2,8 @@ import { subscription } from "@buckt/db";
 import { beforeEach, describe, expect, it, type Mock } from "vitest";
 import app from "../app";
 import { db } from "../lib/db";
-import { checkRateLimit } from "../lib/rate-limit-store";
-import { cleanDb, createTestApiKey, TEST_ORG_ID } from "../lib/test-helpers";
+import { checkRateLimit } from "../utils/rate-limit-store";
+import { cleanDb, createTestApiKey, TEST_ORG_ID } from "../utils/test-helpers";
 
 const mockCheckRateLimit = checkRateLimit as Mock;
 

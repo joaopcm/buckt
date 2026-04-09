@@ -5,7 +5,7 @@ import {
   createActiveBucket,
   createTestApiKey,
   insertProSubscription,
-} from "../../lib/test-helpers";
+} from "../../utils/test-helpers";
 
 describe("GET /api/billing/usage", () => {
   let apiKey: string;

@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import type { RequestLogger } from "evlog";
 import { createMiddleware } from "hono/factory";
 import { db } from "../lib/db";
-import { hashApiKey } from "../lib/hash";
+import { hashApiKey } from "../utils/hash";
 
 interface AuthEnv {
   Variables: {

@@ -4,7 +4,7 @@ import {
   cleanDb,
   createActiveBucket,
   createTestApiKey,
-} from "../../lib/test-helpers";
+} from "../../utils/test-helpers";
 
 const { mockSend } = vi.hoisted(() => ({ mockSend: vi.fn() }));
 vi.mock("../../lib/s3", () => ({

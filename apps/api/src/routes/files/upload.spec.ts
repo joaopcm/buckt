@@ -9,7 +9,7 @@ import {
   createActiveBucket,
   createTestApiKey,
   insertProSubscription,
-} from "../../lib/test-helpers";
+} from "../../utils/test-helpers";
 
 vi.mock("../../lib/s3", () => ({
   s3: { send: vi.fn().mockResolvedValue({}) },

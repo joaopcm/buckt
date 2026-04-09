@@ -4,7 +4,7 @@ import {
   cleanDb,
   createActiveBucket,
   createTestApiKey,
-} from "../../lib/test-helpers";
+} from "../../utils/test-helpers";
 
 const BKT_PREFIX_RE = /^bkt_/;
 

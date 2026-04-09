@@ -3,7 +3,7 @@ import { PLAN_LIMITS, type PlanName } from "@buckt/shared";
 import { and, eq } from "drizzle-orm";
 import type { Context, Next } from "hono";
 import { db } from "../lib/db";
-import { checkRateLimit } from "../lib/rate-limit-store";
+import { checkRateLimit } from "../utils/rate-limit-store";
 
 export async function rateLimit(c: Context, next: Next) {
   const orgId = c.get("orgId") as string;

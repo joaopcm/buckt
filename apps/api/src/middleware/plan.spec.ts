@@ -2,7 +2,7 @@ import { subscription } from "@buckt/db";
 import { beforeEach, describe, expect, it } from "vitest";
 import app from "../app";
 import { db } from "../lib/db";
-import { cleanDb, createTestApiKey, TEST_ORG_ID } from "../lib/test-helpers";
+import { cleanDb, createTestApiKey, TEST_ORG_ID } from "../utils/test-helpers";
 
 describe("plan middleware", () => {
   let apiKey: string;

@@ -2,10 +2,10 @@ import { DeleteObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
 import { buckets } from "@buckt/db";
 import { and, eq, sql } from "drizzle-orm";
 import type { Context } from "hono";
-import { isBucketInScope } from "../../lib/bucket-scope";
 import { db } from "../../lib/db";
-import { error, success } from "../../lib/response";
 import { s3 } from "../../lib/s3";
+import { isBucketInScope } from "../../utils/bucket-scope";
+import { error, success } from "../../utils/response";
 
 const FILE_PATH_RE = /^.*?\/files\//;
 

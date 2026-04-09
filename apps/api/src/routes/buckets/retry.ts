@@ -2,8 +2,8 @@ import { buckets } from "@buckt/db";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
 import { db } from "../../lib/db";
-import { error, success } from "../../lib/response";
 import { provisionBucket } from "../../trigger/provision-bucket";
+import { error, success } from "../../utils/response";
 
 export async function retryBucket(c: Context) {
   const orgId = c.get("orgId") as string;

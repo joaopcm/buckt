@@ -5,7 +5,7 @@ import {
   createTestApiKey,
   insertProSubscription,
   TEST_ORG_ID,
-} from "../../lib/test-helpers";
+} from "../../utils/test-helpers";
 
 describe("POST /api/buckets", () => {
   let apiKey: string;

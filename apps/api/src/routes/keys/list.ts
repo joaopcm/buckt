@@ -2,7 +2,7 @@ import { apiKeys } from "@buckt/db";
 import { and, asc, eq, gt } from "drizzle-orm";
 import type { Context } from "hono";
 import { db } from "../../lib/db";
-import { success } from "../../lib/response";
+import { success } from "../../utils/response";
 
 export async function listKeys(c: Context) {
   const orgId = c.get("orgId");

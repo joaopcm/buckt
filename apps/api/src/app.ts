@@ -5,7 +5,6 @@ import { createAxiomDrain } from "evlog/axiom";
 import { type EvlogVariables, evlog } from "evlog/hono";
 import { createDrainPipeline } from "evlog/pipeline";
 import { Hono } from "hono";
-import { requestId } from "./lib/request-id";
 import { requireAuth } from "./middleware/auth";
 import { requirePlan } from "./middleware/plan";
 import { rateLimit } from "./middleware/rate-limit";
@@ -25,6 +24,7 @@ import { uploadFile } from "./routes/files/upload";
 import { createKey } from "./routes/keys/create";
 import { deleteKey } from "./routes/keys/delete";
 import { listKeys } from "./routes/keys/list";
+import { requestId } from "./utils/request-id";
 
 initLogger({ env: { service: "buckt-api" } });
 

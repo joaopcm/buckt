@@ -2,9 +2,9 @@ import { buckets } from "@buckt/db";
 import { listBucketsSchema } from "@buckt/shared";
 import { and, asc, eq, gt, inArray } from "drizzle-orm";
 import type { Context } from "hono";
-import { getScopedBucketIds } from "../../lib/bucket-scope";
 import { db } from "../../lib/db";
-import { error, success } from "../../lib/response";
+import { getScopedBucketIds } from "../../utils/bucket-scope";
+import { error, success } from "../../utils/response";
 
 export async function listBuckets(c: Context) {
   const orgId = c.get("orgId");

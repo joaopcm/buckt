@@ -8,9 +8,9 @@ import {
   setBucketPrivate,
   setBucketPublic,
 } from "../../lib/aws/bucket-settings";
-import { isBucketInScope } from "../../lib/bucket-scope";
 import { db } from "../../lib/db";
-import { error, success } from "../../lib/response";
+import { isBucketInScope } from "../../utils/bucket-scope";
+import { error, success } from "../../utils/response";
 
 export async function updateBucket(c: Context) {
   const orgId = c.get("orgId") as string;

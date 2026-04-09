@@ -4,7 +4,7 @@ import {
   cleanDb,
   createActiveBucket,
   createTestApiKey,
-} from "../../lib/test-helpers";
+} from "../../utils/test-helpers";
 
 vi.mock("../../lib/aws/bucket-settings", () => ({
   setBucketPublic: vi.fn().mockResolvedValue(undefined),

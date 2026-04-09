@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import app from "../../app";
-import { cleanDb, createTestApiKey } from "../../lib/test-helpers";
+import { cleanDb, createTestApiKey } from "../../utils/test-helpers";
 
 describe("DELETE /api/keys/:id", () => {
   let apiKey: string;

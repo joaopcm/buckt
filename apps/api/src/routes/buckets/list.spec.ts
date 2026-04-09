@@ -4,7 +4,7 @@ import {
   cleanDb,
   createTestApiKey,
   insertProSubscription,
-} from "../../lib/test-helpers";
+} from "../../utils/test-helpers";
 
 describe("GET /api/buckets", () => {
   let apiKey: string;

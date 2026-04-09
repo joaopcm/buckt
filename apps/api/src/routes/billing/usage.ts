@@ -2,7 +2,7 @@ import { buckets } from "@buckt/db";
 import { eq, sql } from "drizzle-orm";
 import type { Context } from "hono";
 import { db } from "../../lib/db";
-import { success } from "../../lib/response";
+import { success } from "../../utils/response";
 
 export async function getUsage(c: Context) {
   const orgId = c.get("orgId") as string;
