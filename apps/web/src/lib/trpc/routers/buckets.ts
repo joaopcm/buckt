@@ -172,6 +172,7 @@ export const bucketsRouter = router({
           corsOrigins: input.corsOrigins,
           lifecycleTtlDays: input.lifecycleTtlDays,
           optimizationMode: input.optimizationMode,
+          domainConnectProvider: input.domainConnectProvider,
           status: "pending",
         })
         .returning();

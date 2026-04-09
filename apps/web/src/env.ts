@@ -22,6 +22,8 @@ export const env = createEnv({
     SENTRY_DSN: z.string().url().optional(),
     AXIOM_TOKEN: z.string().optional(),
     AXIOM_DATASET: z.string().optional().default("buckt-web"),
+    DOMAIN_CONNECT_SIGNING_PRIVATE_KEY: z.string().min(1).optional(),
+    DOMAIN_CONNECT_PROVIDER_ID: z.string().default("buckt.dev"),
   },
   client: {
     NEXT_PUBLIC_BETTER_AUTH_URL: z.url(),

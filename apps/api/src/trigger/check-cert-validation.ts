@@ -8,6 +8,72 @@ const db = createDb(process.env.DATABASE_PUBLIC_URL ?? "");
 
 const TIMEOUT_HOURS = 72;
 
+type BucketRow = typeof buckets.$inferSelect;
+
+async function processBucket(bucket: BucketRow): Promise<void> {
+  if (!bucket.acmCertArn) {
+    return;
+  }
+
+  const status = await getCertificateStatus(bucket.acmCertArn);
+  logger.info("Cert status check", {
+    bucketId: bucket.id,
+    certArn: bucket.acmCertArn,
+    status,
+  });
+
+  if (status === "ISSUED") {
+    const websiteEndpoint = `${bucket.s3BucketName}.s3-website-${bucket.region}.amazonaws.com`;
+
+    const { distributionId, distributionDomain } = await createDistribution({
+      domain: bucket.customDomain,
+      s3WebsiteEndpoint: websiteEndpoint,
+      certArn: bucket.acmCertArn,
+      logBucket: process.env.CLOUDFRONT_LOG_BUCKET,
+      logPrefix: process.env.CLOUDFRONT_LOG_PREFIX,
+    });
+
+    const dnsRecords = (
+      (bucket.dnsRecords as Array<{
+        name: string;
+        type: string;
+        value: string;
+        applied?: boolean;
+      }>) ?? []
+    ).map((r) =>
+      r.value === "pending-cloudfront-distribution"
+        ? { ...r, value: distributionDomain }
+        : r
+    );
+
+    await db
+      .update(buckets)
+      .set({
+        status: "active",
+        cloudfrontDistributionId: distributionId,
+        dnsRecords,
+      })
+      .where(eq(buckets.id, bucket.id));
+
+    logger.info("Bucket activated", { bucketId: bucket.id, distributionId });
+    return;
+  }
+
+  const hoursSinceCreation =
+    (Date.now() - bucket.createdAt.getTime()) / (1000 * 60 * 60);
+
+  if (status === "FAILED" || hoursSinceCreation > TIMEOUT_HOURS) {
+    await db
+      .update(buckets)
+      .set({ status: "failed" })
+      .where(eq(buckets.id, bucket.id));
+    logger.warn("Bucket provisioning failed", {
+      bucketId: bucket.id,
+      reason: status === "FAILED" ? "cert_failed" : "timeout",
+    });
+  }
+}
+
 export const checkCertValidation = schedules.task({
   id: "check-cert-validation",
   cron: "*/5 * * * *",
@@ -19,70 +85,7 @@ export const checkCertValidation = schedules.task({
 
     for (const bucket of pendingBuckets) {
       try {
-        if (!bucket.acmCertArn) {
-          continue;
-        }
-
-        const status = await getCertificateStatus(bucket.acmCertArn);
-        logger.info("Cert status check", {
-          bucketId: bucket.id,
-          certArn: bucket.acmCertArn,
-          status,
-        });
-
-        if (status === "ISSUED") {
-          const websiteEndpoint = `${bucket.s3BucketName}.s3-website-${bucket.region}.amazonaws.com`;
-
-          const { distributionId, distributionDomain } =
-            await createDistribution({
-              domain: bucket.customDomain,
-              s3WebsiteEndpoint: websiteEndpoint,
-              certArn: bucket.acmCertArn,
-              logBucket: process.env.CLOUDFRONT_LOG_BUCKET,
-              logPrefix: process.env.CLOUDFRONT_LOG_PREFIX,
-            });
-
-          const dnsRecords = (
-            (bucket.dnsRecords as Array<{
-              name: string;
-              type: string;
-              value: string;
-            }>) ?? []
-          ).map((r) =>
-            r.value === "pending-cloudfront-distribution"
-              ? { ...r, value: distributionDomain }
-              : r
-          );
-
-          await db
-            .update(buckets)
-            .set({
-              status: "active",
-              cloudfrontDistributionId: distributionId,
-              dnsRecords,
-            })
-            .where(eq(buckets.id, bucket.id));
-
-          logger.info("Bucket activated", {
-            bucketId: bucket.id,
-            distributionId,
-          });
-          continue;
-        }
-
-        const hoursSinceCreation =
-          (Date.now() - bucket.createdAt.getTime()) / (1000 * 60 * 60);
-
-        if (status === "FAILED" || hoursSinceCreation > TIMEOUT_HOURS) {
-          await db
-            .update(buckets)
-            .set({ status: "failed" })
-            .where(eq(buckets.id, bucket.id));
-          logger.warn("Bucket provisioning failed", {
-            bucketId: bucket.id,
-            reason: status === "FAILED" ? "cert_failed" : "timeout",
-          });
-        }
+        await processBucket(bucket);
       } catch (err) {
         console.error(`Failed to process bucket ${bucket.id}:`, err);
       }

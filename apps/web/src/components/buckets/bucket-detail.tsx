@@ -1,9 +1,13 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+import { useEffect, useRef } from "react";
+import { toast } from "sonner";
 import { BucketActions } from "@/components/buckets/bucket-actions";
 import { BucketSettings } from "@/components/buckets/bucket-settings";
 import { BucketUsage } from "@/components/buckets/bucket-usage";
 import { DnsRecords } from "@/components/buckets/dns-records";
+import { DomainConnectBanner } from "@/components/buckets/domain-connect-banner";
 import { FileBrowser } from "@/components/buckets/file-browser";
 import { ProvisioningSteps } from "@/components/buckets/provisioning-steps";
 import { StatusBadge } from "@/components/buckets/status-badge";
@@ -21,6 +25,22 @@ export function BucketDetail({
   bucketId: string;
 }) {
   const { isAdmin } = useOrgRole(orgId);
+  const searchParams = useSearchParams();
+  const dcToastShown = useRef(false);
+
+  useEffect(() => {
+    if (dcToastShown.current) {
+      return;
+    }
+    const dc = searchParams.get("dc");
+    if (dc === "success") {
+      toast.success("DNS records applied automatically");
+      dcToastShown.current = true;
+    } else if (dc === "error") {
+      toast.error("DNS setup failed — you can add records manually");
+      dcToastShown.current = true;
+    }
+  }, [searchParams]);
 
   const { data: bucket, isPending } = trpc.buckets.get.useQuery(
     { orgId, id: bucketId },
@@ -41,6 +61,8 @@ export function BucketDetail({
     );
   }
 
+  const hasDomainConnect = !!bucket.domainConnectProvider;
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -57,10 +79,16 @@ export function BucketDetail({
       </div>
 
       {(bucket.status === "provisioning" || bucket.status === "pending") && (
-        <ProvisioningSteps
-          domain={bucket.customDomain}
-          records={bucket.dnsRecords}
-        />
+        <>
+          {hasDomainConnect && <DomainConnectBanner />}
+          <ProvisioningSteps
+            bucketId={bucketId}
+            domain={bucket.customDomain}
+            hasDomainConnect={hasDomainConnect}
+            orgId={orgId}
+            records={bucket.dnsRecords}
+          />
+        </>
       )}
 
       {bucket.status === "active" && (

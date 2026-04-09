@@ -70,6 +70,7 @@ export const buckets = pgTable(
     optimizationMode: optimizationModeEnum("optimization_mode")
       .default("none")
       .notNull(),
+    domainConnectProvider: text("domain_connect_provider"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
