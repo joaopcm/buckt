@@ -17,9 +17,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { authClient } from "@/lib/auth-client";
-import { getInitials } from "@/lib/get-initials";
-import { setOrgCookie } from "@/lib/org-cookie";
 import { trpc } from "@/lib/trpc/client";
+import { getInitials } from "@/utils/get-initials";
+import { setOrgCookie } from "@/utils/org-cookie";
 
 export function OrgSwitcher({ orgId }: { orgId: string }) {
   const router = useRouter();

@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/sidebar";
 import { UserNav } from "@/components/user-nav";
 import { trpc } from "@/lib/trpc/client";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },

@@ -3,8 +3,8 @@
 import { Activity, Database, HardDrive } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatBytes } from "@/lib/format";
 import { trpc } from "@/lib/trpc/client";
+import { formatBytes } from "@/utils/format";
 
 export function DashboardStats({ orgId }: { orgId: string }) {
   const { data, isPending } = trpc.buckets.stats.useQuery({ orgId });

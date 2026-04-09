@@ -1,7 +1,7 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { ORG_COOKIE_NAME } from "@/lib/org-cookie";
+import { ORG_COOKIE_NAME } from "@/utils/org-cookie";
 
 export default async function RootPage() {
   const session = await auth.api.getSession({ headers: await headers() });
