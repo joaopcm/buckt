@@ -1,0 +1,23 @@
+apps/api/src/routes/keys/create.spec.ts
+  77a577207e61c832 3-7,65,69,73-82
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.6",
+  "base_commit_sha": "a8917bea7b0925d48ea7e9550fba6be3aecbe824",
+  "prompts": {
+    "77a577207e61c832": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "abd7d652-5746-4057-8dd4-4e2c22c973c3",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 17,
+      "total_deletions": 3,
+      "accepted_lines": 17,
+      "overriden_lines": 0
+    }
+  }
+}
