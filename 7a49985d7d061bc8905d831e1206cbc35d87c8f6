@@ -1,0 +1,21 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.6",
+  "base_commit_sha": "7a49985d7d061bc8905d831e1206cbc35d87c8f6",
+  "prompts": {
+    "77a577207e61c832": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "abd7d652-5746-4057-8dd4-4e2c22c973c3",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 2,
+      "total_deletions": 0,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    }
+  }
+}
