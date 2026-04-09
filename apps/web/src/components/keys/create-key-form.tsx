@@ -9,6 +9,7 @@ import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { CopyText } from "@/components/copy-text";
+import { BucketSelect } from "@/components/keys/bucket-select";
 import { PermissionSelect } from "@/components/keys/permission-select";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,6 +29,7 @@ const createKeyFormSchema = z.object({
   permissions: z
     .array(z.enum(PERMISSIONS))
     .min(1, "Select at least one permission"),
+  bucketIds: z.array(z.string()).nullable().default(null),
 });
 
 type CreateKeyValues = z.infer<typeof createKeyFormSchema>;
@@ -44,7 +46,7 @@ export function CreateKeyForm({ orgId }: { orgId: string }) {
     formState: { errors },
   } = useForm<CreateKeyValues>({
     resolver: zodResolver(createKeyFormSchema),
-    defaultValues: { name: "", permissions: [] },
+    defaultValues: { name: "", permissions: [], bucketIds: null },
   });
 
   const createKey = trpc.keys.create.useMutation({
@@ -58,7 +60,11 @@ export function CreateKeyForm({ orgId }: { orgId: string }) {
   });
 
   function onSubmit(values: CreateKeyValues) {
-    createKey.mutate({ ...values, orgId });
+    createKey.mutate({
+      ...values,
+      orgId,
+      bucketIds: values.bucketIds ?? undefined,
+    });
   }
 
   return (
@@ -101,6 +107,21 @@ export function CreateKeyForm({ orgId }: { orgId: string }) {
                   {errors.permissions.message}
                 </p>
               )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Bucket scope</Label>
+              <Controller
+                control={control}
+                name="bucketIds"
+                render={({ field }) => (
+                  <BucketSelect
+                    onChange={field.onChange}
+                    orgId={orgId}
+                    value={field.value}
+                  />
+                )}
+              />
             </div>
 
             <Button

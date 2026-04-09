@@ -3,6 +3,7 @@ import { buckets } from "@buckt/db";
 import { listFilesSchema } from "@buckt/shared";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
+import { isBucketInScope } from "../../lib/bucket-scope";
 import { db } from "../../lib/db";
 import { error, success } from "../../lib/response";
 import { s3 } from "../../lib/s3";
@@ -10,6 +11,10 @@ import { s3 } from "../../lib/s3";
 export async function listFiles(c: Context) {
   const orgId = c.get("orgId");
   const bucketId = c.req.param("bucketId") as string;
+
+  if (!isBucketInScope(c, bucketId)) {
+    return error(c, 404, "Bucket not found");
+  }
 
   const parsed = listFilesSchema.safeParse({
     prefix: c.req.query("prefix"),

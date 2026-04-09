@@ -17,6 +17,7 @@ export class KeysClient {
     name: string;
     permissions: Permission[];
     expiresAt?: Date;
+    bucketIds?: string[];
   }): Promise<ApiKeyWithSecret> {
     const { data } = await this.http.post<ApiKeyWithSecret>("/v1/keys", {
       ...opts,

@@ -50,6 +50,13 @@
       "when": 1775762020932,
       "tag": "0006_absent_nebula",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1775773164257,
+      "tag": "0007_mature_newton_destine",
+      "breakpoints": true
     }
   ]
 }

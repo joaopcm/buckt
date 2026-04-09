@@ -1,6 +1,7 @@
 import { buckets } from "@buckt/db";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
+import { isBucketInScope } from "../../lib/bucket-scope";
 import { db } from "../../lib/db";
 import { error, success } from "../../lib/response";
 import { destroyBucket } from "../../trigger/destroy-bucket";
@@ -8,6 +9,10 @@ import { destroyBucket } from "../../trigger/destroy-bucket";
 export async function deleteBucket(c: Context) {
   const orgId = c.get("orgId");
   const id = c.req.param("id") as string;
+
+  if (!isBucketInScope(c, id)) {
+    return error(c, 404, "Bucket not found");
+  }
 
   const [bucket] = await db
     .select()

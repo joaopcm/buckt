@@ -2,6 +2,7 @@ import { HeadObjectCommand } from "@aws-sdk/client-s3";
 import { buckets } from "@buckt/db";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
+import { isBucketInScope } from "../../lib/bucket-scope";
 import { db } from "../../lib/db";
 import { error, success } from "../../lib/response";
 import { s3 } from "../../lib/s3";
@@ -11,6 +12,10 @@ const FILE_PATH_RE = /^.*?\/files\//;
 export async function getFile(c: Context) {
   const orgId = c.get("orgId");
   const bucketId = c.req.param("bucketId") as string;
+
+  if (!isBucketInScope(c, bucketId)) {
+    return error(c, 404, "Bucket not found");
+  }
   const filePath = c.req.path.replace(FILE_PATH_RE, "");
 
   if (!filePath) {

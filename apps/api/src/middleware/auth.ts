@@ -11,6 +11,7 @@ interface AuthEnv {
     orgId: string;
     apiKeyId: string;
     permissions: Permission[];
+    bucketIds: string[] | null;
     log: RequestLogger;
   };
 }
@@ -83,6 +84,7 @@ export function requireAuth(...requiredPermissions: Permission[]) {
     c.set("orgId", apiKey.orgId);
     c.set("apiKeyId", apiKey.id);
     c.set("permissions", keyPermissions);
+    c.set("bucketIds", apiKey.bucketIds as string[] | null);
 
     const log = c.get("log");
     if (log) {

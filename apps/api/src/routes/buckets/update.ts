@@ -8,12 +8,17 @@ import {
   setBucketPrivate,
   setBucketPublic,
 } from "../../lib/aws/bucket-settings";
+import { isBucketInScope } from "../../lib/bucket-scope";
 import { db } from "../../lib/db";
 import { error, success } from "../../lib/response";
 
 export async function updateBucket(c: Context) {
   const orgId = c.get("orgId") as string;
   const id = c.req.param("id") as string;
+
+  if (!isBucketInScope(c, id)) {
+    return error(c, 404, "Bucket not found");
+  }
 
   const body = await c.req.json();
   const parsed = updateBucketSchema.safeParse(body);

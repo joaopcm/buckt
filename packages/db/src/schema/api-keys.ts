@@ -19,6 +19,7 @@ export const apiKeys = pgTable(
     hashedKey: text("hashed_key").notNull(),
     prefix: text("prefix").notNull(),
     permissions: jsonb("permissions").$type<string[]>().notNull(),
+    bucketIds: jsonb("bucket_ids").$type<string[] | null>(),
     lastUsedAt: timestamp("last_used_at"),
     expiresAt: timestamp("expires_at"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
