@@ -1,5 +1,4 @@
 import { buckets, createDb } from "@buckt/db";
-import { applyAcmValidationRecords } from "@buckt/domain-connect";
 import { logger, task } from "@trigger.dev/sdk/v3";
 import { eq } from "drizzle-orm";
 import { requestCertificate } from "../lib/aws/acm";
@@ -57,71 +56,11 @@ export const provisionBucket = task({
       },
     ];
 
-    let appliedRecords = false;
-
-    if (
-      bucket.domainConnectProvider &&
-      bucket.domainConnectAccessToken &&
-      process.env.DOMAIN_CONNECT_TOKEN_ENCRYPTION_KEY &&
-      process.env.DOMAIN_CONNECT_CLIENT_ID &&
-      process.env.DOMAIN_CONNECT_CLIENT_SECRET
-    ) {
-      try {
-        const result = await applyAcmValidationRecords(
-          {
-            domainConnectProvider: bucket.domainConnectProvider,
-            domainConnectAccessToken: bucket.domainConnectAccessToken,
-            domainConnectRefreshToken: bucket.domainConnectRefreshToken ?? "",
-            domainConnectTokenExpiresAt: bucket.domainConnectTokenExpiresAt,
-            customDomain: bucket.customDomain,
-          },
-          {
-            encryptionKey: process.env.DOMAIN_CONNECT_TOKEN_ENCRYPTION_KEY,
-            clientId: process.env.DOMAIN_CONNECT_CLIENT_ID,
-            clientSecret: process.env.DOMAIN_CONNECT_CLIENT_SECRET,
-            providerId: process.env.DOMAIN_CONNECT_PROVIDER_ID ?? "buckt.dev",
-          },
-          validationRecords
-        );
-
-        if (result.applied) {
-          appliedRecords = true;
-          logger.info("Domain Connect: ACM validation records applied");
-
-          if (result.newAccessToken) {
-            await db
-              .update(buckets)
-              .set({
-                domainConnectAccessToken: result.newAccessToken,
-                domainConnectRefreshToken: result.newRefreshToken,
-                domainConnectTokenExpiresAt: result.newExpiresAt,
-              })
-              .where(eq(buckets.id, bucketId));
-          }
-        }
-      } catch (err) {
-        logger.warn(
-          "Domain Connect: failed to apply ACM records, falling back to manual",
-          {
-            error: String(err),
-          }
-        );
-      }
-    }
-
-    const finalDnsRecords = appliedRecords
-      ? dnsRecords.map((r) =>
-          r.value === "pending-cloudfront-distribution"
-            ? r
-            : { ...r, applied: true }
-        )
-      : dnsRecords;
-
     await db
       .update(buckets)
       .set({
         acmCertArn: certArn,
-        dnsRecords: finalDnsRecords,
+        dnsRecords,
       })
       .where(eq(buckets.id, bucketId));
 
@@ -130,6 +69,6 @@ export const provisionBucket = task({
       websiteEndpoint,
     });
 
-    return { certArn, websiteEndpoint, dnsRecords: finalDnsRecords };
+    return { certArn, websiteEndpoint, dnsRecords };
   },
 });

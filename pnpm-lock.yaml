@@ -51,9 +51,6 @@ importers:
       '@buckt/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@buckt/domain-connect':
-        specifier: workspace:*
-        version: link:../../packages/domain-connect
       '@buckt/shared':
         specifier: workspace:*
         version: link:../../packages/shared

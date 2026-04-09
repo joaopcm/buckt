@@ -9,11 +9,15 @@ interface DomainConnectSettings {
   width?: number;
 }
 
+export type DomainConnectMode = "sync" | "async";
+
 export interface DiscoveryResult {
+  mode?: DomainConnectMode;
   providerHost?: string;
   providerName?: string;
   settings?: DomainConnectSettings;
   supported: boolean;
+  urlSyncUX?: string;
 }
 
 function extractRootDomain(domain: string): string {
@@ -55,15 +59,19 @@ export async function discoverDomainConnect(
 
     const settings: DomainConnectSettings = await res.json();
 
-    if (!settings.urlAsyncUX) {
+    if (!(settings.urlSyncUX || settings.urlAsyncUX)) {
       return { supported: false };
     }
+
+    const mode: DomainConnectMode = settings.urlAsyncUX ? "async" : "sync";
 
     return {
       supported: true,
       providerHost,
       providerName: settings.providerName,
       settings,
+      mode,
+      urlSyncUX: settings.urlSyncUX,
     };
   } catch {
     return { supported: false };

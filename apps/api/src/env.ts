@@ -21,6 +21,7 @@ export const env = createEnv({
     DOMAIN_CONNECT_CLIENT_ID: z.string().min(1).optional(),
     DOMAIN_CONNECT_CLIENT_SECRET: z.string().min(1).optional(),
     DOMAIN_CONNECT_TOKEN_ENCRYPTION_KEY: z.string().length(64).optional(),
+    DOMAIN_CONNECT_SIGNING_PRIVATE_KEY: z.string().min(1).optional(),
     DOMAIN_CONNECT_PROVIDER_ID: z.string().default("buckt.dev"),
   },
   runtimeEnv: process.env,

@@ -1,8 +1,9 @@
 import { buckets } from "@buckt/db";
 import {
-  buildAuthorizationUrl,
+  buildSignedSyncUrl,
   createSignedState,
   discoverDomainConnect,
+  extractDomainParts,
 } from "@buckt/domain-connect";
 import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
@@ -10,11 +11,13 @@ import { z } from "zod";
 import { env } from "@/env";
 import { orgProcedure, protectedProcedure, router } from "../init";
 
+const ACM_SUFFIX = ".acm-validations.aws.";
+
 export const domainConnectRouter = router({
   check: protectedProcedure
     .input(z.object({ domain: z.string().min(1) }))
     .query(async ({ input }) => {
-      if (!env.DOMAIN_CONNECT_CLIENT_ID) {
+      if (!env.DOMAIN_CONNECT_SIGNING_PRIVATE_KEY) {
         return { supported: false as const };
       }
 
@@ -28,13 +31,19 @@ export const domainConnectRouter = router({
         supported: true as const,
         providerName: result.providerName ?? "your DNS provider",
         providerHost: result.providerHost ?? "",
+        mode: result.mode ?? "sync",
       };
     }),
 
-  startOAuth: orgProcedure
-    .input(z.object({ bucketId: z.string() }))
+  buildSyncUrl: orgProcedure
+    .input(
+      z.object({
+        bucketId: z.string(),
+        serviceId: z.enum(["acm-validation", "cdn-cname"]),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
-      if (!env.DOMAIN_CONNECT_CLIENT_ID) {
+      if (!env.DOMAIN_CONNECT_SIGNING_PRIVATE_KEY) {
         throw new TRPCError({
           code: "PRECONDITION_FAILED",
           message: "Domain Connect is not configured",
@@ -60,23 +69,75 @@ export const domainConnectRouter = router({
         });
       }
 
+      const discovery = await discoverDomainConnect(bucket.customDomain);
+      if (!(discovery.supported && discovery.urlSyncUX)) {
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "DNS provider does not support Domain Connect sync flow",
+        });
+      }
+
+      const { rootDomain, host } = extractDomainParts(bucket.customDomain);
+      const dnsRecords = (bucket.dnsRecords ?? []) as Array<{
+        name: string;
+        type: string;
+        value: string;
+      }>;
+
+      let variables: Record<string, string>;
+
+      if (input.serviceId === "acm-validation") {
+        const certRecord = dnsRecords.find(
+          (r) =>
+            r.type === "CNAME" && r.value !== "pending-cloudfront-distribution"
+        );
+        if (!certRecord) {
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message: "No certificate validation record found",
+          });
+        }
+        const value = certRecord.value.endsWith(ACM_SUFFIX)
+          ? certRecord.value.slice(0, -ACM_SUFFIX.length)
+          : certRecord.value;
+        variables = {
+          certValidationName: certRecord.name,
+          certValidationValue: value,
+        };
+      } else {
+        const cnameRecord = dnsRecords.find(
+          (r) =>
+            r.type === "CNAME" &&
+            r.name === bucket.customDomain &&
+            r.value !== "pending-cloudfront-distribution"
+        );
+        if (!cnameRecord) {
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message: "CloudFront distribution not ready yet",
+          });
+        }
+        variables = { pointsTo: cnameRecord.value };
+      }
+
       const state = createSignedState(
         { bucketId: bucket.id, orgId: ctx.orgId },
         env.BETTER_AUTH_SECRET
       );
 
-      const redirectUri = `${env.BETTER_AUTH_URL}/api/domain-connect/callback`;
+      const redirectUri = `${env.BETTER_AUTH_URL}/api/domain-connect/callback?state=${state}&serviceId=${input.serviceId}`;
 
-      const authorizationUrl = buildAuthorizationUrl({
-        providerHost: bucket.domainConnectProvider,
-        domain: bucket.customDomain,
+      const syncUrl = buildSignedSyncUrl({
+        urlSyncUX: discovery.urlSyncUX,
         providerId: env.DOMAIN_CONNECT_PROVIDER_ID,
-        serviceId: "cdn-provisioning",
-        clientId: env.DOMAIN_CONNECT_CLIENT_ID,
+        serviceId: input.serviceId,
+        domain: rootDomain,
+        host,
         redirectUri,
-        state,
+        variables,
+        signingPrivateKey: env.DOMAIN_CONNECT_SIGNING_PRIVATE_KEY,
       });
 
-      return { authorizationUrl };
+      return { syncUrl };
     }),
 });

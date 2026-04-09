@@ -1,7 +1,11 @@
 // biome-ignore lint/performance/noBarrelFile: intentional barrel re-export
 export { applyAcmValidationRecords, applyCloudfrontCname } from "./apply";
 export { decryptToken, encryptToken } from "./crypto";
-export { type DiscoveryResult, discoverDomainConnect } from "./discover";
+export {
+  type DiscoveryResult,
+  type DomainConnectMode,
+  discoverDomainConnect,
+} from "./discover";
 export {
   buildAuthorizationUrl,
   createSignedState,
@@ -9,3 +13,4 @@ export {
   refreshAccessToken,
   verifySignedState,
 } from "./oauth";
+export { buildSignedSyncUrl, extractDomainParts } from "./sync";

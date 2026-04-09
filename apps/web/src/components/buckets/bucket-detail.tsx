@@ -34,12 +34,10 @@ export function BucketDetail({
     }
     const dc = searchParams.get("dc");
     if (dc === "success") {
-      toast.success(
-        "DNS setup authorized — records will be applied automatically"
-      );
+      toast.success("DNS records applied automatically");
       dcToastShown.current = true;
     } else if (dc === "error") {
-      toast.error("DNS authorization failed — you can set up records manually");
+      toast.error("DNS setup failed — you can add records manually");
       dcToastShown.current = true;
     }
   }, [searchParams]);
@@ -63,6 +61,8 @@ export function BucketDetail({
     );
   }
 
+  const hasDomainConnect = !!bucket.domainConnectProvider;
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -80,15 +80,12 @@ export function BucketDetail({
 
       {(bucket.status === "provisioning" || bucket.status === "pending") && (
         <>
-          {bucket.domainConnectProvider && (
-            <DomainConnectBanner
-              bucketId={bucketId}
-              hasToken={!!bucket.domainConnectAccessToken}
-              orgId={orgId}
-            />
-          )}
+          {hasDomainConnect && <DomainConnectBanner />}
           <ProvisioningSteps
+            bucketId={bucketId}
             domain={bucket.customDomain}
+            hasDomainConnect={hasDomainConnect}
+            orgId={orgId}
             records={bucket.dnsRecords}
           />
         </>

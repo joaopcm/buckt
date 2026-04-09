@@ -22,6 +22,7 @@
         "DOMAIN_CONNECT_CLIENT_ID",
         "DOMAIN_CONNECT_CLIENT_SECRET",
         "DOMAIN_CONNECT_TOKEN_ENCRYPTION_KEY",
+        "DOMAIN_CONNECT_SIGNING_PRIVATE_KEY",
         "DOMAIN_CONNECT_PROVIDER_ID"
       ],
       "outputs": ["dist/**", ".next/**"]

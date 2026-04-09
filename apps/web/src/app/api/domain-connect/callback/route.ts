@@ -1,115 +1,90 @@
 import { buckets } from "@buckt/db";
-import {
-  encryptToken,
-  exchangeCodeForTokens,
-  verifySignedState,
-} from "@buckt/domain-connect";
+import { verifySignedState } from "@buckt/domain-connect";
 import { eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 import { env } from "@/env";
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
-  const code = searchParams.get("code");
   const stateParam = searchParams.get("state");
+  const serviceId = searchParams.get("serviceId");
   const error = searchParams.get("error");
 
-  if (error || !code || !stateParam) {
-    return redirectWithError(stateParam, "Authorization was denied or failed");
+  if (!stateParam) {
+    return NextResponse.redirect(new URL("/", env.BETTER_AUTH_URL));
   }
 
   const state = verifySignedState(stateParam, env.BETTER_AUTH_SECRET);
   if (!state) {
-    return redirectWithError(null, "Invalid or expired authorization state");
+    return redirectToBucket(stateParam, "error");
   }
 
-  const session = await auth.api.getSession({ headers: request.headers });
-  if (!session?.user) {
-    return redirectWithError(
-      stateParam,
-      "You must be logged in to complete authorization"
-    );
+  if (error) {
+    return redirectToBucket(stateParam, "error");
   }
 
-  const [bucket] = await db
-    .select()
-    .from(buckets)
-    .where(eq(buckets.id, state.bucketId))
-    .limit(1);
-
-  if (!bucket || bucket.orgId !== state.orgId) {
-    return redirectWithError(stateParam, "Bucket not found");
+  if (serviceId) {
+    await markRecordsAsApplied(state.bucketId, serviceId);
   }
 
-  if (
-    !(
-      bucket.domainConnectProvider &&
-      env.DOMAIN_CONNECT_CLIENT_ID &&
-      env.DOMAIN_CONNECT_CLIENT_SECRET &&
-      env.DOMAIN_CONNECT_TOKEN_ENCRYPTION_KEY
-    )
-  ) {
-    return redirectWithError(stateParam, "Domain Connect is not configured");
-  }
-
-  const redirectUri = `${env.BETTER_AUTH_URL}/api/domain-connect/callback`;
-
-  try {
-    const tokens = await exchangeCodeForTokens({
-      providerHost: bucket.domainConnectProvider,
-      code,
-      clientId: env.DOMAIN_CONNECT_CLIENT_ID,
-      clientSecret: env.DOMAIN_CONNECT_CLIENT_SECRET,
-      redirectUri,
-    });
-
-    const encryptionKey = env.DOMAIN_CONNECT_TOKEN_ENCRYPTION_KEY;
-
-    await db
-      .update(buckets)
-      .set({
-        domainConnectAccessToken: encryptToken(
-          tokens.accessToken,
-          encryptionKey
-        ),
-        domainConnectRefreshToken: encryptToken(
-          tokens.refreshToken,
-          encryptionKey
-        ),
-        domainConnectTokenExpiresAt: new Date(
-          Date.now() + tokens.expiresIn * 1000
-        ),
-      })
-      .where(eq(buckets.id, state.bucketId));
-
-    return NextResponse.redirect(
-      new URL(
-        `/org/${state.orgId}/buckets/${state.bucketId}?dc=success`,
-        request.url
-      )
-    );
-  } catch {
-    return redirectWithError(
-      stateParam,
-      "Failed to exchange authorization code"
-    );
-  }
+  return redirectToBucket(stateParam, "success");
 }
 
-function redirectWithError(
-  stateParam: string | null,
-  _message: string
+async function markRecordsAsApplied(
+  bucketId: string,
+  serviceId: string
+): Promise<void> {
+  const [bucket] = await db
+    .select({ dnsRecords: buckets.dnsRecords })
+    .from(buckets)
+    .where(eq(buckets.id, bucketId))
+    .limit(1);
+
+  if (!(bucket?.dnsRecords && Array.isArray(bucket.dnsRecords))) {
+    return;
+  }
+
+  const records = bucket.dnsRecords as Array<{
+    name: string;
+    type: string;
+    value: string;
+    applied?: boolean;
+  }>;
+
+  const updated = records.map((r) => {
+    if (
+      serviceId === "acm-validation" &&
+      r.value !== "pending-cloudfront-distribution"
+    ) {
+      return { ...r, applied: true };
+    }
+    if (
+      serviceId === "cdn-cname" &&
+      r.name !== r.value &&
+      r.value !== "pending-cloudfront-distribution"
+    ) {
+      return { ...r, applied: true };
+    }
+    return r;
+  });
+
+  await db
+    .update(buckets)
+    .set({ dnsRecords: updated })
+    .where(eq(buckets.id, bucketId));
+}
+
+function redirectToBucket(
+  stateParam: string,
+  result: "success" | "error"
 ): NextResponse {
-  const state = stateParam
-    ? verifySignedState(stateParam, env.BETTER_AUTH_SECRET)
-    : null;
+  const state = verifySignedState(stateParam, env.BETTER_AUTH_SECRET);
 
   if (state) {
     return NextResponse.redirect(
       new URL(
-        `/org/${state.orgId}/buckets/${state.bucketId}?dc=error`,
+        `/org/${state.orgId}/buckets/${state.bucketId}?dc=${result}`,
         env.BETTER_AUTH_URL
       )
     );

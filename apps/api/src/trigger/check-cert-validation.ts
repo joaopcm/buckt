@@ -1,5 +1,4 @@
 import { buckets, createDb } from "@buckt/db";
-import { applyCloudfrontCname } from "@buckt/domain-connect";
 import { logger, schedules } from "@trigger.dev/sdk/v3";
 import { eq } from "drizzle-orm";
 import { getCertificateStatus } from "../lib/aws/acm";
@@ -10,67 +9,6 @@ const db = createDb(process.env.DATABASE_PUBLIC_URL ?? "");
 const TIMEOUT_HOURS = 72;
 
 type BucketRow = typeof buckets.$inferSelect;
-
-async function tryApplyDomainConnectCname(
-  bucket: BucketRow,
-  distributionDomain: string
-): Promise<boolean> {
-  if (
-    !(
-      bucket.domainConnectProvider &&
-      bucket.domainConnectAccessToken &&
-      process.env.DOMAIN_CONNECT_TOKEN_ENCRYPTION_KEY &&
-      process.env.DOMAIN_CONNECT_CLIENT_ID &&
-      process.env.DOMAIN_CONNECT_CLIENT_SECRET
-    )
-  ) {
-    return false;
-  }
-
-  try {
-    const result = await applyCloudfrontCname(
-      {
-        domainConnectProvider: bucket.domainConnectProvider,
-        domainConnectAccessToken: bucket.domainConnectAccessToken,
-        domainConnectRefreshToken: bucket.domainConnectRefreshToken ?? "",
-        domainConnectTokenExpiresAt: bucket.domainConnectTokenExpiresAt,
-        customDomain: bucket.customDomain,
-      },
-      {
-        encryptionKey: process.env.DOMAIN_CONNECT_TOKEN_ENCRYPTION_KEY,
-        clientId: process.env.DOMAIN_CONNECT_CLIENT_ID,
-        clientSecret: process.env.DOMAIN_CONNECT_CLIENT_SECRET,
-        providerId: process.env.DOMAIN_CONNECT_PROVIDER_ID ?? "buckt.dev",
-      },
-      distributionDomain
-    );
-
-    if (result.applied) {
-      logger.info("Domain Connect: CloudFront CNAME applied", {
-        bucketId: bucket.id,
-      });
-
-      if (result.newAccessToken) {
-        await db
-          .update(buckets)
-          .set({
-            domainConnectAccessToken: result.newAccessToken,
-            domainConnectRefreshToken: result.newRefreshToken,
-            domainConnectTokenExpiresAt: result.newExpiresAt,
-          })
-          .where(eq(buckets.id, bucket.id));
-      }
-      return true;
-    }
-  } catch (err) {
-    logger.warn(
-      "Domain Connect: failed to apply CloudFront CNAME, falling back to manual",
-      { bucketId: bucket.id, error: String(err) }
-    );
-  }
-
-  return false;
-}
 
 async function processBucket(bucket: BucketRow): Promise<void> {
   if (!bucket.acmCertArn) {
@@ -95,11 +33,6 @@ async function processBucket(bucket: BucketRow): Promise<void> {
       logPrefix: process.env.CLOUDFRONT_LOG_PREFIX,
     });
 
-    const cnameApplied = await tryApplyDomainConnectCname(
-      bucket,
-      distributionDomain
-    );
-
     const dnsRecords = (
       (bucket.dnsRecords as Array<{
         name: string;
@@ -109,11 +42,7 @@ async function processBucket(bucket: BucketRow): Promise<void> {
       }>) ?? []
     ).map((r) =>
       r.value === "pending-cloudfront-distribution"
-        ? {
-            ...r,
-            value: distributionDomain,
-            applied: cnameApplied || undefined,
-          }
+        ? { ...r, value: distributionDomain }
         : r
     );
 
