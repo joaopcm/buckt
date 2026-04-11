@@ -1,0 +1,23 @@
+apps/web/src/components/settings/profile-name-card.tsx
+  6ca9923474b5a095 1-69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "6773c1c43017d4f0aa9662b462276b3155b26673",
+  "prompts": {
+    "6ca9923474b5a095": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f1eb6765-8385-4b5b-b127-3377c91f3783",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 72,
+      "total_deletions": 3,
+      "accepted_lines": 69,
+      "overriden_lines": 0
+    }
+  }
+}
