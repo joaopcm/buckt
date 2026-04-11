@@ -5,6 +5,7 @@ import { domainConnectRouter } from "./routers/domain-connect";
 import { filesRouter } from "./routers/files";
 import { keysRouter } from "./routers/keys";
 import { orgRouter } from "./routers/org";
+import { userRouter } from "./routers/user";
 
 export const appRouter = router({
   billing: billingRouter,
@@ -13,6 +14,7 @@ export const appRouter = router({
   files: filesRouter,
   keys: keysRouter,
   org: orgRouter,
+  user: userRouter,
 });
 
 export type AppRouter = typeof appRouter;
