@@ -14,19 +14,28 @@ function getSuggestion(
   memberEmails: string[]
 ): string | null {
   const trimmed = currentToken.trim().toLowerCase();
-  if (trimmed.length === 0) return null;
+  if (trimmed.length === 0) {
+    return null;
+  }
 
   for (const email of memberEmails) {
-    if (email.toLowerCase().startsWith(trimmed) && email.toLowerCase() !== trimmed) {
+    if (
+      email.toLowerCase().startsWith(trimmed) &&
+      email.toLowerCase() !== trimmed
+    ) {
       return email.slice(trimmed.length);
     }
   }
 
   const atIndex = trimmed.indexOf("@");
-  if (atIndex === -1) return null;
+  if (atIndex === -1) {
+    return null;
+  }
 
   const domainFragment = trimmed.slice(atIndex + 1);
-  if (domainFragment.length === 0) return null;
+  if (domainFragment.length === 0) {
+    return null;
+  }
 
   for (const domain of COMMON_DOMAINS) {
     if (domain.startsWith(domainFragment) && domain !== domainFragment) {
