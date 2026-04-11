@@ -1,0 +1,36 @@
+packages/shared/src/schemas/forward-instructions.ts
+  684d03650705e4ad 4-7,12-14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "03c4c12ac52183b91cd5234e3302528a5c5b9e1b",
+  "prompts": {
+    "684d03650705e4ad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "35bdf3c1-b721-4395-89c3-0f9f21090df9",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 7,
+      "total_deletions": 2,
+      "accepted_lines": 7,
+      "overriden_lines": 0
+    },
+    "ceb87f30bbd7239a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "073dc84f-eebb-4518-b726-e851383287a0",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": null,
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 2,
+      "overriden_lines": 0
+    }
+  }
+}
