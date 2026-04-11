@@ -1,0 +1,23 @@
+apps/web/src/components/ui/popover.tsx
+  684d03650705e4ad 1-90
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "5023a836c1fdad02277a48ef319950f9f528cd49",
+  "prompts": {
+    "684d03650705e4ad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "35bdf3c1-b721-4395-89c3-0f9f21090df9",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 91,
+      "total_deletions": 1,
+      "accepted_lines": 90,
+      "overriden_lines": 0
+    }
+  }
+}
