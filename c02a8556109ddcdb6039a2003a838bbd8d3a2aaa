@@ -1,0 +1,36 @@
+apps/web/src/components/settings/profile-password-card.tsx
+  6ca9923474b5a095 1-108
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "c02a8556109ddcdb6039a2003a838bbd8d3a2aaa",
+  "prompts": {
+    "4745763f746a3490": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "37279987-dd6d-4583-b7df-b355453b6917",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 81,
+      "total_deletions": 40,
+      "accepted_lines": 81,
+      "overriden_lines": 0
+    },
+    "6ca9923474b5a095": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f1eb6765-8385-4b5b-b127-3377c91f3783",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 108,
+      "total_deletions": 0,
+      "accepted_lines": 108,
+      "overriden_lines": 0
+    }
+  }
+}
