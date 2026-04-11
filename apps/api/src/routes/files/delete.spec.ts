@@ -9,6 +9,7 @@ import {
 const { mockSend } = vi.hoisted(() => ({ mockSend: vi.fn() }));
 vi.mock("../../lib/s3", () => ({
   s3: { send: mockSend },
+  getS3Client: () => ({ send: mockSend }),
 }));
 
 describe("DELETE /api/buckets/:id/files/*", () => {

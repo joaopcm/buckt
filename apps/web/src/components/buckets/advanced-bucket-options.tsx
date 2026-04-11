@@ -1,6 +1,7 @@
 "use client";
 
 import { Accordion } from "@base-ui/react/accordion";
+import type { AllowedRegion } from "@buckt/shared";
 import { ChevronDown, X } from "lucide-react";
 import { useState } from "react";
 import type {
@@ -27,13 +28,7 @@ interface CreateBucketValues {
   lifecycleTtlDays: number | null;
   name: string;
   optimizationMode: "none" | "light" | "balanced" | "maximum";
-  region:
-    | "us-east-1"
-    | "us-west-2"
-    | "eu-west-1"
-    | "eu-central-1"
-    | "ap-southeast-1"
-    | "ap-northeast-1";
+  region: AllowedRegion;
   visibility: "public" | "private";
 }
 

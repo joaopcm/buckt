@@ -6,10 +6,12 @@ import {
   PutBucketPolicyCommand,
   PutPublicAccessBlockCommand,
 } from "@aws-sdk/client-s3";
-import { s3 } from "../s3";
+import { getS3Client } from "../s3";
 
-export async function setBucketPublic(bucketName: string) {
-  await s3.send(
+export async function setBucketPublic(bucketName: string, region: string) {
+  const client = getS3Client(region);
+
+  await client.send(
     new PutPublicAccessBlockCommand({
       Bucket: bucketName,
       PublicAccessBlockConfiguration: {
@@ -21,7 +23,7 @@ export async function setBucketPublic(bucketName: string) {
     })
   );
 
-  await s3.send(
+  await client.send(
     new PutBucketPolicyCommand({
       Bucket: bucketName,
       Policy: JSON.stringify({
@@ -40,8 +42,10 @@ export async function setBucketPublic(bucketName: string) {
   );
 }
 
-export async function setBucketPrivate(bucketName: string) {
-  await s3.send(
+export async function setBucketPrivate(bucketName: string, region: string) {
+  const client = getS3Client(region);
+
+  await client.send(
     new PutPublicAccessBlockCommand({
       Bucket: bucketName,
       PublicAccessBlockConfiguration: {
@@ -53,7 +57,7 @@ export async function setBucketPrivate(bucketName: string) {
     })
   );
 
-  await s3.send(
+  await client.send(
     new PutBucketPolicyCommand({
       Bucket: bucketName,
       Policy: JSON.stringify({
@@ -64,17 +68,23 @@ export async function setBucketPrivate(bucketName: string) {
   );
 }
 
-export async function setBucketCors(bucketName: string, origins: string[]) {
+export async function setBucketCors(
+  bucketName: string,
+  origins: string[],
+  region: string
+) {
+  const client = getS3Client(region);
+
   if (origins.length === 0) {
     try {
-      await s3.send(new DeleteBucketCorsCommand({ Bucket: bucketName }));
+      await client.send(new DeleteBucketCorsCommand({ Bucket: bucketName }));
     } catch {
       // CORS config may not exist
     }
     return;
   }
 
-  await s3.send(
+  await client.send(
     new PutBucketCorsCommand({
       Bucket: bucketName,
       CORSConfiguration: {
@@ -93,18 +103,23 @@ export async function setBucketCors(bucketName: string, origins: string[]) {
 
 export async function setBucketLifecycle(
   bucketName: string,
-  ttlDays: number | null
+  ttlDays: number | null,
+  region: string
 ) {
+  const client = getS3Client(region);
+
   if (ttlDays === null) {
     try {
-      await s3.send(new DeleteBucketLifecycleCommand({ Bucket: bucketName }));
+      await client.send(
+        new DeleteBucketLifecycleCommand({ Bucket: bucketName })
+      );
     } catch {
       // Lifecycle config may not exist
     }
     return;
   }
 
-  await s3.send(
+  await client.send(
     new PutBucketLifecycleConfigurationCommand({
       Bucket: bucketName,
       LifecycleConfiguration: {

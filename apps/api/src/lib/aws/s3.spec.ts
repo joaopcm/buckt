@@ -4,6 +4,7 @@ const mockSend = vi.fn();
 
 vi.mock("../s3", () => ({
   s3: { send: (...args: unknown[]) => mockSend(...args) },
+  getS3Client: () => ({ send: (...args: unknown[]) => mockSend(...args) }),
 }));
 
 import {
@@ -20,11 +21,27 @@ describe("createBucketResources", () => {
   it("creates bucket with website hosting and public access", async () => {
     mockSend.mockResolvedValue({});
     const result = await createBucketResources("test-bucket", "us-east-1");
-
     expect(mockSend).toHaveBeenCalledTimes(4);
     expect(result.websiteEndpoint).toBe(
       "test-bucket.s3-website-us-east-1.amazonaws.com"
     );
+  });
+
+  it("passes LocationConstraint for non-us-east-1 regions", async () => {
+    mockSend.mockResolvedValue({});
+    await createBucketResources("test-bucket", "eu-west-1");
+    const createCall = mockSend.mock.calls[0][0];
+    expect(createCall.input).toEqual({
+      Bucket: "test-bucket",
+      CreateBucketConfiguration: { LocationConstraint: "eu-west-1" },
+    });
+  });
+
+  it("omits LocationConstraint for us-east-1", async () => {
+    mockSend.mockResolvedValue({});
+    await createBucketResources("test-bucket", "us-east-1");
+    const createCall = mockSend.mock.calls[0][0];
+    expect(createCall.input).toEqual({ Bucket: "test-bucket" });
   });
 });
 
@@ -43,13 +60,13 @@ describe("emptyBucket", () => {
       })
       .mockResolvedValueOnce({});
 
-    await emptyBucket("test-bucket");
+    await emptyBucket("test-bucket", "us-east-1");
     expect(mockSend).toHaveBeenCalledTimes(4);
   });
 
   it("handles empty bucket", async () => {
     mockSend.mockResolvedValueOnce({ Contents: undefined, IsTruncated: false });
-    await emptyBucket("test-bucket");
+    await emptyBucket("test-bucket", "us-east-1");
     expect(mockSend).toHaveBeenCalledTimes(1);
   });
 });
@@ -60,7 +77,7 @@ describe("deleteBucketResources", () => {
       .mockResolvedValueOnce({ Contents: undefined, IsTruncated: false })
       .mockResolvedValueOnce({});
 
-    await deleteBucketResources("test-bucket");
+    await deleteBucketResources("test-bucket", "us-east-1");
     expect(mockSend).toHaveBeenCalledTimes(2);
   });
 });
