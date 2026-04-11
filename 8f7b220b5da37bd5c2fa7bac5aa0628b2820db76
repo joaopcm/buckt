@@ -1,0 +1,100 @@
+apps/api/src/routes/files/list.ts
+  4745763f746a3490 7,45
+apps/api/src/trigger/provision-bucket.ts
+  4745763f746a3490 37-41,46-50
+apps/web/src/components/buckets/provisioning-steps.tsx
+  684d03650705e4ad 5,99-103,163-171,173,177,205-213,215,219
+apps/web/src/components/buckets/forward-instructions-popover.tsx
+  684d03650705e4ad 1-120
+apps/api/src/lib/aws/bucket-settings.ts
+  4745763f746a3490 9,11-14,26,45-48,60,71-76,80,87,106-107,109-110,113-115,122
+packages/emails/src/index.ts
+  684d03650705e4ad 2
+apps/web/src/components/ui/popover.tsx
+  684d03650705e4ad 2,5,7-8,10-12,14-34,36-37,39,41-46,48-52,54-56,58-63,65-66,68-76,78-79,81-89
+packages/emails/src/dns-instructions.tsx
+  684d03650705e4ad 1-13,15-45,49-90
+apps/api/src/routes/buckets/update.ts
+  4745763f746a3490 65,67,72-76,80-84
+apps/web/src/components/buckets/advanced-bucket-options.tsx
+  4745763f746a3490 4,31
+apps/web/src/utils/regions.ts
+  4745763f746a3490 2-5,7-8,10,12-13,16,26-27,29,31-32,34-35,37,39-42
+apps/web/package.json
+  684d03650705e4ad 17
+apps/api/src/trigger/destroy-bucket.ts
+  4745763f746a3490 54
+apps/api/src/routes/files/delete.ts
+  4745763f746a3490 6,42,56
+apps/web/src/components/buckets/create-bucket-form.tsx
+  4745763f746a3490 28-34,36,39,42-46,48-49,51-63
+apps/web/src/components/ui/email-autocomplete-textarea.tsx
+  684d03650705e4ad 1-45,47-129
+packages/shared/src/index.ts
+  6ca9923474b5a095 7
+apps/api/src/routes/files/upload.ts
+  4745763f746a3490 13,105,132
+apps/api/src/lib/aws/s3.ts
+  4745763f746a3490 8,16,18-27,35,37,45-46,49,56,71-77
+packages/shared/src/plans.ts
+  4745763f746a3490 26-27,29,31-32,34-35,37,39-42
+apps/api/src/lib/aws/s3.spec.ts
+  4745763f746a3490 7,29-44,63,69,80
+apps/api/src/lib/s3.ts
+  4745763f746a3490 4-21
+apps/api/src/routes/files/get.ts
+  4745763f746a3490 6,40
+apps/api/src/trigger/optimize-file.ts
+  4745763f746a3490 7,18,81,95,123
+packages/shared/src/schemas/forward-instructions.ts
+  684d03650705e4ad 1-3,5-8
+  6ca9923474b5a095 4,9
+apps/web/src/lib/trpc/routers/buckets.ts
+  684d03650705e4ad 2-8,14-15,373-379,381-421,429-437,439-453
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "8f7b220b5da37bd5c2fa7bac5aa0628b2820db76",
+  "prompts": {
+    "4745763f746a3490": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "37279987-dd6d-4583-b7df-b355453b6917",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 50,
+      "total_deletions": 29,
+      "accepted_lines": 193,
+      "overriden_lines": 0
+    },
+    "684d03650705e4ad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "35bdf3c1-b721-4395-89c3-0f9f21090df9",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 202,
+      "accepted_lines": 525,
+      "overriden_lines": 0
+    },
+    "6ca9923474b5a095": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f1eb6765-8385-4b5b-b127-3377c91f3783",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 8,
+      "total_deletions": 16,
+      "accepted_lines": 3,
+      "overriden_lines": 0
+    }
+  }
+}
