@@ -16,7 +16,7 @@ vi.mock("./lib/redis", () => ({
   redis: {},
 }));
 
-vi.mock("./lib/rate-limit-store", () => ({
+vi.mock("./utils/rate-limit-store", () => ({
   checkRateLimit: vi.fn().mockResolvedValue({
     allowed: true,
     limit: 100,
