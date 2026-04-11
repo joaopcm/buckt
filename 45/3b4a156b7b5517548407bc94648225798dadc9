@@ -1,0 +1,23 @@
+apps/api/src/test-setup.ts
+  ea4eef27434a0758 19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "453b4a156b7b5517548407bc94648225798dadc9",
+  "prompts": {
+    "ea4eef27434a0758": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "79e9bb09-45c1-49e7-855b-033bb747f5dd",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 27,
+      "total_deletions": 27,
+      "accepted_lines": 18,
+      "overriden_lines": 0
+    }
+  }
+}
