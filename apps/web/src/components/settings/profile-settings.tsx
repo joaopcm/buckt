@@ -1,5 +1,3 @@
-"use client";
-
 import { ProfileImageCard } from "@/components/settings/profile-image-card";
 import { ProfileNameCard } from "@/components/settings/profile-name-card";
 import { ProfilePasswordCard } from "@/components/settings/profile-password-card";

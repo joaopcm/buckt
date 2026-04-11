@@ -23,7 +23,7 @@ export function ProfilePasswordCard() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isDirty, isSubmitting },
     reset,
   } = useForm<PasswordValues>({
     resolver: zodResolver(changePasswordSchema),
@@ -98,7 +98,7 @@ export function ProfilePasswordCard() {
               </p>
             )}
           </div>
-          <Button disabled={isSubmitting} type="submit">
+          <Button disabled={!isDirty || isSubmitting} type="submit">
             {isSubmitting ? "Changing..." : "Change password"}
           </Button>
         </form>

@@ -30,14 +30,11 @@ export const userRouter = router({
       const bucketId = env.BUCKT_CDN_BUCKET_ID;
       const userId = ctx.session.user.id;
 
-      const [currentUser, cdnBucket] = await Promise.all([
-        auth.api.getSession({ headers: ctx.headers }),
-        buckt.buckets.get(bucketId),
-      ]);
+      const cdnBucket = await buckt.buckets.get(bucketId);
 
-      if (currentUser?.user.image) {
+      if (ctx.session.user.image) {
         try {
-          const url = new URL(currentUser.user.image);
+          const url = new URL(ctx.session.user.image);
           if (url.hostname === cdnBucket.customDomain) {
             const oldPath = url.pathname.slice(1);
             await buckt.files.delete(bucketId, oldPath);
@@ -61,14 +58,11 @@ export const userRouter = router({
   removeImage: protectedProcedure.mutation(async ({ ctx }) => {
     const bucketId = env.BUCKT_CDN_BUCKET_ID;
 
-    const [currentUser, cdnBucket] = await Promise.all([
-      auth.api.getSession({ headers: ctx.headers }),
-      buckt.buckets.get(bucketId),
-    ]);
+    const cdnBucket = await buckt.buckets.get(bucketId);
 
-    if (currentUser?.user.image) {
+    if (ctx.session.user.image) {
       try {
-        const url = new URL(currentUser.user.image);
+        const url = new URL(ctx.session.user.image);
         if (url.hostname === cdnBucket.customDomain) {
           const filePath = url.pathname.slice(1);
           await buckt.files.delete(bucketId, filePath);
