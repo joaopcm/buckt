@@ -1,0 +1,23 @@
+apps/web/src/components/ui/sidebar.tsx
+  ea4eef27434a0758 33,107
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "743d459a5f33d0fc8b3f9a39f861275edd6742d5",
+  "prompts": {
+    "ea4eef27434a0758": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "79e9bb09-45c1-49e7-855b-033bb747f5dd",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 3,
+      "total_deletions": 18,
+      "accepted_lines": 19,
+      "overriden_lines": 0
+    }
+  }
+}
