@@ -130,6 +130,9 @@ importers:
       '@buckt/domain-connect':
         specifier: workspace:*
         version: link:../../packages/domain-connect
+      '@buckt/emails':
+        specifier: workspace:*
+        version: link:../../packages/emails
       '@buckt/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
@@ -145,6 +148,9 @@ importers:
       '@hugeicons/react':
         specifier: ^1.1.6
         version: 1.1.6(react@19.2.4)
+      '@react-email/components':
+        specifier: ^0.0.41
+        version: 0.0.41(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@sentry/nextjs':
         specifier: ^10.47.0
         version: 10.47.0(@opentelemetry/context-async-hooks@2.6.1(@opentelemetry/api@1.9.1))(@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.6.1(@opentelemetry/api@1.9.1))(next@16.2.1(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(webpack@5.105.4)

@@ -1,9 +1,18 @@
 import { buckets, subscription } from "@buckt/db";
-import { createBucketSchema, PLAN_LIMITS, type PlanName } from "@buckt/shared";
+import { DnsInstructionsEmail } from "@buckt/emails";
+import {
+  createBucketSchema,
+  forwardInstructionsSchema,
+  PLAN_LIMITS,
+  type PlanName,
+} from "@buckt/shared";
+import { render } from "@react-email/components";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
 import { and, count, desc, eq, ilike, lt, sum } from "drizzle-orm";
 import { z } from "zod";
+import { auth } from "@/lib/auth";
+import { resend } from "@/lib/resend";
 import { orgProcedure, router } from "../init";
 
 export const bucketsRouter = router({
@@ -360,5 +369,86 @@ export const bucketsRouter = router({
         .where(eq(buckets.id, input.id));
 
       return { id: input.id, status: "pending" as const };
+    }),
+
+  forwardInstructions: orgProcedure
+    .input(forwardInstructionsSchema)
+    .mutation(async ({ ctx, input }) => {
+      const [bucket] = await ctx.db
+        .select()
+        .from(buckets)
+        .where(and(eq(buckets.id, input.bucketId), eq(buckets.orgId, ctx.orgId)))
+        .limit(1);
+
+      if (!bucket) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Bucket not found",
+        });
+      }
+
+      const allRecords = (
+        Array.isArray(bucket.dnsRecords) ? bucket.dnsRecords : []
+      ) as { applied?: boolean; name: string; type: string; value: string }[];
+
+      const PLACEHOLDER = "pending-cloudfront-distribution";
+      const domain = bucket.customDomain;
+      const rootDomain = domain.split(".").slice(-2).join(".");
+
+      const records =
+        input.serviceId === "acm-validation"
+          ? [
+              ...allRecords.filter((r) => r.value !== PLACEHOLDER),
+              { name: rootDomain, type: "CAA", value: '0 issue "amazon.com"' },
+            ]
+          : allRecords.filter(
+              (r) => r.name === domain && r.value !== PLACEHOLDER
+            );
+
+      if (records.length === 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "No DNS records available for this step",
+        });
+      }
+
+      const org = await auth.api.getFullOrganization({
+        headers: ctx.headers,
+        query: { organizationId: ctx.orgId },
+      });
+
+      const senderName = ctx.session?.user?.name ?? "A team member";
+      const orgName = org?.name ?? "your organization";
+
+      const html = await render(
+        DnsInstructionsEmail({
+          senderName,
+          orgName,
+          domain,
+          records,
+        })
+      );
+
+      const results = await Promise.allSettled(
+        input.emails.map((email) =>
+          resend.emails.send({
+            from: "Buckt <hi@transactional.buckt.dev>",
+            to: email,
+            subject: `DNS setup instructions for ${domain}`,
+            html,
+          })
+        )
+      );
+
+      const sent = results.filter((r) => r.status === "fulfilled").length;
+
+      if (sent === 0) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to send instructions",
+        });
+      }
+
+      return { sent };
     }),
 });
