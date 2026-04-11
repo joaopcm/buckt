@@ -69,11 +69,19 @@ export async function updateBucket(c: Context) {
   }
 
   if (updates.corsOrigins !== undefined) {
-    await setBucketCors(bucket.s3BucketName, updates.corsOrigins, bucket.region);
+    await setBucketCors(
+      bucket.s3BucketName,
+      updates.corsOrigins,
+      bucket.region
+    );
   }
 
   if (updates.lifecycleTtlDays !== undefined) {
-    await setBucketLifecycle(bucket.s3BucketName, updates.lifecycleTtlDays, bucket.region);
+    await setBucketLifecycle(
+      bucket.s3BucketName,
+      updates.lifecycleTtlDays,
+      bucket.region
+    );
   }
 
   const [updated] = await db

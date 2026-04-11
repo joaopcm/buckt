@@ -1,7 +1,7 @@
 "use client";
 
-import type { AllowedRegion } from "@buckt/shared";
 import { Accordion } from "@base-ui/react/accordion";
+import type { AllowedRegion } from "@buckt/shared";
 import { ChevronDown, X } from "lucide-react";
 import { useState } from "react";
 import type {
