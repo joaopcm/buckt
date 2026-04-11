@@ -1,0 +1,27 @@
+packages/emails/src/dns-instructions.tsx
+  684d03650705e4ad 27-33,53,73-81,89
+apps/web/src/components/ui/email-autocomplete-textarea.tsx
+  684d03650705e4ad 120-122
+packages/emails/src/components/email-layout.tsx
+  684d03650705e4ad 8,11-13,19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "cc2ff722c827b22afd6244c879ed7142214ba9be",
+  "prompts": {
+    "684d03650705e4ad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "35bdf3c1-b721-4395-89c3-0f9f21090df9",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 30,
+      "total_deletions": 153,
+      "accepted_lines": 26,
+      "overriden_lines": 0
+    }
+  }
+}
