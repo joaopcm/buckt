@@ -6,7 +6,6 @@ import {
   PLAN_LIMITS,
   type PlanName,
 } from "@buckt/shared";
-import { render } from "@react-email/components";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
 import { and, count, desc, eq, ilike, lt, sum } from "drizzle-orm";
@@ -377,7 +376,9 @@ export const bucketsRouter = router({
       const [bucket] = await ctx.db
         .select()
         .from(buckets)
-        .where(and(eq(buckets.id, input.bucketId), eq(buckets.orgId, ctx.orgId)))
+        .where(
+          and(eq(buckets.id, input.bucketId), eq(buckets.orgId, ctx.orgId))
+        )
         .limit(1);
 
       if (!bucket) {
@@ -420,22 +421,18 @@ export const bucketsRouter = router({
       const senderName = ctx.session?.user?.name ?? "A team member";
       const orgName = org?.name ?? "your organization";
 
-      const html = await render(
-        DnsInstructionsEmail({
-          senderName,
-          orgName,
-          domain,
-          records,
-        })
-      );
-
       const results = await Promise.allSettled(
         input.emails.map((email) =>
           resend.emails.send({
             from: "Buckt <hi@transactional.buckt.dev>",
             to: email,
             subject: `DNS setup instructions for ${domain}`,
-            html,
+            react: DnsInstructionsEmail({
+              senderName,
+              orgName,
+              domain,
+              records,
+            }),
           })
         )
       );

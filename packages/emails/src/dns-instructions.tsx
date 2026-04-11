@@ -10,10 +10,10 @@ interface DnsRecord {
 }
 
 interface DnsInstructionsEmailProps {
-  senderName: string;
-  orgName: string;
   domain: string;
+  orgName: string;
   records: DnsRecord[];
+  senderName: string;
 }
 
 const cellStyle: React.CSSProperties = {
@@ -43,9 +43,7 @@ export function DnsInstructionsEmail({
   records,
 }: DnsInstructionsEmailProps) {
   return (
-    <EmailLayout
-      preview={`DNS setup instructions for ${domain}`}
-    >
+    <EmailLayout preview={`DNS setup instructions for ${domain}`}>
       <Heading style={heading}>DNS Setup Instructions</Heading>
       <Text style={paragraph}>
         <strong>{senderName}</strong> from <strong>{orgName}</strong> shared DNS
