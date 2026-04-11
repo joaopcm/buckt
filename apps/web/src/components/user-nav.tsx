@@ -1,7 +1,6 @@
 "use client";
 
 import { LogOut, User } from "lucide-react";
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -62,11 +61,9 @@ export function UserNav() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem asChild>
-            <Link href={`/org/${orgId}/profile`}>
-              <User className="size-4" />
-              Profile
-            </Link>
+          <DropdownMenuItem onClick={() => router.push(`/org/${orgId}/profile`)}>
+            <User className="size-4" />
+            Profile
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
