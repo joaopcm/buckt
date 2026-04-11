@@ -4,7 +4,7 @@ import type { OptimizationMode } from "@buckt/shared";
 import { logger, task } from "@trigger.dev/sdk/v3";
 import { eq, sql } from "drizzle-orm";
 import sharp from "sharp";
-import { s3 } from "../lib/s3";
+import { getS3Client } from "../lib/s3";
 
 const db = createDb(process.env.DATABASE_PUBLIC_URL ?? "");
 
@@ -15,6 +15,7 @@ interface OptimizeFilePayload {
   fileKey: string;
   mode: Exclude<OptimizationMode, "none">;
   originalSize: number;
+  region: string;
   s3BucketName: string;
 }
 
@@ -77,6 +78,7 @@ export const optimizeFile = task({
     const {
       bucketId,
       s3BucketName,
+      region,
       fileKey,
       contentType,
       originalSize,
@@ -90,7 +92,7 @@ export const optimizeFile = task({
       originalSize,
     });
 
-    const response = await s3.send(
+    const response = await getS3Client(region).send(
       new GetObjectCommand({ Bucket: s3BucketName, Key: fileKey })
     );
 
@@ -118,7 +120,7 @@ export const optimizeFile = task({
     }
 
     logger.info("Uploading optimized file", { optimizedSize });
-    await s3.send(
+    await getS3Client(region).send(
       new PutObjectCommand({
         Bucket: s3BucketName,
         Key: fileKey,

@@ -13,6 +13,7 @@ import {
 
 vi.mock("../../lib/s3", () => ({
   s3: { send: vi.fn().mockResolvedValue({}) },
+  getS3Client: () => ({ send: vi.fn().mockResolvedValue({}) }),
 }));
 
 describe("PUT /api/buckets/:id/files/*", () => {

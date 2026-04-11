@@ -3,7 +3,7 @@ import { buckets } from "@buckt/db";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
 import { db } from "../../lib/db";
-import { s3 } from "../../lib/s3";
+import { getS3Client } from "../../lib/s3";
 import { isBucketInScope } from "../../utils/bucket-scope";
 import { error, success } from "../../utils/response";
 
@@ -37,7 +37,7 @@ export async function getFile(c: Context) {
   }
 
   try {
-    const head = await s3.send(
+    const head = await getS3Client(bucket.region).send(
       new HeadObjectCommand({
         Bucket: bucket.s3BucketName,
         Key: filePath,

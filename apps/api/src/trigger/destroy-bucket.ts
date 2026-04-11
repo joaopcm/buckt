@@ -51,7 +51,7 @@ export const destroyBucket = task({
 
     try {
       logger.info("Deleting S3 bucket", { s3BucketName: bucket.s3BucketName });
-      await deleteBucketResources(bucket.s3BucketName);
+      await deleteBucketResources(bucket.s3BucketName, bucket.region);
     } catch (err) {
       if (!(err instanceof Error && err.name === "NoSuchBucket")) {
         throw err;

@@ -5,3 +5,4 @@ export * from "./schemas/files";
 export * from "./schemas/keys";
 export * from "./schemas/org";
 export * from "./schemas/forward-instructions";
+export * from "./schemas/user";
