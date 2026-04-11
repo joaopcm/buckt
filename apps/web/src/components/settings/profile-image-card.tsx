@@ -1,0 +1,147 @@
+"use client";
+
+import { Upload, X } from "lucide-react";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { authClient } from "@/lib/auth-client";
+import { trpc } from "@/lib/trpc/client";
+import { formatBytes } from "@/utils/format";
+import { getInitials } from "@/utils/get-initials";
+
+const MAX_FILE_SIZE = 2 * 1024 * 1024;
+const ACCEPTED_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "image/svg+xml",
+]);
+
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      resolve(result.split(",")[1]);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+export function ProfileImageCard() {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const { data: session, refetch } = authClient.useSession();
+  const user = session?.user;
+
+  const updateImage = trpc.user.updateImage.useMutation({
+    onSuccess: () => {
+      toast.success("Profile picture updated");
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const removeImage = trpc.user.removeImage.useMutation({
+    onSuccess: () => {
+      toast.success("Profile picture removed");
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) {
+      return;
+    }
+
+    if (!ACCEPTED_TYPES.has(file.type)) {
+      toast.error("Unsupported image format");
+      return;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error(`Image must be under ${formatBytes(MAX_FILE_SIZE)}`);
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const image = await fileToBase64(file);
+      await updateImage.mutateAsync({
+        image,
+        contentType: file.type as
+          | "image/jpeg"
+          | "image/png"
+          | "image/webp"
+          | "image/gif"
+          | "image/svg+xml",
+      });
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  const initials = user?.name ? getInitials(user.name) : "?";
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Profile picture</CardTitle>
+        <CardDescription>Your avatar appears across the app</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center gap-4">
+          <Avatar className="size-16 text-lg">
+            <AvatarImage src={user?.image ?? undefined} />
+            <AvatarFallback>{initials}</AvatarFallback>
+          </Avatar>
+          <div className="flex gap-2">
+            <Button
+              disabled={uploading || removeImage.isPending}
+              onClick={() => inputRef.current?.click()}
+              size="sm"
+              variant="outline"
+            >
+              <Upload className="mr-1 size-4" />
+              {uploading ? "Uploading..." : "Upload"}
+            </Button>
+            {user?.image && (
+              <Button
+                disabled={uploading || removeImage.isPending}
+                onClick={() => removeImage.mutate()}
+                size="sm"
+                variant="outline"
+              >
+                <X className="mr-1 size-4" />
+                {removeImage.isPending ? "Removing..." : "Remove"}
+              </Button>
+            )}
+            <input
+              accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
+              className="hidden"
+              onChange={handleFileChange}
+              ref={inputRef}
+              type="file"
+            />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

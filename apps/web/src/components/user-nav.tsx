@@ -1,7 +1,7 @@
 "use client";
 
 import { LogOut, User } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -16,6 +16,7 @@ import { authClient } from "@/lib/auth-client";
 
 export function UserNav() {
   const router = useRouter();
+  const { orgId } = useParams<{ orgId: string }>();
   const { data: session } = authClient.useSession();
 
   async function handleSignOut() {
@@ -60,7 +61,9 @@ export function UserNav() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => router.push(`/org/${orgId}/profile`)}
+          >
             <User className="size-4" />
             Profile
           </DropdownMenuItem>
