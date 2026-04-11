@@ -34,12 +34,12 @@ export const provisionBucket = task({
 
     if (bucket.corsOrigins.length > 0) {
       logger.info("Setting CORS", { origins: bucket.corsOrigins });
-      await setBucketCors(bucket.s3BucketName, bucket.corsOrigins);
+      await setBucketCors(bucket.s3BucketName, bucket.corsOrigins, bucket.region);
     }
 
     if (bucket.lifecycleTtlDays !== null) {
       logger.info("Setting lifecycle", { ttlDays: bucket.lifecycleTtlDays });
-      await setBucketLifecycle(bucket.s3BucketName, bucket.lifecycleTtlDays);
+      await setBucketLifecycle(bucket.s3BucketName, bucket.lifecycleTtlDays, bucket.region);
     }
 
     logger.info("Requesting ACM certificate", { domain: bucket.customDomain });

@@ -62,18 +62,18 @@ export async function updateBucket(c: Context) {
     updates.visibility !== bucket.visibility
   ) {
     if (updates.visibility === "private") {
-      await setBucketPrivate(bucket.s3BucketName);
+      await setBucketPrivate(bucket.s3BucketName, bucket.region);
     } else {
-      await setBucketPublic(bucket.s3BucketName);
+      await setBucketPublic(bucket.s3BucketName, bucket.region);
     }
   }
 
   if (updates.corsOrigins !== undefined) {
-    await setBucketCors(bucket.s3BucketName, updates.corsOrigins);
+    await setBucketCors(bucket.s3BucketName, updates.corsOrigins, bucket.region);
   }
 
   if (updates.lifecycleTtlDays !== undefined) {
-    await setBucketLifecycle(bucket.s3BucketName, updates.lifecycleTtlDays);
+    await setBucketLifecycle(bucket.s3BucketName, updates.lifecycleTtlDays, bucket.region);
   }
 
   const [updated] = await db

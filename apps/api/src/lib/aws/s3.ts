@@ -5,7 +5,7 @@ import {
   ListObjectsV2Command,
   PutBucketWebsiteCommand,
 } from "@aws-sdk/client-s3";
-import { s3 } from "../s3";
+import { getS3Client } from "../s3";
 import { setBucketPrivate, setBucketPublic } from "./bucket-settings";
 
 export async function createBucketResources(
@@ -13,9 +13,18 @@ export async function createBucketResources(
   region: string,
   visibility: "public" | "private" = "public"
 ) {
-  await s3.send(new CreateBucketCommand({ Bucket: bucketName }));
+  const client = getS3Client(region);
 
-  await s3.send(
+  await client.send(
+    new CreateBucketCommand({
+      Bucket: bucketName,
+      ...(region !== "us-east-1" && {
+        CreateBucketConfiguration: { LocationConstraint: region },
+      }),
+    })
+  );
+
+  await client.send(
     new PutBucketWebsiteCommand({
       Bucket: bucketName,
       WebsiteConfiguration: { IndexDocument: { Suffix: "index.html" } },
@@ -23,9 +32,9 @@ export async function createBucketResources(
   );
 
   if (visibility === "public") {
-    await setBucketPublic(bucketName);
+    await setBucketPublic(bucketName, region);
   } else {
-    await setBucketPrivate(bucketName);
+    await setBucketPrivate(bucketName, region);
   }
 
   return {
@@ -33,17 +42,18 @@ export async function createBucketResources(
   };
 }
 
-export async function emptyBucket(bucketName: string) {
+export async function emptyBucket(bucketName: string, region: string) {
+  const client = getS3Client(region);
   let continuationToken: string | undefined;
   do {
-    const list = await s3.send(
+    const list = await client.send(
       new ListObjectsV2Command({
         Bucket: bucketName,
         ContinuationToken: continuationToken,
       })
     );
     if (list.Contents?.length) {
-      await s3.send(
+      await client.send(
         new DeleteObjectsCommand({
           Bucket: bucketName,
           Delete: {
@@ -58,7 +68,11 @@ export async function emptyBucket(bucketName: string) {
   } while (continuationToken);
 }
 
-export async function deleteBucketResources(bucketName: string) {
-  await emptyBucket(bucketName);
-  await s3.send(new DeleteBucketCommand({ Bucket: bucketName }));
+export async function deleteBucketResources(
+  bucketName: string,
+  region: string
+) {
+  await emptyBucket(bucketName, region);
+  const client = getS3Client(region);
+  await client.send(new DeleteBucketCommand({ Bucket: bucketName }));
 }
