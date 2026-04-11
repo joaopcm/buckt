@@ -1,0 +1,57 @@
+apps/api/src/trigger/destroy-bucket.ts
+  4745763f746a3490 54
+apps/api/src/trigger/provision-bucket.ts
+  6ca9923474b5a095 42
+  4745763f746a3490 37
+apps/api/src/routes/files/upload.ts
+  4745763f746a3490 13,105,132
+apps/api/src/routes/files/delete.ts
+  4745763f746a3490 6,42,56
+apps/api/src/routes/buckets/update.ts
+  4745763f746a3490 65,67,72,76
+apps/api/src/routes/files/get.ts
+  4745763f746a3490 6,40
+apps/api/src/lib/s3.ts
+  4745763f746a3490 4-21
+apps/api/src/routes/files/list.ts
+  4745763f746a3490 7,45
+apps/api/src/lib/aws/bucket-settings.ts
+  4745763f746a3490 9,11-14,26,45-48,60,71-76,80,87,106-107,109-110,113-115,122
+apps/api/src/trigger/optimize-file.ts
+  4745763f746a3490 7,18,81,95,123
+apps/api/src/lib/aws/s3.ts
+  4745763f746a3490 8,16,18-27,35,37,45-46,49,56,71-77
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "9b9eeab92a7825b375570fdf78092b0c58ea9875",
+  "prompts": {
+    "4745763f746a3490": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "37279987-dd6d-4583-b7df-b355453b6917",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 11,
+      "total_deletions": 9,
+      "accepted_lines": 92,
+      "overriden_lines": 0
+    },
+    "6ca9923474b5a095": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f1eb6765-8385-4b5b-b127-3377c91f3783",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 24,
+      "overriden_lines": 0
+    }
+  }
+}
