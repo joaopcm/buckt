@@ -1,0 +1,27 @@
+apps/web/src/components/ui/popover.tsx
+  684d03650705e4ad 1,3-4,6,9,13,33,39,42,47,54,57,63,67,76,80,90
+apps/web/src/lib/trpc/routers/buckets.ts
+  684d03650705e4ad 379-381,430-435
+packages/emails/src/dns-instructions.tsx
+  684d03650705e4ad 14,16,46
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "56653140b1f8d03d9cf2245cc8892c030aaa9e80",
+  "prompts": {
+    "684d03650705e4ad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "35bdf3c1-b721-4395-89c3-0f9f21090df9",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 29,
+      "total_deletions": 35,
+      "accepted_lines": 29,
+      "overriden_lines": 0
+    }
+  }
+}
