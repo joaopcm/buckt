@@ -1,0 +1,23 @@
+apps/web/src/lib/shortcuts/index.ts
+  ea4eef27434a0758 1-15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "0dd2f6729969f0b9780c159503c8dbdc05554bc9",
+  "prompts": {
+    "ea4eef27434a0758": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "79e9bb09-45c1-49e7-855b-033bb747f5dd",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 23,
+      "total_deletions": 8,
+      "accepted_lines": 32,
+      "overriden_lines": 0
+    }
+  }
+}
