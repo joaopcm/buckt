@@ -46,7 +46,9 @@ export function ForwardInstructionsPopover({
   useEffect(() => {
     if (open) {
       const saved = localStorage.getItem(storageKey(bucketId));
-      if (saved) setValue(saved);
+      setValue(saved ?? "");
+    } else {
+      setValue("");
     }
   }, [open, bucketId]);
 

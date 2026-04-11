@@ -40,9 +40,16 @@ export function EmailAutocompleteTextarea({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const [cursorPos, setCursorPos] = useState(value.length);
+  const [dismissed, setDismissed] = useState(false);
 
   const currentToken = getCurrentToken(value, cursorPos);
   const suggestion = useEmailSuggestion(currentToken, memberEmails);
+
+  useEffect(() => {
+    setDismissed(false);
+  }, [currentToken]);
+
+  const activeSuggestion = dismissed ? null : suggestion;
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -61,21 +68,24 @@ export function EmailAutocompleteTextarea({
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
-      if (e.key === "Tab" && suggestion) {
+      if (e.key === "Tab" && activeSuggestion) {
         e.preventDefault();
         const before = value.slice(0, cursorPos);
         const after = value.slice(cursorPos);
-        const newValue = before + suggestion + after;
-        const newCursorPos = cursorPos + suggestion.length;
+        const newValue = before + activeSuggestion + after;
+        const newCursorPos = cursorPos + activeSuggestion.length;
         onChange(newValue);
         setCursorPos(newCursorPos);
+        setDismissed(false);
 
         requestAnimationFrame(() => {
           textareaRef.current?.setSelectionRange(newCursorPos, newCursorPos);
         });
+      } else if (e.key === "Escape" && activeSuggestion) {
+        setDismissed(true);
       }
     },
-    [suggestion, value, cursorPos, onChange]
+    [activeSuggestion, value, cursorPos, onChange]
   );
 
   const handleScroll = useCallback(() => {
@@ -104,8 +114,8 @@ export function EmailAutocompleteTextarea({
         )}
       >
         <span className="invisible">{beforeCursor}</span>
-        {suggestion && (
-          <span className="text-muted-foreground/40">{suggestion}</span>
+        {activeSuggestion && (
+          <span className="text-muted-foreground/40">{activeSuggestion}</span>
         )}
         <span className="invisible">{afterCursor}</span>
       </div>
