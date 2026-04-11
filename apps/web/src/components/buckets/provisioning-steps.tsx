@@ -2,6 +2,7 @@
 
 import { Check, Circle, Loader2, Zap } from "lucide-react";
 import { toast } from "sonner";
+import { ForwardInstructionsPopover } from "@/components/buckets/forward-instructions-popover";
 import { CopyText } from "@/components/copy-text";
 import { Button } from "@/components/ui/button";
 import {
@@ -95,6 +96,11 @@ export function ProvisioningSteps({
   const rootDomain = domain.split(".").slice(-2).join(".");
   const validationApplied = validationRecords.some((r) => r.applied);
 
+  const { data: membersData } = trpc.org.members.useQuery({ orgId });
+  const memberEmails = (membersData?.members ?? []).map(
+    (m: { user: { email: string } }) => m.user.email
+  );
+
   function dnsStepStatus(): StepStatus {
     if (validationApplied) {
       return "done";
@@ -154,13 +160,21 @@ export function ProvisioningSteps({
                   },
                 ]}
               />
-              {hasDomainConnect && (
-                <ApplyButton
+              <div className="flex items-center gap-2">
+                {hasDomainConnect && (
+                  <ApplyButton
+                    bucketId={bucketId}
+                    orgId={orgId}
+                    serviceId="acm-validation"
+                  />
+                )}
+                <ForwardInstructionsPopover
                   bucketId={bucketId}
+                  memberEmails={memberEmails}
                   orgId={orgId}
                   serviceId="acm-validation"
                 />
-              )}
+              </div>
             </div>
           )
         )}
@@ -188,13 +202,21 @@ export function ProvisioningSteps({
           ) : (
             <div className="space-y-3">
               <DnsTable records={[domainRecord]} />
-              {hasDomainConnect && (
-                <ApplyButton
+              <div className="flex items-center gap-2">
+                {hasDomainConnect && (
+                  <ApplyButton
+                    bucketId={bucketId}
+                    orgId={orgId}
+                    serviceId="cdn-cname"
+                  />
+                )}
+                <ForwardInstructionsPopover
                   bucketId={bucketId}
+                  memberEmails={memberEmails}
                   orgId={orgId}
                   serviceId="cdn-cname"
                 />
-              )}
+              </div>
             </div>
           ))}
       </Step>
