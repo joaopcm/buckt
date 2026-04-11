@@ -9,13 +9,13 @@ export type ShortcutScope =
 
 export type ShortcutCategory = "navigation" | "action" | "contextual";
 
-export type ShortcutDefinition = {
+export interface ShortcutDefinition {
+  category: ShortcutCategory;
   id: string;
   keys: string;
   label: string;
-  category: ShortcutCategory;
   scope: ShortcutScope;
-};
+}
 
 export const shortcuts: ShortcutDefinition[] = [
   {
