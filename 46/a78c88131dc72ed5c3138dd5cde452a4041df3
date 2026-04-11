@@ -1,0 +1,34 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "46a78c88131dc72ed5c3138dd5cde452a4041df3",
+  "prompts": {
+    "6ca9923474b5a095": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f1eb6765-8385-4b5b-b127-3377c91f3783",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 2,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "ea4eef27434a0758": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "79e9bb09-45c1-49e7-855b-033bb747f5dd",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 56,
+      "total_deletions": 27,
+      "accepted_lines": 1,
+      "overriden_lines": 16
+    }
+  }
+}
