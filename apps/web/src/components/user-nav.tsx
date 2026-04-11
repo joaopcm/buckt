@@ -61,7 +61,9 @@ export function UserNav() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => router.push(`/org/${orgId}/profile`)}>
+          <DropdownMenuItem
+            onClick={() => router.push(`/org/${orgId}/profile`)}
+          >
             <User className="size-4" />
             Profile
           </DropdownMenuItem>
