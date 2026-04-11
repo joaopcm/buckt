@@ -1,0 +1,23 @@
+apps/web/src/components/user-nav.tsx
+  6ca9923474b5a095 64-66
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "2016f31ef283dc564f2eb7cafa37904ff57f9d7b",
+  "prompts": {
+    "6ca9923474b5a095": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f1eb6765-8385-4b5b-b127-3377c91f3783",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 64,
+      "total_deletions": 86,
+      "accepted_lines": 62,
+      "overriden_lines": 4
+    }
+  }
+}
