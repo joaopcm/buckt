@@ -18,6 +18,7 @@ describe("shortcuts registry", () => {
     expect(navIds).toContain("nav.keys");
     expect(navIds).toContain("nav.settings");
     expect(navIds).toContain("nav.billing");
+    expect(navIds).toContain("nav.profile");
   });
 
   it("contains all expected action shortcuts", () => {

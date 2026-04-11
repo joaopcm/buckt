@@ -54,6 +54,13 @@ export const shortcuts: ShortcutDefinition[] = [
     scope: "global",
   },
   {
+    id: "nav.profile",
+    keys: "g>p",
+    label: "Go to Profile",
+    category: "navigation",
+    scope: "global",
+  },
+  {
     id: "action.toggle-sidebar",
     keys: "mod+b",
     label: "Toggle Sidebar",
