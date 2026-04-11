@@ -1,21 +1,21 @@
 "use client";
 
 import {
+  type KeyboardEvent,
   useCallback,
   useEffect,
   useRef,
   useState,
-  type KeyboardEvent,
 } from "react";
 import { useEmailSuggestion } from "@/hooks/use-email-suggestion";
 import { cn } from "@/utils/utils";
 
 interface EmailAutocompleteTextareaProps {
-  value: string;
-  onChange: (value: string) => void;
-  memberEmails: string[];
-  placeholder?: string;
   className?: string;
+  memberEmails: string[];
+  onChange: (value: string) => void;
+  placeholder?: string;
+  value: string;
 }
 
 function getCurrentToken(text: string, cursorPos: number): string {
@@ -45,6 +45,7 @@ export function EmailAutocompleteTextarea({
   const currentToken = getCurrentToken(value, cursorPos);
   const suggestion = useEmailSuggestion(currentToken, memberEmails);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset dismissed when token changes
   useEffect(() => {
     setDismissed(false);
   }, [currentToken]);
@@ -94,6 +95,7 @@ export function EmailAutocompleteTextarea({
     }
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: sync scroll position when value changes
   useEffect(() => {
     if (textareaRef.current && overlayRef.current) {
       overlayRef.current.scrollTop = textareaRef.current.scrollTop;
@@ -106,12 +108,12 @@ export function EmailAutocompleteTextarea({
   return (
     <div className={cn("relative", className)}>
       <div
-        ref={overlayRef}
         aria-hidden="true"
         className={cn(
           SHARED_STYLES,
           "pointer-events-none absolute inset-0 overflow-hidden border border-transparent"
         )}
+        ref={overlayRef}
       >
         <span className="invisible">{beforeCursor}</span>
         {activeSuggestion && (
@@ -121,7 +123,6 @@ export function EmailAutocompleteTextarea({
       </div>
 
       <textarea
-        ref={textareaRef}
         className={cn(
           SHARED_STYLES,
           "relative z-10 h-full w-full resize-none border border-input bg-transparent text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/50"
@@ -131,6 +132,7 @@ export function EmailAutocompleteTextarea({
         onScroll={handleScroll}
         onSelect={handleSelect}
         placeholder={placeholder}
+        ref={textareaRef}
         rows={3}
         value={value}
       />

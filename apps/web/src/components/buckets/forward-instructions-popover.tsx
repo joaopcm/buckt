@@ -20,18 +20,20 @@ function storageKey(bucketId: string) {
   return `forward-dns-emails:${bucketId}`;
 }
 
+const EMAIL_SEPARATOR = /[,\n]/;
+
 function parseEmails(raw: string): string[] {
   return raw
-    .split(/[,\n]/)
+    .split(EMAIL_SEPARATOR)
     .map((s) => s.trim())
     .filter(Boolean);
 }
 
 interface ForwardInstructionsPopoverProps {
-  orgId: string;
   bucketId: string;
-  serviceId: "acm-validation" | "cdn-cname";
   memberEmails: string[];
+  orgId: string;
+  serviceId: "acm-validation" | "cdn-cname";
 }
 
 export function ForwardInstructionsPopover({
@@ -54,7 +56,9 @@ export function ForwardInstructionsPopover({
 
   const forward = trpc.buckets.forwardInstructions.useMutation({
     onSuccess: ({ sent }) => {
-      toast.success(`Instructions sent to ${sent} recipient${sent > 1 ? "s" : ""}`);
+      toast.success(
+        `Instructions sent to ${sent} recipient${sent > 1 ? "s" : ""}`
+      );
       localStorage.setItem(storageKey(bucketId), value);
       setOpen(false);
     },
@@ -82,9 +86,7 @@ export function ForwardInstructionsPopover({
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
-      <PopoverTrigger
-        render={<Button size="sm" variant="outline" />}
-      >
+      <PopoverTrigger render={<Button size="sm" variant="outline" />}>
         <Mail className="mr-1.5 size-3" />
         Forward instructions
       </PopoverTrigger>
