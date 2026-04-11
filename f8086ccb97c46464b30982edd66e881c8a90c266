@@ -1,0 +1,23 @@
+apps/web/src/components/buckets/provisioning-steps.tsx
+  684d03650705e4ad 5,99-103,163-171,173,177,205-213,215,219
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "f8086ccb97c46464b30982edd66e881c8a90c266",
+  "prompts": {
+    "684d03650705e4ad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "35bdf3c1-b721-4395-89c3-0f9f21090df9",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 29,
+      "total_deletions": 7,
+      "accepted_lines": 28,
+      "overriden_lines": 0
+    }
+  }
+}
