@@ -1,0 +1,27 @@
+apps/api/src/routes/buckets/update.ts
+  4745763f746a3490 72-76,80-84
+apps/web/src/components/buckets/advanced-bucket-options.tsx
+  4745763f746a3490 4
+apps/api/src/trigger/provision-bucket.ts
+  4745763f746a3490 37-41,46-50
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "60e14867e432788aad20a77cc764be7a502456e0",
+  "prompts": {
+    "4745763f746a3490": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "37279987-dd6d-4583-b7df-b355453b6917",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 50,
+      "total_deletions": 29,
+      "accepted_lines": 50,
+      "overriden_lines": 0
+    }
+  }
+}
