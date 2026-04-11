@@ -1,0 +1,54 @@
+apps/web/src/components/settings/profile-password-card.tsx
+  6ca9923474b5a095 1-108
+packages/shared/src/schemas/forward-instructions.ts
+  684d03650705e4ad 1-3,8-11
+  6ca9923474b5a095 4-7,12-14
+packages/shared/src/index.ts
+  6ca9923474b5a095 5
+apps/web/src/lib/trpc/routers/user.ts
+  6ca9923474b5a095 33,35-36,38,40,64,66-67,69,71
+apps/web/src/components/user-nav.tsx
+  6ca9923474b5a095 4-5,65-69
+  684d03650705e4ad 20
+apps/web/src/lib/trpc/router.ts
+  6ca9923474b5a095 8,17
+apps/web/src/components/settings/profile-name-card.tsx
+  6ca9923474b5a095 1-69
+apps/web/src/components/settings/profile-image-card.tsx
+  6ca9923474b5a095 1-147
+apps/web/src/app/(dashboard)/org/[orgId]/profile/page.tsx
+  6ca9923474b5a095 1-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "52a2c0dfa6eef7136362a47520714bdc2ac4ba81",
+  "prompts": {
+    "684d03650705e4ad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "35bdf3c1-b721-4395-89c3-0f9f21090df9",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 202,
+      "accepted_lines": 8,
+      "overriden_lines": 0
+    },
+    "6ca9923474b5a095": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f1eb6765-8385-4b5b-b127-3377c91f3783",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 8,
+      "total_deletions": 16,
+      "accepted_lines": 369,
+      "overriden_lines": 0
+    }
+  }
+}
