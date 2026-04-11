@@ -1,0 +1,38 @@
+apps/web/src/lib/trpc/routers/user.ts
+  6ca9923474b5a095 33,35,37,61,63,65
+apps/web/src/components/settings/profile-password-card.tsx
+  6ca9923474b5a095 26,101
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "c5eca891c418da977545bcde0e940b7b281346fd",
+  "prompts": {
+    "684d03650705e4ad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "35bdf3c1-b721-4395-89c3-0f9f21090df9",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 202,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "6ca9923474b5a095": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f1eb6765-8385-4b5b-b127-3377c91f3783",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 8,
+      "total_deletions": 16,
+      "accepted_lines": 8,
+      "overriden_lines": 0
+    }
+  }
+}
