@@ -117,7 +117,9 @@ export function EmailAutocompleteTextarea({
       >
         <span className="invisible">{beforeCursor}</span>
         {activeSuggestion && (
-          <span className="text-muted-foreground/40">{activeSuggestion}</span>
+          <span className="whitespace-nowrap text-muted-foreground/40">
+            {activeSuggestion}
+          </span>
         )}
         <span className="invisible">{afterCursor}</span>
       </div>

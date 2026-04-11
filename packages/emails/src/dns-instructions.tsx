@@ -24,6 +24,13 @@ const cellStyle: React.CSSProperties = {
   wordBreak: "break-all",
 };
 
+const typeCellStyle: React.CSSProperties = {
+  ...cellStyle,
+  whiteSpace: "nowrap",
+  wordBreak: "normal",
+  width: "56px",
+};
+
 const headerCellStyle: React.CSSProperties = {
   ...cellStyle,
   backgroundColor: "#f4f4f5",
@@ -43,7 +50,7 @@ export function DnsInstructionsEmail({
   records,
 }: DnsInstructionsEmailProps) {
   return (
-    <EmailLayout preview={`DNS setup instructions for ${domain}`}>
+    <EmailLayout preview={`DNS setup instructions for ${domain}`} wide>
       <Heading style={heading}>DNS Setup Instructions</Heading>
       <Text style={paragraph}>
         <strong>{senderName}</strong> from <strong>{orgName}</strong> shared DNS
@@ -63,7 +70,15 @@ export function DnsInstructionsEmail({
         >
           <thead>
             <tr>
-              <th style={headerCellStyle}>Type</th>
+              <th
+                style={{
+                  ...headerCellStyle,
+                  whiteSpace: "nowrap",
+                  width: "56px",
+                }}
+              >
+                Type
+              </th>
               <th style={headerCellStyle}>Name</th>
               <th style={headerCellStyle}>Value</th>
             </tr>
@@ -71,7 +86,7 @@ export function DnsInstructionsEmail({
           <tbody>
             {records.map((record) => (
               <tr key={`${record.type}-${record.name}`}>
-                <td style={cellStyle}>{record.type}</td>
+                <td style={typeCellStyle}>{record.type}</td>
                 <td style={cellStyle}>{record.name}</td>
                 <td style={cellStyle}>{record.value}</td>
               </tr>
