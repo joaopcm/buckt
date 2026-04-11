@@ -17,6 +17,7 @@ export function GlobalShortcuts() {
   useShortcut("nav.keys", () => navigate("/keys"));
   useShortcut("nav.settings", () => navigate("/settings"));
   useShortcut("nav.billing", () => navigate("/billing"));
+  useShortcut("nav.profile", () => navigate("/profile"));
 
   useShortcut("action.create", () => {
     const segments = pathname.split("/");
