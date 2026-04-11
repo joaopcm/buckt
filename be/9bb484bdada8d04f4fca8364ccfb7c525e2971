@@ -1,0 +1,42 @@
+apps/api/src/routes/files/get.spec.ts
+  4745763f746a3490 12
+apps/api/src/routes/files/delete.spec.ts
+  4745763f746a3490 12
+apps/api/src/routes/files/list.spec.ts
+  4745763f746a3490 12
+apps/api/src/routes/files/upload.spec.ts
+  4745763f746a3490 16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "be9bb484bdada8d04f4fca8364ccfb7c525e2971",
+  "prompts": {
+    "4745763f746a3490": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "37279987-dd6d-4583-b7df-b355453b6917",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 15,
+      "total_deletions": 16,
+      "accepted_lines": 13,
+      "overriden_lines": 4
+    },
+    "6ca9923474b5a095": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f1eb6765-8385-4b5b-b127-3377c91f3783",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 50,
+      "overriden_lines": 0
+    }
+  }
+}
