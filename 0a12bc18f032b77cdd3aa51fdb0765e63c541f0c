@@ -1,0 +1,39 @@
+apps/web/src/components/ui/email-autocomplete-textarea.tsx
+  684d03650705e4ad 4,14,16,18,98,116,135
+  4745763f746a3490 48
+apps/web/src/components/buckets/forward-instructions-popover.tsx
+  684d03650705e4ad 23-24,27,35-36,59-61,89
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "0a12bc18f032b77cdd3aa51fdb0765e63c541f0c",
+  "prompts": {
+    "4745763f746a3490": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "37279987-dd6d-4583-b7df-b355453b6917",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 0,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "684d03650705e4ad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "35bdf3c1-b721-4395-89c3-0f9f21090df9",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 29,
+      "total_deletions": 341,
+      "accepted_lines": 29,
+      "overriden_lines": 0
+    }
+  }
+}
