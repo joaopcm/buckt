@@ -1,0 +1,29 @@
+apps/api/src/trigger/check-cert-validation.ts
+  23e64977091e5b75 18-19,29-38
+apps/api/src/trigger/destroy-bucket.ts
+  23e64977091e5b75 23-24,30,32,44,56
+apps/api/src/trigger/aggregate-storage.ts
+  23e64977091e5b75 22-26
+apps/api/src/trigger/provision-bucket.ts
+  23e64977091e5b75 1,28,30-37,39-42,44-51,53-60,62-69,71-77,79-105
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "b697f6a46be39dd4dbd57c4a026f3f886dc4d9a2",
+  "prompts": {
+    "23e64977091e5b75": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "936f85ef-a75d-4f05-a9c1-01ad2da9b569",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 102,
+      "total_deletions": 58,
+      "accepted_lines": 102,
+      "overriden_lines": 0
+    }
+  }
+}
