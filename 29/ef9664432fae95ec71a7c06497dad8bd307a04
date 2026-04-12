@@ -1,0 +1,35 @@
+apps/api/src/routes/connections/get.ts
+  23e64977091e5b75 1-22
+apps/api/src/routes/connections/delete.ts
+  23e64977091e5b75 1-34
+apps/api/src/app.ts
+  23e64977091e5b75 20-25,135-177
+apps/api/src/routes/connections/create.ts
+  23e64977091e5b75 1-53
+apps/api/src/routes/connections/verify.ts
+  23e64977091e5b75 1-69
+apps/api/src/routes/connections/list.ts
+  23e64977091e5b75 1-17
+apps/api/src/routes/connections/list-buckets.ts
+  23e64977091e5b75 1-70
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "29ef9664432fae95ec71a7c06497dad8bd307a04",
+  "prompts": {
+    "23e64977091e5b75": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "936f85ef-a75d-4f05-a9c1-01ad2da9b569",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 353,
+      "total_deletions": 23,
+      "accepted_lines": 340,
+      "overriden_lines": 0
+    }
+  }
+}
