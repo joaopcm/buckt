@@ -1,0 +1,25 @@
+apps/web/src/lib/trpc/router.ts
+  23e64977091e5b75 4,13
+apps/web/src/lib/trpc/routers/connections.ts
+  23e64977091e5b75 1-248
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "56bdbe67eeea21b07d84815697bf3787cf96a62b",
+  "prompts": {
+    "23e64977091e5b75": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "936f85ef-a75d-4f05-a9c1-01ad2da9b569",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 257,
+      "total_deletions": 7,
+      "accepted_lines": 287,
+      "overriden_lines": 0
+    }
+  }
+}
