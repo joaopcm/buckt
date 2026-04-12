@@ -1,0 +1,29 @@
+packages/db/src/schema/aws-connections.ts
+  23e64977091e5b75 1-29
+packages/db/src/schema/index.ts
+  23e64977091e5b75 4
+packages/db/drizzle/0008_breezy_shatterstar.sql
+  23e64977091e5b75 1-16
+packages/db/src/schema/buckets.ts
+  23e64977091e5b75 20,75
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "559ad703311b9d8094d6a628977c15a421fdbb90",
+  "prompts": {
+    "23e64977091e5b75": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "936f85ef-a75d-4f05-a9c1-01ad2da9b569",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 48,
+      "total_deletions": 0,
+      "accepted_lines": 48,
+      "overriden_lines": 0
+    }
+  }
+}
