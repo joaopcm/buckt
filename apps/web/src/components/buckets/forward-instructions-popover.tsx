@@ -102,6 +102,7 @@ export function ForwardInstructionsPopover({
             className="h-24"
             memberEmails={memberEmails}
             onChange={setValue}
+            onSubmit={handleSubmit}
             placeholder="Enter email addresses..."
             value={value}
           />

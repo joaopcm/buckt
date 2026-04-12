@@ -14,6 +14,7 @@ interface EmailAutocompleteTextareaProps {
   className?: string;
   memberEmails: string[];
   onChange: (value: string) => void;
+  onSubmit?: () => void;
   placeholder?: string;
   value: string;
 }
@@ -33,6 +34,7 @@ const SHARED_STYLES =
 export function EmailAutocompleteTextarea({
   value,
   onChange,
+  onSubmit,
   memberEmails,
   placeholder,
   className,
@@ -84,9 +86,12 @@ export function EmailAutocompleteTextarea({
         });
       } else if (e.key === "Escape" && activeSuggestion) {
         setDismissed(true);
+      } else if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && onSubmit) {
+        e.preventDefault();
+        onSubmit();
       }
     },
-    [activeSuggestion, value, cursorPos, onChange]
+    [activeSuggestion, value, cursorPos, onChange, onSubmit]
   );
 
   const handleScroll = useCallback(() => {
