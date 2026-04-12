@@ -8,3 +8,4 @@ docs/superpowers/
 .superpowers/
 .vscode/
 .serena/
+apps/api/.trigger/dev.lock
