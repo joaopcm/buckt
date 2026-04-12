@@ -1,0 +1,36 @@
+apps/web/src/components/buckets/create-bucket-form.tsx
+  23e64977091e5b75 15,73,103,108-110,131,145-159,192,194,197-205
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "3ee0b65aed8706ada849cf63411e58934e07bc63",
+  "prompts": {
+    "23e64977091e5b75": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "936f85ef-a75d-4f05-a9c1-01ad2da9b569",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 33,
+      "total_deletions": 5,
+      "accepted_lines": 187,
+      "overriden_lines": 0
+    },
+    "ceb87f30bbd7239a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "073dc84f-eebb-4518-b726-e851383287a0",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": null,
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
