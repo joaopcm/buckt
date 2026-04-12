@@ -1,0 +1,33 @@
+apps/api/src/lib/aws/cloudfront.ts
+  23e64977091e5b75 7,9-15,17-20,87-93,111-116
+apps/api/src/lib/aws/credentials.ts
+  23e64977091e5b75 7-13
+apps/api/src/lib/aws/acm.ts
+  23e64977091e5b75 6,8-13,27,32-36,63-69,76-81
+apps/api/src/lib/aws/cloudwatch.ts
+  23e64977091e5b75 1-2,5-11
+apps/api/src/lib/aws/bucket-settings.ts
+  23e64977091e5b75 9-10,12-17,50-55,80-86,116-117,119-121
+apps/api/src/lib/aws/s3.ts
+  23e64977091e5b75 8-9,15-16,18-20,31,33,41-46,72-77,79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "e7174163f78964627f0c34182f5a3a26f3c396a4",
+  "prompts": {
+    "23e64977091e5b75": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "936f85ef-a75d-4f05-a9c1-01ad2da9b569",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 126,
+      "total_deletions": 60,
+      "accepted_lines": 126,
+      "overriden_lines": 0
+    }
+  }
+}
