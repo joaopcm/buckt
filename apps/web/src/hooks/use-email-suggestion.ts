@@ -11,17 +11,22 @@ const COMMON_DOMAINS = [
 
 function getSuggestion(
   currentToken: string,
-  memberEmails: string[]
+  memberEmails: string[],
+  existingEmails: string[]
 ): string | null {
   const trimmed = currentToken.trim().toLowerCase();
   if (trimmed.length === 0) {
     return null;
   }
 
+  const existing = new Set(existingEmails.map((e) => e.toLowerCase()));
+
   for (const email of memberEmails) {
+    const lower = email.toLowerCase();
     if (
-      email.toLowerCase().startsWith(trimmed) &&
-      email.toLowerCase() !== trimmed
+      lower.startsWith(trimmed) &&
+      lower !== trimmed &&
+      !existing.has(lower)
     ) {
       return email.slice(trimmed.length);
     }
@@ -48,11 +53,12 @@ function getSuggestion(
 
 export function useEmailSuggestion(
   currentToken: string,
-  memberEmails: string[]
+  memberEmails: string[],
+  existingEmails: string[]
 ): string | null {
   return useMemo(
-    () => getSuggestion(currentToken, memberEmails),
-    [currentToken, memberEmails]
+    () => getSuggestion(currentToken, memberEmails, existingEmails),
+    [currentToken, memberEmails, existingEmails]
   );
 }
 

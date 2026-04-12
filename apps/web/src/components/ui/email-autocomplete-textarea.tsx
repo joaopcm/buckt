@@ -4,6 +4,7 @@ import {
   type KeyboardEvent,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -28,6 +29,8 @@ function getCurrentToken(text: string, cursorPos: number): string {
   return beforeCursor.slice(lastSeparator + 1);
 }
 
+const EMAIL_SEPARATOR = /[,\n]/;
+
 const SHARED_STYLES =
   "whitespace-pre-wrap break-words font-mono text-xs leading-5 p-2.5";
 
@@ -45,7 +48,19 @@ export function EmailAutocompleteTextarea({
   const [dismissed, setDismissed] = useState(false);
 
   const currentToken = getCurrentToken(value, cursorPos);
-  const suggestion = useEmailSuggestion(currentToken, memberEmails);
+  const existingEmails = useMemo(
+    () =>
+      value
+        .split(EMAIL_SEPARATOR)
+        .map((s) => s.trim())
+        .filter(Boolean),
+    [value]
+  );
+  const suggestion = useEmailSuggestion(
+    currentToken,
+    memberEmails,
+    existingEmails
+  );
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: reset dismissed when token changes
   useEffect(() => {
