@@ -1,0 +1,40 @@
+apps/api/src/app.ts
+  23e64977091e5b75 17,102-108
+apps/api/src/routes/buckets/import.ts
+  23e64977091e5b75 1-147
+apps/web/src/lib/trpc/routers/buckets.ts
+  23e64977091e5b75 394-597
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "6c42b457889335fe1c4f7721ef684927187bd7ea",
+  "prompts": {
+    "23e64977091e5b75": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "936f85ef-a75d-4f05-a9c1-01ad2da9b569",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 394,
+      "total_deletions": 29,
+      "accepted_lines": 510,
+      "overriden_lines": 0
+    },
+    "ceb87f30bbd7239a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "073dc84f-eebb-4518-b726-e851383287a0",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": null,
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
