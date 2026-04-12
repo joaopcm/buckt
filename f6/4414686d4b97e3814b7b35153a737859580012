@@ -1,0 +1,64 @@
+apps/web/src/lib/trpc/routers/domain-connect.ts
+  23e64977091e5b75 67-73
+apps/api/src/routes/files/get.ts
+  23e64977091e5b75 39-42
+apps/api/src/lib/aws/credentials.ts
+  23e64977091e5b75 14,31-33,41-46,48-50,63,78-80,103-105,116-119
+apps/api/src/trigger/check-cert-validation.ts
+  23e64977091e5b75 27-34
+apps/web/src/lib/trpc/routers/org.ts
+  23e64977091e5b75 193-199
+packages/db/drizzle/0009_goofy_firebrand.sql
+  23e64977091e5b75 1
+apps/web/src/components/buckets/file-browser.tsx
+  23e64977091e5b75 70,608,613,651,653-656
+packages/db/src/schema/buckets.ts
+  23e64977091e5b75 54
+apps/api/src/lib/aws/s3.ts
+  23e64977091e5b75 10
+apps/web/src/components/buckets/bucket-detail.tsx
+  23e64977091e5b75 74-78
+apps/web/src/components/buckets/provisioning-steps.tsx
+  23e64977091e5b75 83,92-95
+apps/api/src/lib/aws/cloudwatch.ts
+  23e64977091e5b75 3
+apps/web/src/components/buckets/bucket-table.tsx
+  23e64977091e5b75 128-135
+apps/web/src/lib/trpc/routers/files.ts
+  23e64977091e5b75 116-122
+apps/api/src/routes/buckets/create.ts
+  23e64977091e5b75 81-90
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "f64414686d4b97e3814b7b35153a737859580012",
+  "prompts": {
+    "23e64977091e5b75": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "936f85ef-a75d-4f05-a9c1-01ad2da9b569",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 154,
+      "overriden_lines": 0
+    },
+    "ceb87f30bbd7239a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "073dc84f-eebb-4518-b726-e851383287a0",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": null,
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
