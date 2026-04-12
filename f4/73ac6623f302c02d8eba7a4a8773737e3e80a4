@@ -1,0 +1,42 @@
+apps/web/src/app/(dashboard)/org/[orgId]/buckets/page.tsx
+  23e64977091e5b75 24-31
+apps/web/src/components/buckets/import-bucket-form.tsx
+  23e64977091e5b75 1-245
+apps/web/src/components/connections/connection-picker.tsx
+  23e64977091e5b75 1-81
+apps/web/src/app/(dashboard)/org/[orgId]/buckets/import/page.tsx
+  23e64977091e5b75 1-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "f473ac6623f302c02d8eba7a4a8773737e3e80a4",
+  "prompts": {
+    "23e64977091e5b75": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "936f85ef-a75d-4f05-a9c1-01ad2da9b569",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 435,
+      "total_deletions": 79,
+      "accepted_lines": 513,
+      "overriden_lines": 0
+    },
+    "ceb87f30bbd7239a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "073dc84f-eebb-4518-b726-e851383287a0",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": null,
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
