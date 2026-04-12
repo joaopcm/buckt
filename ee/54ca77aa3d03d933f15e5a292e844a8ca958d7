@@ -1,0 +1,23 @@
+docs/superpowers/specs/2026-04-12-byoa-design.md
+  23e64977091e5b75 1-195
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "ee54ca77aa3d03d933f15e5a292e844a8ca958d7",
+  "prompts": {
+    "23e64977091e5b75": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "936f85ef-a75d-4f05-a9c1-01ad2da9b569",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 195,
+      "total_deletions": 0,
+      "accepted_lines": 195,
+      "overriden_lines": 0
+    }
+  }
+}
