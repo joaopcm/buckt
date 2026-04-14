@@ -3,6 +3,7 @@
 import { X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { DnsRecords } from "@/components/buckets/dns-records";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -68,17 +69,20 @@ interface BucketSettingsProps {
     optimizationMode: string;
   };
   disabled?: boolean;
+  dnsRecords?: unknown;
   orgId: string;
 }
 
 export function BucketSettings({
   bucket,
   disabled,
+  dnsRecords,
   orgId,
 }: BucketSettingsProps) {
   return (
     <div className="space-y-6">
       <h2 className="font-semibold text-lg">Settings</h2>
+      <DnsRecords records={dnsRecords} />
       <VisibilityCard bucket={bucket} disabled={disabled} orgId={orgId} />
       <CachingCard bucket={bucket} disabled={disabled} orgId={orgId} />
       <OptimizationCard bucket={bucket} disabled={disabled} orgId={orgId} />

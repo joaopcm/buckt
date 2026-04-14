@@ -1,10 +1,9 @@
 "use client";
 
 import { Check, Circle, Loader2, Zap } from "lucide-react";
-import { toast } from "sonner";
+import { ApplyButton } from "@/components/buckets/apply-button";
 import { ForwardInstructionsPopover } from "@/components/buckets/forward-instructions-popover";
 import { CopyText } from "@/components/copy-text";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -221,41 +220,6 @@ export function ProvisioningSteps({
           ))}
       </Step>
     </div>
-  );
-}
-
-function ApplyButton({
-  orgId,
-  bucketId,
-  serviceId,
-}: {
-  orgId: string;
-  bucketId: string;
-  serviceId: "acm-validation" | "cdn-cname";
-}) {
-  const buildSyncUrl = trpc.domainConnect.buildSyncUrl.useMutation({
-    onSuccess: ({ syncUrl }) => {
-      window.location.href = syncUrl;
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
-  });
-
-  return (
-    <Button
-      disabled={buildSyncUrl.isPending}
-      onClick={() => buildSyncUrl.mutate({ orgId, bucketId, serviceId })}
-      size="sm"
-      variant="default"
-    >
-      {buildSyncUrl.isPending ? (
-        <Loader2 className="mr-1.5 size-3 animate-spin" />
-      ) : (
-        <Zap className="mr-1.5 size-3" />
-      )}
-      Apply automatically
-    </Button>
   );
 }
 
