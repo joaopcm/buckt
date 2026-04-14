@@ -17,10 +17,20 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { env } from "@/env";
 import { trpc } from "@/lib/trpc/client";
 
-const CF_TEMPLATE_URL =
-  "https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate";
+function buildQuickCreateUrl(externalId: string) {
+  const templateUrl = env.NEXT_PUBLIC_CF_TEMPLATE_URL;
+  const accountId = env.NEXT_PUBLIC_BUCKT_AWS_ACCOUNT_ID ?? "";
+  const params = new URLSearchParams({
+    templateURL: templateUrl,
+    stackName: "BucktAccess",
+    param_BucktAccountId: accountId,
+    param_ExternalId: externalId,
+  });
+  return `https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?${params.toString()}`;
+}
 
 const labelSchema = z.object({
   label: z.string().max(100).optional(),
@@ -163,7 +173,7 @@ export function ConnectAwsDialog({
             <Button
               className="w-full"
               onClick={() => {
-                window.open(CF_TEMPLATE_URL, "_blank");
+                window.open(buildQuickCreateUrl(externalId), "_blank");
               }}
               variant="outline"
             >

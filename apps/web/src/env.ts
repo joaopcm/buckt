@@ -30,12 +30,19 @@ export const env = createEnv({
     NEXT_PUBLIC_POSTHOG_KEY: z.string().min(1).optional(),
     NEXT_PUBLIC_POSTHOG_HOST: z.url().optional(),
     NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
+    NEXT_PUBLIC_CF_TEMPLATE_URL: z
+      .url()
+      .default("https://cdn.buckt.dev/cloudformation/buckt-byoa-role.yaml"),
+    NEXT_PUBLIC_BUCKT_AWS_ACCOUNT_ID: z.string().min(1).optional(),
   },
   experimental__runtimeEnv: {
     NEXT_PUBLIC_BETTER_AUTH_URL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
+    NEXT_PUBLIC_CF_TEMPLATE_URL: process.env.NEXT_PUBLIC_CF_TEMPLATE_URL,
+    NEXT_PUBLIC_BUCKT_AWS_ACCOUNT_ID:
+      process.env.NEXT_PUBLIC_BUCKT_AWS_ACCOUNT_ID,
   },
   emptyStringAsUndefined: true,
 });
