@@ -1,0 +1,38 @@
+apps/api/src/routes/aws-accounts/disconnect.ts
+  a3274198a21368b8 42
+apps/api/src/routes/aws-accounts/connect.ts
+  a3274198a21368b8 22,28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "b853b2ae19211c6ba646b5a6cfa583afd10ddcd9",
+  "prompts": {
+    "a3274198a21368b8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "396475a8-9e52-4321-800c-303b8999795f",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 3,
+      "total_deletions": 2,
+      "accepted_lines": 3,
+      "overriden_lines": 0
+    },
+    "ceb87f30bbd7239a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "073dc84f-eebb-4518-b726-e851383287a0",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": null,
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
