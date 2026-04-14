@@ -57,6 +57,13 @@
       "when": 1775773164257,
       "tag": "0007_mature_newton_destine",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1776206705739,
+      "tag": "0008_handy_tattoo",
+      "breakpoints": true
     }
   ]
 }
