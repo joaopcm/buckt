@@ -1,0 +1,23 @@
+apps/web/src/lib/trpc/routers/domain-connect.ts
+  9f9da9bbd0b48b11 105-114,116
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "66d3136518654d22842dc150f643f5a994004899",
+  "prompts": {
+    "9f9da9bbd0b48b11": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "acb67996-c575-475d-9f4c-dda9068c8d2f",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 14,
+      "total_deletions": 4,
+      "accepted_lines": 1511,
+      "overriden_lines": 0
+    }
+  }
+}
