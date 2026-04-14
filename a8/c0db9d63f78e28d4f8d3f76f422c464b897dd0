@@ -1,0 +1,23 @@
+packages/domain-connect/src/sync.ts
+  9f9da9bbd0b48b11 17-21,23,27,30-33,36,39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "a8c0db9d63f78e28d4f8d3f76f422c464b897dd0",
+  "prompts": {
+    "9f9da9bbd0b48b11": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "acb67996-c575-475d-9f4c-dda9068c8d2f",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": null,
+      "messages": [],
+      "total_additions": 16,
+      "total_deletions": 14,
+      "accepted_lines": 13,
+      "overriden_lines": 0
+    }
+  }
+}
