@@ -1,0 +1,25 @@
+apps/web/src/lib/trpc/routers/buckets.ts
+  9f9da9bbd0b48b11 373-427
+apps/web/src/components/buckets/bucket-detail.tsx
+  9f9da9bbd0b48b11 55-62,73,105-116,118-129
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "850acbbb82a1d168915b73f55c9913f46751daed",
+  "prompts": {
+    "9f9da9bbd0b48b11": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "acb67996-c575-475d-9f4c-dda9068c8d2f",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 101,
+      "total_deletions": 39,
+      "accepted_lines": 1588,
+      "overriden_lines": 0
+    }
+  }
+}
