@@ -21,25 +21,25 @@ interface OptimizeFilePayload {
 
 const QUALITY_MAP = {
   light: {
-    jpeg: 85,
-    webp: 85,
-    avif: 70,
-    gif: 85,
-    png: { compressionLevel: 4, palette: false },
+    jpeg: 90,
+    webp: 90,
+    avif: 75,
+    gif: { colours: 256 },
+    png: { compressionLevel: 3, palette: false },
   },
   balanced: {
-    jpeg: 75,
-    webp: 75,
-    avif: 55,
-    gif: 70,
-    png: { compressionLevel: 6, palette: false },
+    jpeg: 70,
+    webp: 70,
+    avif: 50,
+    gif: { colours: 128 },
+    png: { compressionLevel: 6, palette: true },
   },
   maximum: {
-    jpeg: 60,
-    webp: 60,
-    avif: 40,
-    gif: 50,
-    png: { compressionLevel: 9, palette: true },
+    jpeg: 40,
+    webp: 40,
+    avif: 25,
+    gif: { colours: 64 },
+    png: { compressionLevel: 9, palette: true, colours: 64 },
   },
 } as const;
 
@@ -59,6 +59,7 @@ function compressImage(
         .png({
           compressionLevel: settings.png.compressionLevel,
           palette: settings.png.palette,
+          ...("colours" in settings.png && { colours: settings.png.colours }),
         })
         .toBuffer();
     case "image/webp":
@@ -66,7 +67,7 @@ function compressImage(
     case "image/avif":
       return pipeline.avif({ quality: settings.avif }).toBuffer();
     case "image/gif":
-      return pipeline.gif().toBuffer();
+      return pipeline.gif({ colours: settings.gif.colours }).toBuffer();
     default:
       throw new Error(`Unsupported content type: ${contentType}`);
   }
