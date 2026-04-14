@@ -31,7 +31,7 @@ export function DnsRecords({ records }: { records: unknown }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>DNS Configuration</CardTitle>
+        <CardTitle className="text-base">DNS Configuration</CardTitle>
         <CardDescription>
           Add these records to your DNS provider to complete setup
         </CardDescription>
