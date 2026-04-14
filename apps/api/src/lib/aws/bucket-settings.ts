@@ -1,15 +1,24 @@
 import {
   DeleteBucketCorsCommand,
   DeleteBucketLifecycleCommand,
+  GetBucketCorsCommand,
+  GetBucketLifecycleConfigurationCommand,
+  GetBucketLocationCommand,
+  GetPublicAccessBlockCommand,
   PutBucketCorsCommand,
   PutBucketLifecycleConfigurationCommand,
   PutBucketPolicyCommand,
   PutPublicAccessBlockCommand,
 } from "@aws-sdk/client-s3";
+import type { AwsCredentialIdentity } from "@smithy/types";
 import { getS3Client } from "../s3";
 
-export async function setBucketPublic(bucketName: string, region: string) {
-  const client = getS3Client(region);
+export async function setBucketPublic(
+  bucketName: string,
+  region: string,
+  credentials?: AwsCredentialIdentity
+) {
+  const client = getS3Client(region, credentials);
 
   await client.send(
     new PutPublicAccessBlockCommand({
@@ -42,8 +51,12 @@ export async function setBucketPublic(bucketName: string, region: string) {
   );
 }
 
-export async function setBucketPrivate(bucketName: string, region: string) {
-  const client = getS3Client(region);
+export async function setBucketPrivate(
+  bucketName: string,
+  region: string,
+  credentials?: AwsCredentialIdentity
+) {
+  const client = getS3Client(region, credentials);
 
   await client.send(
     new PutPublicAccessBlockCommand({
@@ -71,9 +84,10 @@ export async function setBucketPrivate(bucketName: string, region: string) {
 export async function setBucketCors(
   bucketName: string,
   origins: string[],
-  region: string
+  region: string,
+  credentials?: AwsCredentialIdentity
 ) {
-  const client = getS3Client(region);
+  const client = getS3Client(region, credentials);
 
   if (origins.length === 0) {
     try {
@@ -104,9 +118,10 @@ export async function setBucketCors(
 export async function setBucketLifecycle(
   bucketName: string,
   ttlDays: number | null,
-  region: string
+  region: string,
+  credentials?: AwsCredentialIdentity
 ) {
-  const client = getS3Client(region);
+  const client = getS3Client(region, credentials);
 
   if (ttlDays === null) {
     try {
@@ -134,4 +149,63 @@ export async function setBucketLifecycle(
       },
     })
   );
+}
+
+export async function readBucketSettings(
+  bucketName: string,
+  region: string,
+  credentials?: AwsCredentialIdentity
+) {
+  const client = getS3Client(region, credentials);
+
+  let visibility: "public" | "private" = "private";
+  try {
+    const block = await client.send(
+      new GetPublicAccessBlockCommand({ Bucket: bucketName })
+    );
+    const cfg = block.PublicAccessBlockConfiguration;
+    if (!(cfg?.BlockPublicAcls || cfg?.BlockPublicPolicy)) {
+      visibility = "public";
+    }
+  } catch {
+    visibility = "private";
+  }
+
+  let corsOrigins: string[] = [];
+  try {
+    const cors = await client.send(
+      new GetBucketCorsCommand({ Bucket: bucketName })
+    );
+    corsOrigins = cors.CORSRules?.flatMap((r) => r.AllowedOrigins ?? []) ?? [];
+  } catch {
+    // no CORS config
+  }
+
+  let lifecycleTtlDays: number | null = null;
+  try {
+    const lifecycle = await client.send(
+      new GetBucketLifecycleConfigurationCommand({ Bucket: bucketName })
+    );
+    const expireRule = lifecycle.Rules?.find(
+      (r) => r.Status === "Enabled" && r.Expiration?.Days
+    );
+    if (expireRule?.Expiration?.Days) {
+      lifecycleTtlDays = expireRule.Expiration.Days;
+    }
+  } catch {
+    // no lifecycle config
+  }
+
+  return { visibility, corsOrigins, lifecycleTtlDays };
+}
+
+export async function getBucketRegion(
+  bucketName: string,
+  credentials?: AwsCredentialIdentity
+): Promise<string> {
+  const client = getS3Client("us-east-1", credentials);
+  const result = await client.send(
+    new GetBucketLocationCommand({ Bucket: bucketName })
+  );
+  return result.LocationConstraint ?? "us-east-1";
 }

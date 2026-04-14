@@ -3,11 +3,13 @@ import {
   CreateDistributionCommand,
   DeleteDistributionCommand,
   GetDistributionCommand,
+  ListDistributionsCommand,
   UpdateDistributionCommand,
 } from "@aws-sdk/client-cloudfront";
+import type { AwsCredentialIdentity } from "@smithy/types";
 import { env } from "../../env";
 
-const cloudfront = new CloudFrontClient({
+const defaultCloudfront = new CloudFrontClient({
   region: "us-east-1",
   credentials: {
     accessKeyId: env.AWS_ACCESS_KEY_ID,
@@ -15,12 +17,22 @@ const cloudfront = new CloudFrontClient({
   },
 });
 
+function getCloudfrontClient(
+  credentials?: AwsCredentialIdentity
+): CloudFrontClient {
+  if (credentials) {
+    return new CloudFrontClient({ region: "us-east-1", credentials });
+  }
+  return defaultCloudfront;
+}
+
 export async function createDistribution(opts: {
   domain: string;
   s3WebsiteEndpoint: string;
   certArn: string;
   logBucket?: string;
   logPrefix?: string;
+  credentials?: AwsCredentialIdentity;
 }) {
   const logging = opts.logBucket
     ? {
@@ -31,7 +43,8 @@ export async function createDistribution(opts: {
       }
     : { Enabled: false, Bucket: "", Prefix: "", IncludeCookies: false };
 
-  const result = await cloudfront.send(
+  const client = getCloudfrontClient(opts.credentials);
+  const result = await client.send(
     new CreateDistributionCommand({
       DistributionConfig: {
         CallerReference: `buckt-${Date.now()}`,
@@ -87,8 +100,12 @@ export async function createDistribution(opts: {
   };
 }
 
-export async function disableDistribution(distributionId: string) {
-  const dist = await cloudfront.send(
+export async function disableDistribution(
+  distributionId: string,
+  credentials?: AwsCredentialIdentity
+) {
+  const client = getCloudfrontClient(credentials);
+  const dist = await client.send(
     new GetDistributionCommand({ Id: distributionId })
   );
   const config = dist.Distribution?.DistributionConfig;
@@ -96,7 +113,7 @@ export async function disableDistribution(distributionId: string) {
     return;
   }
 
-  await cloudfront.send(
+  await client.send(
     new UpdateDistributionCommand({
       Id: distributionId,
       IfMatch: dist.ETag ?? "",
@@ -105,14 +122,62 @@ export async function disableDistribution(distributionId: string) {
   );
 }
 
-export async function deleteDistribution(distributionId: string) {
-  const dist = await cloudfront.send(
+export async function deleteDistribution(
+  distributionId: string,
+  credentials?: AwsCredentialIdentity
+) {
+  const client = getCloudfrontClient(credentials);
+  const dist = await client.send(
     new GetDistributionCommand({ Id: distributionId })
   );
-  await cloudfront.send(
+  await client.send(
     new DeleteDistributionCommand({
       Id: distributionId,
       IfMatch: dist.ETag ?? "",
     })
   );
+}
+
+export async function findDistributionForBucket(
+  s3BucketName: string,
+  region: string,
+  credentials?: AwsCredentialIdentity
+): Promise<{
+  distributionId: string;
+  distributionDomain: string;
+  certArn: string | null;
+  customDomain: string | null;
+} | null> {
+  const client = getCloudfrontClient(credentials);
+  const s3Origin = `${s3BucketName}.s3-website-${region}.amazonaws.com`;
+  const s3OriginAlt = `${s3BucketName}.s3.${region}.amazonaws.com`;
+
+  let marker: string | undefined;
+  do {
+    const result = await client.send(
+      new ListDistributionsCommand({ Marker: marker, MaxItems: 100 })
+    );
+
+    for (const dist of result.DistributionList?.Items ?? []) {
+      const origins = dist.Origins?.Items ?? [];
+      const matchesOrigin = origins.some(
+        (o) => o.DomainName === s3Origin || o.DomainName === s3OriginAlt
+      );
+      if (matchesOrigin && dist.Id) {
+        const aliases = dist.Aliases?.Items ?? [];
+        return {
+          distributionId: dist.Id,
+          distributionDomain: dist.DomainName ?? "",
+          certArn: dist.ViewerCertificate?.ACMCertificateArn ?? null,
+          customDomain: aliases[0] ?? null,
+        };
+      }
+    }
+
+    marker = result.DistributionList?.IsTruncated
+      ? result.DistributionList.NextMarker
+      : undefined;
+  } while (marker);
+
+  return null;
 }

@@ -9,6 +9,14 @@ import { requireAuth } from "./middleware/auth";
 import { requirePlan } from "./middleware/plan";
 import { rateLimit } from "./middleware/rate-limit";
 import { timeout } from "./middleware/timeout";
+import { connectAwsAccount } from "./routes/aws-accounts/connect";
+import { disconnectAwsAccount } from "./routes/aws-accounts/disconnect";
+import { getAwsAccount } from "./routes/aws-accounts/get";
+import { importBuckets } from "./routes/aws-accounts/import";
+import { listAwsAccounts } from "./routes/aws-accounts/list";
+import { listS3Buckets } from "./routes/aws-accounts/list-s3-buckets";
+import { updateAwsAccount } from "./routes/aws-accounts/update";
+import { validateAwsAccount } from "./routes/aws-accounts/validate";
 import { getSubscription } from "./routes/billing/subscription";
 import { getUsage } from "./routes/billing/usage";
 import { createBucket } from "./routes/buckets/create";
@@ -63,6 +71,57 @@ app.onError((err, c) => {
 });
 
 app.get("/health", (c) => c.json({ status: "ok" }));
+
+app.post(
+  "/v1/aws-accounts",
+  requireAuth("aws-accounts:write"),
+  rateLimit,
+  requirePlan(),
+  connectAwsAccount
+);
+app.get(
+  "/v1/aws-accounts",
+  requireAuth("aws-accounts:read"),
+  rateLimit,
+  listAwsAccounts
+);
+app.get(
+  "/v1/aws-accounts/:id",
+  requireAuth("aws-accounts:read"),
+  rateLimit,
+  getAwsAccount
+);
+app.patch(
+  "/v1/aws-accounts/:id",
+  requireAuth("aws-accounts:write"),
+  rateLimit,
+  updateAwsAccount
+);
+app.post(
+  "/v1/aws-accounts/:id/validate",
+  requireAuth("aws-accounts:write"),
+  rateLimit,
+  validateAwsAccount
+);
+app.delete(
+  "/v1/aws-accounts/:id",
+  requireAuth("aws-accounts:delete"),
+  rateLimit,
+  disconnectAwsAccount
+);
+app.get(
+  "/v1/aws-accounts/:id/s3-buckets",
+  requireAuth("aws-accounts:read"),
+  rateLimit,
+  listS3Buckets
+);
+app.post(
+  "/v1/aws-accounts/:id/import",
+  requireAuth("buckets:write"),
+  rateLimit,
+  requirePlan(),
+  importBuckets
+);
 
 app.post(
   "/v1/buckets",

@@ -24,6 +24,7 @@ export class BucketsClient {
     corsOrigins?: string[];
     lifecycleTtlDays?: number | null;
     optimizationMode?: OptimizationMode;
+    awsAccountId?: string;
   }): Promise<Bucket> {
     const { data } = await this.http.post<Bucket>("/v1/buckets", opts);
     return data;

@@ -19,6 +19,7 @@ export const createBucketSchema = z.object({
   lifecycleTtlDays: z.number().int().min(1).max(3650).nullable().default(null),
   optimizationMode: z.enum(OPTIMIZATION_MODES).default("none"),
   domainConnectProvider: z.string().optional(),
+  awsAccountId: z.string().optional(),
 });
 
 export const updateBucketSchema = z.object({
