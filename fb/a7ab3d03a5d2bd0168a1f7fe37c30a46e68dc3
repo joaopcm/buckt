@@ -1,0 +1,37 @@
+apps/api/src/trigger/aggregate-storage.ts
+  a3274198a21368b8 5,23-28
+apps/api/package.json
+  a3274198a21368b8 35
+apps/api/src/trigger/aggregate-bandwidth.ts
+  a3274198a21368b8 7-8,140-156
+apps/api/src/trigger/check-cert-validation.ts
+  a3274198a21368b8 2,6,15-18,23,37-43,98-99
+apps/api/src/trigger/destroy-bucket.ts
+  a3274198a21368b8 5,24-25,31,33,45,57-61
+apps/api/src/trigger/provision-bucket.ts
+  a3274198a21368b8 6,29-30,35-36,44-45,54-55,61-62
+apps/api/src/lib/aws/sts.ts
+  a3274198a21368b8 1-82
+apps/api/src/lib/aws/client-factory.ts
+  a3274198a21368b8 1-35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "fba7ab3d03a5d2bd0168a1f7fe37c30a46e68dc3",
+  "prompts": {
+    "a3274198a21368b8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "396475a8-9e52-4321-800c-303b8999795f",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 182,
+      "total_deletions": 16,
+      "accepted_lines": 182,
+      "overriden_lines": 0
+    }
+  }
+}
