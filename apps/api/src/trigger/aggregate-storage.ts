@@ -2,6 +2,7 @@ import { buckets, createDb, subscription } from "@buckt/db";
 import { schedules } from "@trigger.dev/sdk/v3";
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
+import { resolveCredentials } from "../lib/aws/client-factory";
 import { getBucketSizeBytes } from "../lib/aws/cloudwatch";
 
 const db = createDb(process.env.DATABASE_PUBLIC_URL ?? "");
@@ -19,7 +20,12 @@ export const aggregateStorage = schedules.task({
 
     for (const bucket of activeBuckets) {
       try {
-        const sizeBytes = await getBucketSizeBytes(bucket.s3BucketName);
+        const credentials = await resolveCredentials(bucket.awsAccountId, db);
+        const sizeBytes = await getBucketSizeBytes(
+          bucket.s3BucketName,
+          bucket.region,
+          credentials
+        );
         if (sizeBytes > 0) {
           await db
             .update(buckets)

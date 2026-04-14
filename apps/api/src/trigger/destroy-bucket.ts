@@ -2,6 +2,7 @@ import { buckets, createDb } from "@buckt/db";
 import { logger, task, wait } from "@trigger.dev/sdk/v3";
 import { eq, sql } from "drizzle-orm";
 import { deleteCertificate } from "../lib/aws/acm";
+import { resolveCredentials } from "../lib/aws/client-factory";
 import { deleteDistribution, disableDistribution } from "../lib/aws/cloudfront";
 import { deleteBucketResources } from "../lib/aws/s3";
 
@@ -20,14 +21,16 @@ export const destroyBucket = task({
       throw new Error(`Bucket ${bucketId} not found`);
     }
 
+    const credentials = await resolveCredentials(bucket.awsAccountId, db);
+
     if (bucket.cloudfrontDistributionId) {
       try {
         logger.info("Disabling CloudFront distribution", {
           distributionId: bucket.cloudfrontDistributionId,
         });
-        await disableDistribution(bucket.cloudfrontDistributionId);
+        await disableDistribution(bucket.cloudfrontDistributionId, credentials);
         await wait.for({ minutes: 15 });
-        await deleteDistribution(bucket.cloudfrontDistributionId);
+        await deleteDistribution(bucket.cloudfrontDistributionId, credentials);
         logger.info("CloudFront distribution deleted");
       } catch (err) {
         if (!(err instanceof Error && err.name === "NoSuchDistribution")) {
@@ -39,7 +42,7 @@ export const destroyBucket = task({
     if (bucket.acmCertArn) {
       try {
         logger.info("Deleting ACM certificate", { certArn: bucket.acmCertArn });
-        await deleteCertificate(bucket.acmCertArn);
+        await deleteCertificate(bucket.acmCertArn, credentials);
       } catch (err) {
         if (
           !(err instanceof Error && err.name === "ResourceNotFoundException")
@@ -51,7 +54,11 @@ export const destroyBucket = task({
 
     try {
       logger.info("Deleting S3 bucket", { s3BucketName: bucket.s3BucketName });
-      await deleteBucketResources(bucket.s3BucketName, bucket.region);
+      await deleteBucketResources(
+        bucket.s3BucketName,
+        bucket.region,
+        credentials
+      );
     } catch (err) {
       if (!(err instanceof Error && err.name === "NoSuchBucket")) {
         throw err;
