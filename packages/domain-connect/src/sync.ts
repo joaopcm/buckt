@@ -36,7 +36,7 @@ export function buildSignedSyncUrl(params: BuildSyncUrlParams): string {
   signer.update(sortedCanonical);
   const signature = signer.sign(params.signingPrivateKey, "base64");
 
-  return `${base}?${sortedCanonical}&key=${encodeURIComponent("_dcpubkeyv1.buckt.dev")}&sig=${encodeURIComponent(signature)}`;
+  return `${base}?${sortedCanonical}&key=${encodeURIComponent("_dcpubkeyv1")}&sig=${encodeURIComponent(signature)}`;
 }
 
 export function extractDomainParts(customDomain: string): {
