@@ -1,0 +1,53 @@
+apps/web/src/components/ui/label.tsx
+  a3274198a21368b8 5
+apps/web/src/components/settings/org-settings.tsx
+  a3274198a21368b8 10,57
+apps/web/src/lib/trpc/routers/buckets.ts
+  a3274198a21368b8 1,6,166-196,201-209,226-227,339-366
+apps/web/src/components/ui/separator.tsx
+  a3274198a21368b8 5
+apps/web/src/lib/trpc/routers/_aws-validate.ts
+  a3274198a21368b8 1-60
+apps/web/src/components/buckets/managed-settings-card.tsx
+  a3274198a21368b8 1-100
+apps/web/src/components/aws-accounts/connect-dialog.tsx
+  a3274198a21368b8 1-249
+apps/web/src/components/ui/switch.tsx
+  a3274198a21368b8 1-32
+apps/web/src/lib/trpc/routers/_bucket-import.ts
+  a3274198a21368b8 1-69
+apps/web/src/components/ui/checkbox.tsx
+  a3274198a21368b8 1-27
+apps/web/src/lib/trpc/router.ts
+  a3274198a21368b8 2,12
+apps/web/src/components/aws-accounts/import-dialog.tsx
+  a3274198a21368b8 1-200
+apps/web/src/lib/trpc/routers/_cloudfront-import.ts
+  a3274198a21368b8 1-54
+apps/web/src/components/ui/field.tsx
+  a3274198a21368b8 1-237
+apps/web/src/lib/trpc/routers/aws-accounts.ts
+  a3274198a21368b8 1-365
+apps/web/src/components/settings/aws-accounts-card.tsx
+  a3274198a21368b8 1-168
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "4e775fdc43044b90ea40259a6a2f4ce4c68af3cc",
+  "prompts": {
+    "a3274198a21368b8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "396475a8-9e52-4321-800c-303b8999795f",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 1647,
+      "total_deletions": 4,
+      "accepted_lines": 1639,
+      "overriden_lines": 0
+    }
+  }
+}
