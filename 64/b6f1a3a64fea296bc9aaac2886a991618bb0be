@@ -1,0 +1,37 @@
+apps/api/src/routes/aws-accounts/connect.spec.ts
+  a3274198a21368b8 1-67
+apps/api/src/routes/aws-accounts/validate.spec.ts
+  a3274198a21368b8 1-66
+apps/api/src/routes/aws-accounts/get.spec.ts
+  a3274198a21368b8 1-60
+apps/api/src/utils/test-helpers.ts
+  a3274198a21368b8 1,37
+apps/api/src/routes/aws-accounts/list.spec.ts
+  a3274198a21368b8 1-78
+apps/api/src/routes/aws-accounts/disconnect.spec.ts
+  a3274198a21368b8 1-91
+packages/sdk/src/resources/aws-accounts.spec.ts
+  a3274198a21368b8 1-136
+apps/api/src/routes/aws-accounts/update.spec.ts
+  a3274198a21368b8 1-77
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "64b6f1a3a64fea296bc9aaac2886a991618bb0be",
+  "prompts": {
+    "a3274198a21368b8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "396475a8-9e52-4321-800c-303b8999795f",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 577,
+      "total_deletions": 1,
+      "accepted_lines": 577,
+      "overriden_lines": 0
+    }
+  }
+}
