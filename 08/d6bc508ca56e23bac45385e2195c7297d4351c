@@ -1,0 +1,31 @@
+apps/web/src/components/buckets/bucket-settings.tsx
+  9f9da9bbd0b48b11 6,72,79,85
+apps/web/src/components/buckets/bucket-detail.tsx
+  9f9da9bbd0b48b11 11,96-122,132-137
+apps/web/src/components/buckets/pending-cname-banner.tsx
+  9f9da9bbd0b48b11 1-105
+apps/web/src/components/buckets/apply-button.tsx
+  9f9da9bbd0b48b11 1-41
+apps/web/src/components/buckets/provisioning-steps.tsx
+  9f9da9bbd0b48b11 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "08d6bc508ca56e23bac45385e2195c7297d4351c",
+  "prompts": {
+    "9f9da9bbd0b48b11": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "acb67996-c575-475d-9f4c-dda9068c8d2f",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 185,
+      "total_deletions": 40,
+      "accepted_lines": 1685,
+      "overriden_lines": 0
+    }
+  }
+}
