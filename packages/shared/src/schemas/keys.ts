@@ -9,6 +9,9 @@ export const PERMISSIONS = [
   "files:delete",
   "keys:read",
   "keys:write",
+  "aws-accounts:read",
+  "aws-accounts:write",
+  "aws-accounts:delete",
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];

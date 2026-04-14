@@ -5,15 +5,17 @@ import {
   ListObjectsV2Command,
   PutBucketWebsiteCommand,
 } from "@aws-sdk/client-s3";
+import type { AwsCredentialIdentity } from "@smithy/types";
 import { getS3Client } from "../s3";
 import { setBucketPrivate, setBucketPublic } from "./bucket-settings";
 
 export async function createBucketResources(
   bucketName: string,
   region: string,
-  visibility: "public" | "private" = "public"
+  visibility: "public" | "private" = "public",
+  credentials?: AwsCredentialIdentity
 ) {
-  const client = getS3Client(region);
+  const client = getS3Client(region, credentials);
 
   await client.send(
     new CreateBucketCommand({
@@ -32,9 +34,9 @@ export async function createBucketResources(
   );
 
   if (visibility === "public") {
-    await setBucketPublic(bucketName, region);
+    await setBucketPublic(bucketName, region, credentials);
   } else {
-    await setBucketPrivate(bucketName, region);
+    await setBucketPrivate(bucketName, region, credentials);
   }
 
   return {
@@ -42,8 +44,12 @@ export async function createBucketResources(
   };
 }
 
-export async function emptyBucket(bucketName: string, region: string) {
-  const client = getS3Client(region);
+export async function emptyBucket(
+  bucketName: string,
+  region: string,
+  credentials?: AwsCredentialIdentity
+) {
+  const client = getS3Client(region, credentials);
   let continuationToken: string | undefined;
   do {
     const list = await client.send(
@@ -70,9 +76,10 @@ export async function emptyBucket(bucketName: string, region: string) {
 
 export async function deleteBucketResources(
   bucketName: string,
-  region: string
+  region: string,
+  credentials?: AwsCredentialIdentity
 ) {
-  await emptyBucket(bucketName, region);
-  const client = getS3Client(region);
+  await emptyBucket(bucketName, region, credentials);
+  const client = getS3Client(region, credentials);
   await client.send(new DeleteBucketCommand({ Bucket: bucketName }));
 }
