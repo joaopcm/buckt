@@ -6,9 +6,9 @@ import { toast } from "sonner";
 import { BucketActions } from "@/components/buckets/bucket-actions";
 import { BucketSettings } from "@/components/buckets/bucket-settings";
 import { BucketUsage } from "@/components/buckets/bucket-usage";
-import { DnsRecords } from "@/components/buckets/dns-records";
 import { DomainConnectBanner } from "@/components/buckets/domain-connect-banner";
 import { FileBrowser } from "@/components/buckets/file-browser";
+import { PendingCnameBanner } from "@/components/buckets/pending-cname-banner";
 import { ProvisioningSteps } from "@/components/buckets/provisioning-steps";
 import { StatusBadge } from "@/components/buckets/status-badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -93,7 +93,33 @@ export function BucketDetail({
 
       {bucket.status === "active" && (
         <>
-          <DnsRecords records={bucket.dnsRecords} />
+          {(() => {
+            const dnsRecords = (
+              Array.isArray(bucket.dnsRecords) ? bucket.dnsRecords : []
+            ) as Array<{
+              name: string;
+              type: string;
+              value: string;
+              applied?: boolean;
+            }>;
+            const pendingCname = dnsRecords.find(
+              (r) =>
+                r.type === "CNAME" &&
+                r.name === bucket.customDomain &&
+                !r.applied
+            );
+            if (pendingCname) {
+              return (
+                <PendingCnameBanner
+                  bucketId={bucketId}
+                  cnameRecord={pendingCname}
+                  hasDomainConnect={hasDomainConnect}
+                  orgId={orgId}
+                />
+              );
+            }
+            return null;
+          })()}
           <BucketUsage
             bandwidthUsedBytes={bucket.bandwidthUsedBytes}
             storageUsedBytes={bucket.storageUsedBytes}
@@ -103,7 +129,12 @@ export function BucketDetail({
             customDomain={bucket.customDomain}
             orgId={orgId}
           />
-          <BucketSettings bucket={bucket} disabled={!isAdmin} orgId={orgId} />
+          <BucketSettings
+            bucket={bucket}
+            disabled={!isAdmin}
+            dnsRecords={bucket.dnsRecords}
+            orgId={orgId}
+          />
         </>
       )}
 
