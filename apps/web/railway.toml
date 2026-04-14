@@ -6,6 +6,7 @@ watchPatterns = [
   "packages/db/**",
   "packages/shared/**",
   "packages/auth/**",
+  "packages/domain-connect/**",
   "pnpm-lock.yaml",
 ]
 
