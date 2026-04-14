@@ -19,12 +19,13 @@ export async function connectAwsAccount(c: Context) {
   }
 
   const externalId = crypto.randomUUID();
+  const pendingAccountId = `pending-${crypto.randomUUID().slice(0, 8)}`;
 
   const [account] = await db
     .insert(awsAccounts)
     .values({
       orgId,
-      awsAccountId: "",
+      awsAccountId: pendingAccountId,
       externalId,
       label: parsed.data.label,
       status: "pending",

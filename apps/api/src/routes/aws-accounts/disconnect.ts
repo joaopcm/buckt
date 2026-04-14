@@ -39,5 +39,5 @@ export async function disconnectAwsAccount(c: Context) {
 
   await db.delete(awsAccounts).where(eq(awsAccounts.id, id));
 
-  return c.json(null, 204);
+  return c.body(null, 204);
 }
