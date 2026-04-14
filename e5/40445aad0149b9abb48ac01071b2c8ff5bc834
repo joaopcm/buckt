@@ -1,0 +1,23 @@
+apps/web/src/env.ts
+  a3274198a21368b8 33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "e540445aad0149b9abb48ac01071b2c8ff5bc834",
+  "prompts": {
+    "a3274198a21368b8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "396475a8-9e52-4321-800c-303b8999795f",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 3,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
