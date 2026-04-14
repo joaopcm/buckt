@@ -51,6 +51,8 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@aws-sdk/client-cloudfront": "^3.1023.0",
+    "@aws-sdk/client-sts": "^3.1030.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
