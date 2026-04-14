@@ -129,14 +129,15 @@ export const domainConnectRouter = router({
 
       const redirectUri = `${env.BETTER_AUTH_URL}/api/domain-connect/callback`;
 
+      const redirectUriWithState = `${redirectUri}?state=${state}&serviceId=${input.serviceId}`;
+
       const syncUrl = buildSignedSyncUrl({
         urlSyncUX: discovery.urlSyncUX,
         providerId: env.DOMAIN_CONNECT_PROVIDER_ID,
         serviceId: input.serviceId,
         domain: rootDomain,
         host,
-        redirectUri,
-        state,
+        redirectUri: redirectUriWithState,
         variables,
         signingPrivateKey: env.DOMAIN_CONNECT_SIGNING_PRIVATE_KEY,
       });

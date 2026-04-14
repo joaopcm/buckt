@@ -7,39 +7,36 @@ interface BuildSyncUrlParams {
   redirectUri: string;
   serviceId: string;
   signingPrivateKey: string;
-  state?: string;
   urlSyncUX: string;
   variables: Record<string, string>;
 }
 
 export function buildSignedSyncUrl(params: BuildSyncUrlParams): string {
   const base = `${params.urlSyncUX}/v2/domainTemplates/providers/${params.providerId}/services/${params.serviceId}/apply`;
-  const url = new URL(base);
 
-  url.searchParams.set("domain", params.domain);
+  const queryParams: [string, string][] = [
+    ["domain", params.domain],
+    ["redirect_uri", params.redirectUri],
+  ];
+
   if (params.host) {
-    url.searchParams.set("host", params.host);
-  }
-  url.searchParams.set("redirect_uri", params.redirectUri);
-
-  if (params.state) {
-    url.searchParams.set("state", params.state);
+    queryParams.push(["host", params.host]);
   }
 
   for (const [key, value] of Object.entries(params.variables)) {
-    url.searchParams.set(key, value);
+    queryParams.push([key, value]);
   }
 
-  const queryToSign = url.search.slice(1);
+  const sortedCanonical = queryParams
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+    .join("&");
 
   const signer = createSign("SHA256");
-  signer.update(queryToSign);
+  signer.update(sortedCanonical);
   const signature = signer.sign(params.signingPrivateKey, "base64");
 
-  url.searchParams.set("key", "_dcpubkeyv1.buckt.dev");
-  url.searchParams.set("sig", signature);
-
-  return url.toString();
+  return `${base}?${sortedCanonical}&key=${encodeURIComponent("_dcpubkeyv1")}&sig=${encodeURIComponent(signature)}`;
 }
 
 export function extractDomainParts(customDomain: string): {
