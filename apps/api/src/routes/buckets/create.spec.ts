@@ -1,5 +1,7 @@
+import { awsAccounts } from "@buckt/db";
 import { beforeEach, describe, expect, it } from "vitest";
 import app from "../../app";
+import { db } from "../../lib/db";
 import {
   cleanDb,
   createTestApiKey,
@@ -196,5 +198,90 @@ describe("POST /api/buckets", () => {
       scopedKey
     );
     expect(res.status).toBe(201);
+  });
+
+  it("rejects BYOA bucket on free plan", async () => {
+    const res = await req({
+      name: "BYOA",
+      customDomain: "byoa.test.com",
+      awsAccountId: "some-account-id",
+    });
+    expect(res.status).toBe(402);
+    const json = await res.json();
+    expect(json.error.message).toContain("BYOA");
+  });
+
+  it("rejects BYOA bucket with non-existent aws account", async () => {
+    await insertProSubscription();
+    const res = await req({
+      name: "BYOA",
+      customDomain: "byoa.test.com",
+      awsAccountId: "non-existent",
+    });
+    expect(res.status).toBe(404);
+  });
+
+  it("rejects BYOA bucket with non-active aws account", async () => {
+    await insertProSubscription();
+    const [account] = await db
+      .insert(awsAccounts)
+      .values({
+        orgId: TEST_ORG_ID,
+        awsAccountId: "123456789012",
+        externalId: "ext-123",
+        roleArn: "arn:aws:iam::123456789012:role/BucktAccess",
+        status: "pending",
+      })
+      .returning();
+
+    const res = await req({
+      name: "BYOA",
+      customDomain: "byoa.test.com",
+      awsAccountId: account.id,
+    });
+    expect(res.status).toBe(400);
+    const json = await res.json();
+    expect(json.error.message).toContain("not active");
+  });
+
+  it("creates BYOA bucket with active aws account", async () => {
+    await insertProSubscription();
+    const [account] = await db
+      .insert(awsAccounts)
+      .values({
+        orgId: TEST_ORG_ID,
+        awsAccountId: "123456789012",
+        externalId: "ext-123",
+        roleArn: "arn:aws:iam::123456789012:role/BucktAccess",
+        status: "active",
+      })
+      .returning();
+
+    const res = await req({
+      name: "BYOA Bucket",
+      customDomain: "byoa.test.com",
+      awsAccountId: account.id,
+    });
+    expect(res.status).toBe(201);
+    const json = await res.json();
+    expect(json.data.awsAccountId).toBe(account.id);
+    expect(json.data.managedSettings).toEqual({
+      visibility: true,
+      cache: true,
+      cors: true,
+      lifecycle: true,
+      optimization: true,
+    });
+  });
+
+  it("creates non-BYOA bucket with empty managedSettings", async () => {
+    const res = await req({
+      name: "Regular",
+      customDomain: "regular.test.com",
+    });
+    expect(res.status).toBe(201);
+    const json = await res.json();
+    expect(json.data.awsAccountId).toBeNull();
+    expect(json.data.managedSettings).toEqual({});
   });
 });
