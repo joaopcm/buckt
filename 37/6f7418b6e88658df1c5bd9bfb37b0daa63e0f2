@@ -1,0 +1,25 @@
+apps/web/src/env.ts
+  a3274198a21368b8 33-36,43-45
+apps/web/src/components/aws-accounts/connect-dialog.tsx
+  a3274198a21368b8 20,23-33,176
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "376f7418b6e88658df1c5bd9bfb37b0daa63e0f2",
+  "prompts": {
+    "a3274198a21368b8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "396475a8-9e52-4321-800c-303b8999795f",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 22,
+      "total_deletions": 5,
+      "accepted_lines": 20,
+      "overriden_lines": 0
+    }
+  }
+}
