@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { trpc } from "@/lib/trpc/client";
+import { getRegion } from "@/utils/regions";
 
 const VISIBILITY_OPTIONS = [
   { value: "public", label: "Public — files served openly via custom domain" },
@@ -61,6 +62,7 @@ type CachePresetValue = (typeof CACHE_PRESETS)[number]["value"];
 interface BucketSettingsProps {
   bucket: {
     id: string;
+    region: string;
     visibility: "public" | "private";
     cachePreset: string;
     cacheControlOverride: string | null;
@@ -82,6 +84,7 @@ export function BucketSettings({
   return (
     <div className="space-y-6">
       <h2 className="font-semibold text-lg">Settings</h2>
+      <RegionCard bucket={bucket} />
       <DnsRecords records={dnsRecords} />
       <VisibilityCard bucket={bucket} disabled={disabled} orgId={orgId} />
       <CachingCard bucket={bucket} disabled={disabled} orgId={orgId} />
@@ -89,6 +92,34 @@ export function BucketSettings({
       <CorsCard bucket={bucket} disabled={disabled} orgId={orgId} />
       <LifecycleCard bucket={bucket} disabled={disabled} orgId={orgId} />
     </div>
+  );
+}
+
+function RegionCard({ bucket }: { bucket: BucketSettingsProps["bucket"] }) {
+  const region = getRegion(bucket.region);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Region</CardTitle>
+        <CardDescription>
+          AWS region where this bucket's data is stored
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {region ? (
+          <div className="flex items-center gap-2">
+            <region.Flag className="size-4 shrink-0" />
+            <span className="text-sm">{region.label}</span>
+            <span className="font-mono text-muted-foreground text-xs">
+              {bucket.region}
+            </span>
+          </div>
+        ) : (
+          <span className="font-mono text-sm">{bucket.region}</span>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
