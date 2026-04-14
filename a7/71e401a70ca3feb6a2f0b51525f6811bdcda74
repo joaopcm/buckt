@@ -1,0 +1,49 @@
+packages/shared/cloudformation/buckt-byoa-role.yaml
+  a3274198a21368b8 1-60
+packages/db/src/schema/buckets.ts
+  a3274198a21368b8 3,75-77
+packages/shared/src/schemas/aws-accounts.ts
+  a3274198a21368b8 1-41
+packages/shared/src/schemas/keys.ts
+  a3274198a21368b8 12-14
+apps/api/src/lib/aws/cloudfront.ts
+  a3274198a21368b8 6,9,12,20-28,35,46-47,103-108,116,125-130,133,140-182
+apps/api/src/lib/aws/s3.ts
+  a3274198a21368b8 8,15-16,18,37,39,47-52,79-80,82-83
+apps/api/src/lib/s3.ts
+  a3274198a21368b8 2,5,10,12-19,23-24
+packages/shared/src/schemas/buckets.ts
+  a3274198a21368b8 22
+apps/api/src/lib/aws/acm.ts
+  a3274198a21368b8 7,10,18-29,42,47-51,78-82,89-93
+packages/db/src/schema/aws-accounts.ts
+  a3274198a21368b8 1-42
+packages/db/src/schema/index.ts
+  a3274198a21368b8 4
+packages/shared/src/index.ts
+  a3274198a21368b8 3
+apps/api/src/lib/aws/bucket-settings.ts
+  a3274198a21368b8 4-7,13,16-21,54-59,87-88,90,121-122,124,153-208,210
+apps/api/src/lib/aws/cloudwatch.ts
+  a3274198a21368b8 5,8,16-33,36,38,65-118
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "a771e401a70ca3feb6a2f0b51525f6811bdcda74",
+  "prompts": {
+    "a3274198a21368b8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "396475a8-9e52-4321-800c-303b8999795f",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 444,
+      "total_deletions": 40,
+      "accepted_lines": 444,
+      "overriden_lines": 0
+    }
+  }
+}
