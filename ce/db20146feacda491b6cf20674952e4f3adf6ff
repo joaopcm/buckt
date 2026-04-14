@@ -1,0 +1,25 @@
+apps/web/src/components/buckets/bucket-settings.tsx
+  0795ca23046b9f8b 25,65,87,98-125
+apps/web/src/components/buckets/dns-records.tsx
+  0795ca23046b9f8b 34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "cedb20146feacda491b6cf20674952e4f3adf6ff",
+  "prompts": {
+    "0795ca23046b9f8b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e95e514c-1b4b-4682-ab5a-e96f51894bdb",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 32,
+      "total_deletions": 1,
+      "accepted_lines": 32,
+      "overriden_lines": 0
+    }
+  }
+}
