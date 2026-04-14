@@ -4,6 +4,8 @@ import { buckets, createDb, subscription } from "@buckt/db";
 import { schedules } from "@trigger.dev/sdk/v3";
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
+import { resolveCredentials } from "../lib/aws/client-factory";
+import { getDistributionBandwidthBytes } from "../lib/aws/cloudwatch";
 import { s3 } from "../lib/s3";
 
 const db = createDb(process.env.DATABASE_PUBLIC_URL ?? "");
@@ -135,8 +137,23 @@ export const aggregateBandwidth = schedules.task({
       if (!bucket.cloudfrontDistributionId) {
         continue;
       }
-      const bytes =
-        distributionBandwidth.get(bucket.cloudfrontDistributionId) ?? 0;
+
+      let bytes: number;
+      if (bucket.awsAccountId) {
+        try {
+          const credentials = await resolveCredentials(bucket.awsAccountId, db);
+          bytes = await getDistributionBandwidthBytes(
+            bucket.cloudfrontDistributionId,
+            yesterday,
+            credentials
+          );
+        } catch {
+          continue;
+        }
+      } else {
+        bytes = distributionBandwidth.get(bucket.cloudfrontDistributionId) ?? 0;
+      }
+
       const newTotal = (bucket.bandwidthUsedBytes ?? 0) + bytes;
 
       await db

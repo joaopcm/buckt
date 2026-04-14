@@ -1,7 +1,9 @@
 import { buckets, createDb } from "@buckt/db";
+import type { AwsCredentialIdentity } from "@smithy/types";
 import { logger, schedules } from "@trigger.dev/sdk/v3";
 import { eq } from "drizzle-orm";
 import { getCertificateStatus } from "../lib/aws/acm";
+import { resolveCredentials } from "../lib/aws/client-factory";
 import { createDistribution } from "../lib/aws/cloudfront";
 
 const db = createDb(process.env.DATABASE_PUBLIC_URL ?? "");
@@ -10,12 +12,15 @@ const TIMEOUT_HOURS = 72;
 
 type BucketRow = typeof buckets.$inferSelect;
 
-async function processBucket(bucket: BucketRow): Promise<void> {
+async function processBucket(
+  bucket: BucketRow,
+  credentials?: AwsCredentialIdentity
+): Promise<void> {
   if (!bucket.acmCertArn) {
     return;
   }
 
-  const status = await getCertificateStatus(bucket.acmCertArn);
+  const status = await getCertificateStatus(bucket.acmCertArn, credentials);
   logger.info("Cert status check", {
     bucketId: bucket.id,
     certArn: bucket.acmCertArn,
@@ -29,8 +34,13 @@ async function processBucket(bucket: BucketRow): Promise<void> {
       domain: bucket.customDomain,
       s3WebsiteEndpoint: websiteEndpoint,
       certArn: bucket.acmCertArn,
-      logBucket: process.env.CLOUDFRONT_LOG_BUCKET,
-      logPrefix: process.env.CLOUDFRONT_LOG_PREFIX,
+      logBucket: bucket.awsAccountId
+        ? undefined
+        : process.env.CLOUDFRONT_LOG_BUCKET,
+      logPrefix: bucket.awsAccountId
+        ? undefined
+        : process.env.CLOUDFRONT_LOG_PREFIX,
+      credentials,
     });
 
     const dnsRecords = (
@@ -85,7 +95,8 @@ export const checkCertValidation = schedules.task({
 
     for (const bucket of pendingBuckets) {
       try {
-        await processBucket(bucket);
+        const credentials = await resolveCredentials(bucket.awsAccountId, db);
+        await processBucket(bucket, credentials);
       } catch (err) {
         console.error(`Failed to process bucket ${bucket.id}:`, err);
       }
