@@ -4,9 +4,10 @@ import {
   DescribeCertificateCommand,
   RequestCertificateCommand,
 } from "@aws-sdk/client-acm";
+import type { AwsCredentialIdentity } from "@smithy/types";
 import { env } from "../../env";
 
-const acm = new ACMClient({
+const defaultAcm = new ACMClient({
   region: "us-east-1",
   credentials: {
     accessKeyId: env.AWS_ACCESS_KEY_ID,
@@ -14,7 +15,18 @@ const acm = new ACMClient({
   },
 });
 
-export async function requestCertificate(domain: string) {
+function getAcmClient(credentials?: AwsCredentialIdentity): ACMClient {
+  if (credentials) {
+    return new ACMClient({ region: "us-east-1", credentials });
+  }
+  return defaultAcm;
+}
+
+export async function requestCertificate(
+  domain: string,
+  credentials?: AwsCredentialIdentity
+) {
+  const acm = getAcmClient(credentials);
   const result = await acm.send(
     new RequestCertificateCommand({
       DomainName: domain,
@@ -27,12 +39,16 @@ export async function requestCertificate(domain: string) {
     throw new Error("ACM did not return a certificate ARN");
   }
 
-  const validationRecords = await pollValidationRecords(certArn);
+  const validationRecords = await pollValidationRecords(certArn, acm);
 
   return { certArn, validationRecords };
 }
 
-async function pollValidationRecords(certArn: string, maxAttempts = 10) {
+async function pollValidationRecords(
+  certArn: string,
+  acm: ACMClient,
+  maxAttempts = 10
+) {
   for (let i = 0; i < maxAttempts; i++) {
     const details = await acm.send(
       new DescribeCertificateCommand({ CertificateArn: certArn })
@@ -59,13 +75,21 @@ async function pollValidationRecords(certArn: string, maxAttempts = 10) {
   );
 }
 
-export async function getCertificateStatus(certArn: string) {
+export async function getCertificateStatus(
+  certArn: string,
+  credentials?: AwsCredentialIdentity
+) {
+  const acm = getAcmClient(credentials);
   const result = await acm.send(
     new DescribeCertificateCommand({ CertificateArn: certArn })
   );
   return result.Certificate?.Status ?? "PENDING_VALIDATION";
 }
 
-export async function deleteCertificate(certArn: string) {
+export async function deleteCertificate(
+  certArn: string,
+  credentials?: AwsCredentialIdentity
+) {
+  const acm = getAcmClient(credentials);
   await acm.send(new DeleteCertificateCommand({ CertificateArn: certArn }));
 }

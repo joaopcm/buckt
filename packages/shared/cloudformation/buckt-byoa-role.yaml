@@ -1,0 +1,60 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Creates an IAM role for Buckt to manage resources in your AWS account"
+
+Parameters:
+  BucktAccountId:
+    Type: String
+    Description: "Buckt's AWS account ID (do not modify)"
+  ExternalId:
+    Type: String
+    Description: "Unique secret for cross-account trust (do not modify)"
+    NoEcho: true
+
+Resources:
+  BucktAccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: BucktAccess
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${BucktAccountId}:root"
+            Action: "sts:AssumeRole"
+            Condition:
+              StringEquals:
+                "sts:ExternalId": !Ref ExternalId
+      ManagedPolicyArns: []
+      Policies:
+        - PolicyName: BucktResourceManagement
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: S3FullAccess
+                Effect: Allow
+                Action: "s3:*"
+                Resource: "*"
+              - Sid: CloudFrontFullAccess
+                Effect: Allow
+                Action: "cloudfront:*"
+                Resource: "*"
+              - Sid: ACMFullAccess
+                Effect: Allow
+                Action: "acm:*"
+                Resource: "*"
+              - Sid: CloudWatchReadAccess
+                Effect: Allow
+                Action:
+                  - "cloudwatch:GetMetricData"
+                  - "cloudwatch:GetMetricStatistics"
+                  - "cloudwatch:ListMetrics"
+                Resource: "*"
+
+Outputs:
+  RoleArn:
+    Description: "ARN of the IAM role created for Buckt"
+    Value: !GetAtt BucktAccessRole.Arn
+  ExternalId:
+    Description: "External ID used for cross-account trust"
+    Value: !Ref ExternalId
