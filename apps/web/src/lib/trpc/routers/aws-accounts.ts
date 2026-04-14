@@ -97,12 +97,13 @@ export const awsAccountsRouter = router({
       }
 
       const externalId = crypto.randomUUID();
+      const pendingAccountId = `pending-${crypto.randomUUID().slice(0, 8)}`;
 
       const [account] = await ctx.db
         .insert(awsAccounts)
         .values({
           orgId: ctx.orgId,
-          awsAccountId: "",
+          awsAccountId: pendingAccountId,
           externalId,
           label: input.label,
           status: "pending",
