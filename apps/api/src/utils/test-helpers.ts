@@ -1,4 +1,4 @@
-import { apiKeys, buckets, subscription } from "@buckt/db";
+import { apiKeys, awsAccounts, buckets, subscription } from "@buckt/db";
 import type { Permission } from "@buckt/shared";
 import { PERMISSIONS } from "@buckt/shared";
 import { eq, sql } from "drizzle-orm";
@@ -34,6 +34,7 @@ export async function createTestApiKey(opts?: {
 
 export async function cleanDb() {
   await db.delete(buckets).where(sql`1=1`);
+  await db.delete(awsAccounts).where(sql`1=1`);
   await db.delete(apiKeys).where(sql`1=1`);
   await db.delete(subscription).where(sql`1=1`);
 }

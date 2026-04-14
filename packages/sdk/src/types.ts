@@ -11,7 +11,10 @@ export type Permission =
   | "buckets:delete"
   | "files:read"
   | "files:write"
-  | "files:delete";
+  | "files:delete"
+  | "aws-accounts:read"
+  | "aws-accounts:write"
+  | "aws-accounts:delete";
 
 export type BucketVisibility = "public" | "private";
 
@@ -24,8 +27,17 @@ export type CachePreset =
 
 export type OptimizationMode = "none" | "light" | "balanced" | "maximum";
 
+export interface ManagedSettings {
+  cache?: boolean;
+  cors?: boolean;
+  lifecycle?: boolean;
+  optimization?: boolean;
+  visibility?: boolean;
+}
+
 export interface Bucket {
   acmCertArn: string | null;
+  awsAccountId: string | null;
   bandwidthUsedBytes: number;
   cacheControlOverride: string | null;
   cachePreset: CachePreset;
@@ -36,7 +48,9 @@ export interface Bucket {
   dnsRecords: unknown | null;
   domainConnectProvider: string | null;
   id: string;
+  isImported: boolean;
   lifecycleTtlDays: number | null;
+  managedSettings: ManagedSettings | null;
   name: string;
   optimizationMode: OptimizationMode;
   orgId: string;
@@ -48,6 +62,27 @@ export interface Bucket {
   storageUsedBytes: number;
   updatedAt: string;
   visibility: BucketVisibility;
+}
+
+export type AwsAccountStatus = "pending" | "validating" | "active" | "failed";
+
+export interface AwsAccount {
+  awsAccountId: string;
+  createdAt: string;
+  externalId: string;
+  id: string;
+  label: string | null;
+  lastValidatedAt: string | null;
+  orgId: string;
+  roleArn: string;
+  stackId: string | null;
+  status: AwsAccountStatus;
+  updatedAt: string;
+}
+
+export interface S3BucketInfo {
+  creationDate: string;
+  name: string;
 }
 
 export interface ApiKey {

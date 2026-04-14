@@ -1,6 +1,6 @@
-import { buckets } from "@buckt/db";
+import { awsAccounts, buckets } from "@buckt/db";
 import { createBucketSchema } from "@buckt/shared";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import type { Context } from "hono";
 import { db } from "../../lib/db";
 import { provisionBucket } from "../../trigger/provision-bucket";
@@ -23,9 +23,31 @@ export async function createBucket(c: Context) {
     lifecycleTtlDays,
     optimizationMode,
     domainConnectProvider,
+    awsAccountId,
   } = parsed.data;
   const orgId = c.get("orgId");
   const planLimits = c.get("planLimits");
+
+  if (awsAccountId) {
+    const plan = c.get("plan") as string;
+    if (plan === "free") {
+      return error(c, 402, "BYOA requires a paid plan. Upgrade to enable.");
+    }
+    const [account] = await db
+      .select({ id: awsAccounts.id, status: awsAccounts.status })
+      .from(awsAccounts)
+      .where(
+        and(eq(awsAccounts.id, awsAccountId), eq(awsAccounts.orgId, orgId))
+      )
+      .limit(1);
+    if (!account) {
+      return error(c, 404, "AWS account not found");
+    }
+    if (account.status !== "active") {
+      return error(c, 400, "AWS account is not active");
+    }
+  }
+
   const slug = customDomain.replace(/\./g, "-");
   const s3BucketName = `buckt-${orgId.slice(0, 8)}-${slug}`.toLowerCase();
 
@@ -63,6 +85,16 @@ export async function createBucket(c: Context) {
     }
   }
 
+  const managedSettings = awsAccountId
+    ? {
+        visibility: true,
+        cache: true,
+        cors: true,
+        lifecycle: true,
+        optimization: true,
+      }
+    : {};
+
   const [bucket] = await db
     .insert(buckets)
     .values({
@@ -78,6 +110,8 @@ export async function createBucket(c: Context) {
       lifecycleTtlDays,
       optimizationMode,
       domainConnectProvider,
+      awsAccountId: awsAccountId ?? null,
+      managedSettings,
       status: "pending",
     })
     .returning();
