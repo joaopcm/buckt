@@ -1,0 +1,23 @@
+apps/api/src/trigger/optimize-file.ts
+  31739a3b115fa261 24-28,31-35,38-42,62,70
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "f34c2a0d4f1459f74c61179e234e26652f052862",
+  "prompts": {
+    "31739a3b115fa261": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f2085bd8-5845-4108-88cb-53a75323d1fd",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 17,
+      "total_deletions": 16,
+      "accepted_lines": 17,
+      "overriden_lines": 0
+    }
+  }
+}
