@@ -102,8 +102,18 @@ export const domainConnectRouter = router({
         const value = certRecord.value.endsWith(ACM_SUFFIX)
           ? certRecord.value.slice(0, -ACM_SUFFIX.length)
           : certRecord.value;
+
+        const domainSuffix = host ? `.${host}.${rootDomain}` : `.${rootDomain}`;
+        let certName = certRecord.name;
+        if (certName.endsWith(".")) {
+          certName = certName.slice(0, -1);
+        }
+        if (certName.endsWith(domainSuffix)) {
+          certName = certName.slice(0, -domainSuffix.length);
+        }
+
         variables = {
-          certValidationName: certRecord.name,
+          certValidationName: certName,
           certValidationValue: value,
         };
       } else {
