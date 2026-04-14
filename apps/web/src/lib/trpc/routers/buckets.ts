@@ -370,6 +370,61 @@ export const bucketsRouter = router({
       return { id: input.id, status: "pending" as const };
     }),
 
+  verifyCname: orgProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const [bucket] = await ctx.db
+        .select()
+        .from(buckets)
+        .where(and(eq(buckets.id, input.id), eq(buckets.orgId, ctx.orgId)))
+        .limit(1);
+
+      if (!bucket || bucket.status !== "active") {
+        return { verified: false };
+      }
+
+      const records = (
+        Array.isArray(bucket.dnsRecords) ? bucket.dnsRecords : []
+      ) as Array<{
+        name: string;
+        type: string;
+        value: string;
+        applied?: boolean;
+      }>;
+
+      const cnameRecord = records.find(
+        (r) =>
+          r.type === "CNAME" && r.name === bucket.customDomain && !r.applied
+      );
+
+      if (!cnameRecord) {
+        return { verified: true };
+      }
+
+      try {
+        const { resolveCname } = await import("node:dns/promises");
+        const results = await resolveCname(bucket.customDomain);
+        const matches = results.some(
+          (r) => r === cnameRecord.value || r === `${cnameRecord.value}.`
+        );
+
+        if (matches) {
+          const updated = records.map((r) =>
+            r === cnameRecord ? { ...r, applied: true } : r
+          );
+          await ctx.db
+            .update(buckets)
+            .set({ dnsRecords: updated })
+            .where(eq(buckets.id, bucket.id));
+          return { verified: true };
+        }
+      } catch {
+        return { verified: false };
+      }
+
+      return { verified: false };
+    }),
+
   forwardInstructions: orgProcedure
     .input(forwardInstructionsSchema)
     .mutation(async ({ ctx, input }) => {

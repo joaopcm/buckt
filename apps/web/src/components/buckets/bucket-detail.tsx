@@ -52,6 +52,14 @@ export function BucketDetail({
     }
   );
 
+  const cnameVerification = trpc.buckets.verifyCname.useQuery(
+    { orgId, id: bucketId },
+    {
+      enabled: bucket?.status === "active",
+      refetchInterval: (query) => (query.state.data?.verified ? false : 30_000),
+    }
+  );
+
   if (isPending || !bucket) {
     return (
       <div className="space-y-6">
@@ -62,6 +70,7 @@ export function BucketDetail({
   }
 
   const hasDomainConnect = !!bucket.domainConnectProvider;
+  const cnameVerified = cnameVerification.data?.verified ?? false;
 
   return (
     <div className="space-y-8">
@@ -93,33 +102,31 @@ export function BucketDetail({
 
       {bucket.status === "active" && (
         <>
-          {(() => {
-            const dnsRecords = (
-              Array.isArray(bucket.dnsRecords) ? bucket.dnsRecords : []
-            ) as Array<{
-              name: string;
-              type: string;
-              value: string;
-              applied?: boolean;
-            }>;
-            const pendingCname = dnsRecords.find(
-              (r) =>
-                r.type === "CNAME" &&
-                r.name === bucket.customDomain &&
-                !r.applied
-            );
-            if (pendingCname) {
-              return (
-                <PendingCnameBanner
-                  bucketId={bucketId}
-                  cnameRecord={pendingCname}
-                  hasDomainConnect={hasDomainConnect}
-                  orgId={orgId}
-                />
+          {!cnameVerified &&
+            (() => {
+              const dnsRecords = (
+                Array.isArray(bucket.dnsRecords) ? bucket.dnsRecords : []
+              ) as Array<{
+                name: string;
+                type: string;
+                value: string;
+                applied?: boolean;
+              }>;
+              const pendingCname = dnsRecords.find(
+                (r) => r.type === "CNAME" && r.name === bucket.customDomain
               );
-            }
-            return null;
-          })()}
+              if (pendingCname) {
+                return (
+                  <PendingCnameBanner
+                    bucketId={bucketId}
+                    cnameRecord={pendingCname}
+                    hasDomainConnect={hasDomainConnect}
+                    orgId={orgId}
+                  />
+                );
+              }
+              return null;
+            })()}
           <BucketUsage
             bandwidthUsedBytes={bucket.bandwidthUsedBytes}
             storageUsedBytes={bucket.storageUsedBytes}
