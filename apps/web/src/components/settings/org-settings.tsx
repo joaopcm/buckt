@@ -7,7 +7,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type { z } from "zod";
-import { AwsAccountsCard } from "@/components/settings/aws-accounts-card";
 import { InviteMemberDialog } from "@/components/settings/invite-member-dialog";
 import { MemberRow } from "@/components/settings/member-row";
 import { OrgLogoCard } from "@/components/settings/org-logo-card";
@@ -53,8 +52,6 @@ export function OrgSettings({ orgId }: { orgId: string }) {
         org={org}
         orgId={orgId}
       />
-
-      <AwsAccountsCard isAdmin={isAdmin} orgId={orgId} />
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">

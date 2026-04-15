@@ -7,7 +7,7 @@ import {
   updateAwsAccountSchema,
 } from "@buckt/shared";
 import { TRPCError } from "@trpc/server";
-import { and, count, desc, eq, lt } from "drizzle-orm";
+import { and, count, desc, eq, ilike, lt } from "drizzle-orm";
 import { z } from "zod";
 import { adminProcedure, orgProcedure, router } from "../init";
 
@@ -17,11 +17,15 @@ export const awsAccountsRouter = router({
       z.object({
         cursor: z.string().optional(),
         limit: z.number().int().positive().max(100).default(20),
+        search: z.string().optional(),
       })
     )
     .query(async ({ ctx, input }) => {
-      const { cursor, limit } = input;
+      const { cursor, limit, search } = input;
       const baseConditions = [eq(awsAccounts.orgId, ctx.orgId)];
+      if (search) {
+        baseConditions.push(ilike(awsAccounts.label, `%${search}%`));
+      }
 
       const conditions = [...baseConditions];
       if (cursor) {

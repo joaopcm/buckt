@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Cloud,
   CreditCard,
   HardDrive,
   Key,
@@ -29,6 +30,7 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Buckets", href: "/buckets", icon: HardDrive },
   { name: "API Keys", href: "/keys", icon: Key },
+  { name: "AWS Accounts", href: "/aws-accounts", icon: Cloud },
   { name: "Settings", href: "/settings", icon: Settings },
   { name: "Billing", href: "/billing", icon: CreditCard },
 ];
@@ -41,6 +43,7 @@ export function AppSidebar({ orgId }: { orgId: string }) {
   const prefetchMap: Record<string, () => void> = {
     "/buckets": () => utils.buckets.list.prefetch({ orgId }),
     "/keys": () => utils.keys.list.prefetch({ orgId }),
+    "/aws-accounts": () => utils.awsAccounts.list.prefetch({ orgId }),
     "/settings": () => {
       utils.org.get.prefetch({ orgId });
       utils.org.members.prefetch({ orgId });
