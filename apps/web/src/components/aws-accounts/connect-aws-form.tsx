@@ -171,29 +171,33 @@ export function ConnectAwsForm({ orgId }: { orgId: string }) {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="flex gap-3 rounded-md border border-blue-500/20 bg-blue-500/5 p-3">
-              <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
-              <div className="text-blue-200/80 text-xs">
-                <p className="font-medium text-blue-300">
-                  What happens when you open the console:
-                </p>
-                <ol className="mt-1.5 list-inside list-decimal space-y-1">
-                  <li>
-                    A CloudFormation "Quick Create" page opens with pre-filled
-                    parameters
-                  </li>
-                  <li>
-                    Scroll down, check the acknowledgment checkbox, and click
-                    "Create stack"
-                  </li>
-                  <li>Wait for the stack status to show "CREATE_COMPLETE"</li>
-                  <li>
-                    Go to the Outputs tab and copy the <strong>RoleArn</strong>{" "}
-                    value
-                  </li>
-                </ol>
-              </div>
-            </div>
+            <Card className="bg-blue-500/10 ring-blue-500/20">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Info className="size-4 text-blue-600" />
+                  <CardTitle className="text-sm">
+                    What happens when you open the console
+                  </CardTitle>
+                </div>
+                <CardDescription className="text-xs">
+                  <ol className="list-inside list-decimal space-y-1">
+                    <li>
+                      A CloudFormation "Quick Create" page opens with pre-filled
+                      parameters
+                    </li>
+                    <li>
+                      Scroll down, check the acknowledgment checkbox, and click
+                      "Create stack"
+                    </li>
+                    <li>Wait for the stack status to show "CREATE_COMPLETE"</li>
+                    <li>
+                      Go to the Outputs tab and copy the{" "}
+                      <strong className="text-foreground">RoleArn</strong> value
+                    </li>
+                  </ol>
+                </CardDescription>
+              </CardHeader>
+            </Card>
             <div className="space-y-2">
               <Label>External ID</Label>
               <CopyText
