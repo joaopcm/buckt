@@ -1,12 +1,13 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, Copy, ExternalLink, Info } from "lucide-react";
+import { Check, ExternalLink, Info } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { CopyText } from "@/components/copy-text";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -73,11 +74,6 @@ export function ConnectAwsForm({ orgId }: { orgId: string }) {
     resolver: zodResolver(roleArnSchema),
     defaultValues: { roleArn: "" },
   });
-
-  async function handleCopy(text: string) {
-    await navigator.clipboard.writeText(text);
-    toast.success("Copied to clipboard");
-  }
 
   if (step === "done") {
     return (
@@ -200,20 +196,10 @@ export function ConnectAwsForm({ orgId }: { orgId: string }) {
             </div>
             <div className="space-y-2">
               <Label>External ID</Label>
-              <div className="flex gap-2">
-                <Input
-                  className="font-mono text-xs"
-                  readOnly
-                  value={externalId}
-                />
-                <Button
-                  onClick={() => handleCopy(externalId)}
-                  size="icon"
-                  variant="outline"
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
+              <CopyText
+                className="rounded-md border px-3 py-2"
+                value={externalId}
+              />
             </div>
             <Button
               className="w-full"
