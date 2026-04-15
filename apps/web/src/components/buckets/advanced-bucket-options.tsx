@@ -357,6 +357,13 @@ export function AdvancedBucketOptions({
             <div className="space-y-2">
               <Label>AWS Account</Label>
               <Select
+                items={[
+                  { value: "", label: "Buckt-managed (default)" },
+                  ...activeAwsAccounts.map((a) => ({
+                    value: a.id,
+                    label: a.label || a.awsAccountId,
+                  })),
+                ]}
                 onValueChange={onAwsAccountChange}
                 value={selectedAwsAccountId ?? ""}
               >
