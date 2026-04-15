@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, ExternalLink, Info } from "lucide-react";
+import { ExternalLink, Info } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -39,7 +39,7 @@ const roleArnSchema = z.object({
     .regex(/^arn:aws:iam::\d{12}:role\/.+$/, "Must be a valid IAM role ARN"),
 });
 
-type Step = "label" | "cloudformation" | "role-arn" | "validating" | "done";
+type Step = "label" | "cloudformation" | "role-arn" | "validating";
 
 export function ConnectAwsForm({ orgId }: { orgId: string }) {
   const router = useRouter();
@@ -62,7 +62,8 @@ export function ConnectAwsForm({ orgId }: { orgId: string }) {
 
   const validateMutation = trpc.awsAccounts.validate.useMutation({
     onSuccess: () => {
-      setStep("done");
+      toast.success("AWS account connected successfully");
+      router.push(`/org/${orgId}/aws-accounts`);
     },
     onError: (err) => {
       toast.error(err.message);
@@ -74,22 +75,6 @@ export function ConnectAwsForm({ orgId }: { orgId: string }) {
     resolver: zodResolver(roleArnSchema),
     defaultValues: { roleArn: "" },
   });
-
-  if (step === "done") {
-    return (
-      <Card className="max-w-lg">
-        <CardContent className="flex flex-col items-center gap-4 pt-8 pb-8">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
-            <Check className="h-6 w-6 text-green-600 dark:text-green-400" />
-          </div>
-          <p className="font-medium">AWS account connected successfully</p>
-          <Button onClick={() => router.push(`/org/${orgId}/aws-accounts`)}>
-            View accounts
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
 
   if (step === "validating") {
     return (
@@ -200,10 +185,7 @@ export function ConnectAwsForm({ orgId }: { orgId: string }) {
             </Card>
             <div className="space-y-2">
               <Label>External ID</Label>
-              <CopyText
-                className="border px-3 py-2"
-                value={externalId}
-              />
+              <CopyText className="border px-3 py-2" value={externalId} />
             </div>
             <Button
               className="w-full"
