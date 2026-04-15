@@ -1,0 +1,27 @@
+apps/web/src/components/ui/label.tsx
+  a3274198a21368b8 9
+apps/web/src/components/ui/field.tsx
+  a3274198a21368b8 77,197,204-205
+apps/web/src/env.ts
+  a3274198a21368b8 33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "77e8d8cc400039d9993def5443d44c3dacaef68d",
+  "prompts": {
+    "a3274198a21368b8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "396475a8-9e52-4321-800c-303b8999795f",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 9,
+      "total_deletions": 7,
+      "accepted_lines": 7,
+      "overriden_lines": 0
+    }
+  }
+}
