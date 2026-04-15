@@ -28,17 +28,23 @@ import { useCursorPagination } from "@/hooks/use-cursor-pagination";
 import { useDebounce } from "@/hooks/use-debounce";
 import { trpc } from "@/lib/trpc/client";
 
-const STATUS_VARIANT: Record<
-  string,
-  {
-    label: string;
-    variant: "default" | "secondary" | "destructive" | "outline";
-  }
-> = {
-  pending: { label: "Pending", variant: "outline" },
-  validating: { label: "Validating", variant: "secondary" },
-  active: { label: "Active", variant: "default" },
-  failed: { label: "Failed", variant: "destructive" },
+const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
+  pending: {
+    label: "Pending",
+    className: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
+  },
+  validating: {
+    label: "Validating",
+    className: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+  },
+  active: {
+    label: "Active",
+    className: "bg-green-500/10 text-green-500 border-green-500/20",
+  },
+  failed: {
+    label: "Failed",
+    className: "bg-red-500/10 text-red-500 border-red-500/20",
+  },
 };
 
 export function AwsAccountTable({ orgId }: { orgId: string }) {
@@ -109,8 +115,8 @@ export function AwsAccountTable({ orgId }: { orgId: string }) {
             </TableHeader>
             <TableBody>
               {data.items.map((account) => {
-                const badge =
-                  STATUS_VARIANT[account.status] ?? STATUS_VARIANT.pending;
+                const status =
+                  STATUS_CONFIG[account.status] ?? STATUS_CONFIG.pending;
                 return (
                   <TableRow key={account.id}>
                     <TableCell className="truncate font-medium text-xs">
@@ -122,7 +128,9 @@ export function AwsAccountTable({ orgId }: { orgId: string }) {
                         : account.awsAccountId}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={badge.variant}>{badge.label}</Badge>
+                      <Badge className={status.className} variant="outline">
+                        {status.label}
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       <DateDisplay
