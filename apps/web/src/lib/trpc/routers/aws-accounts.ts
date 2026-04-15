@@ -171,7 +171,7 @@ export const awsAccountsRouter = router({
         });
       }
 
-      const { validateRole } = await import("@/lib/trpc/routers/_aws-validate");
+      const { validateRole } = await import("@/lib/trpc/routers/aws-validate");
       const result = await validateRole(account.roleArn, account.externalId);
 
       if (result.valid) {
@@ -254,7 +254,7 @@ export const awsAccountsRouter = router({
         });
       }
 
-      const { assumeRole } = await import("@/lib/trpc/routers/_aws-validate");
+      const { assumeRole } = await import("@/lib/trpc/routers/aws-validate");
       const credentials = await assumeRole(account.roleArn, account.externalId);
 
       const { ListBucketsCommand, S3Client } = await import(
@@ -303,15 +303,15 @@ export const awsAccountsRouter = router({
         });
       }
 
-      const { assumeRole } = await import("@/lib/trpc/routers/_aws-validate");
+      const { assumeRole } = await import("@/lib/trpc/routers/aws-validate");
       const credentials = await assumeRole(account.roleArn, account.externalId);
 
       const { getBucketRegion, readBucketSettings } = await import(
-        "@/lib/trpc/routers/_bucket-import"
+        "@/lib/trpc/routers/bucket-import"
       );
 
       const { findDistributionForBucket } = await import(
-        "@/lib/trpc/routers/_cloudfront-import"
+        "@/lib/trpc/routers/cloudfront-import"
       );
 
       const defaultManagedSettings: ManagedSettings = {
