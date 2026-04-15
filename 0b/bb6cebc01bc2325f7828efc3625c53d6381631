@@ -1,0 +1,23 @@
+apps/web/src/components/aws-accounts/connect-aws-form.tsx
+  a3274198a21368b8 174-200
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "0bbb6cebc01bc2325f7828efc3625c53d6381631",
+  "prompts": {
+    "a3274198a21368b8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "396475a8-9e52-4321-800c-303b8999795f",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 30,
+      "total_deletions": 26,
+      "accepted_lines": 27,
+      "overriden_lines": 0
+    }
+  }
+}
