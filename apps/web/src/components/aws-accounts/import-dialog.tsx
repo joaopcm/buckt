@@ -90,7 +90,7 @@ export function ImportBucketsDialog({
         <div className="space-y-4 py-4">
           <Select
             onValueChange={(v) => {
-              setSelectedAccountId(v);
+              setSelectedAccountId(v ?? "");
               setSelectedBuckets(new Set());
               setCursor(undefined);
             }}
