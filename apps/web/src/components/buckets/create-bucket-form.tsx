@@ -8,6 +8,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -16,6 +17,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useDebounce } from "@/hooks/use-debounce";
 import { trpc } from "@/lib/trpc/client";
 
@@ -100,6 +108,14 @@ export function CreateBucketForm({ orgId }: { orgId: string }) {
   const utils = trpc.useUtils();
   const defaultRegion = getClosestRegion();
 
+  const { data: awsAccountsData } = trpc.awsAccounts.list.useQuery({
+    orgId,
+    limit: 50,
+  });
+  const activeAccounts =
+    awsAccountsData?.items.filter((a) => a.status === "active") ?? [];
+  const [selectedAwsAccount, setSelectedAwsAccount] = useState<string>("");
+
   const {
     register,
     handleSubmit,
@@ -142,6 +158,7 @@ export function CreateBucketForm({ orgId }: { orgId: string }) {
     createBucket.mutate({
       ...values,
       orgId,
+      awsAccountId: selectedAwsAccount || undefined,
       domainConnectProvider: dcCheck.data?.supported
         ? dcCheck.data.providerHost
         : undefined,
@@ -155,6 +172,33 @@ export function CreateBucketForm({ orgId }: { orgId: string }) {
       </CardHeader>
       <CardContent>
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+          {activeAccounts.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="awsAccount">AWS Account</Label>
+              <Select
+                onValueChange={setSelectedAwsAccount}
+                value={selectedAwsAccount}
+              >
+                <SelectTrigger id="awsAccount">
+                  <SelectValue placeholder="Buckt-managed (default)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Buckt-managed (default)</SelectItem>
+                  {activeAccounts.map((account) => (
+                    <SelectItem key={account.id} value={account.id}>
+                      {account.label || account.awsAccountId}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-muted-foreground text-xs">
+                {selectedAwsAccount
+                  ? "Bucket will be created in your AWS account"
+                  : "Bucket will be created in Buckt's infrastructure"}
+              </p>
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="name">Name</Label>
             <Input id="name" placeholder="My CDN" {...register("name")} />
