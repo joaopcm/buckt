@@ -1,6 +1,6 @@
 "use client";
 
-import { Cloud, MoreVertical, RefreshCw, Search } from "lucide-react";
+import { Cloud, MoreVertical, Search } from "lucide-react";
 import { parseAsString, useQueryState } from "nuqs";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
@@ -215,7 +215,6 @@ function AccountActions({
               disabled={validateMutation.isPending}
               onClick={() => validateMutation.mutate({ orgId, id: accountId })}
             >
-              <RefreshCw className="mr-2 size-3.5" />
               Validate
             </DropdownMenuItem>
           )}
