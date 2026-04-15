@@ -65,18 +65,30 @@ const LIFECYCLE_PRESETS = [
   { value: 365, label: "1 year" },
 ] as const;
 
+interface AwsAccount {
+  awsAccountId: string;
+  id: string;
+  label: string | null;
+}
+
 interface AdvancedBucketOptionsProps {
+  activeAwsAccounts?: AwsAccount[];
   defaultRegion: string;
   errors: FieldErrors<CreateBucketValues>;
+  onAwsAccountChange?: (value: string) => void;
+  selectedAwsAccountId?: string;
   setValue: UseFormSetValue<CreateBucketValues>;
   watch: UseFormWatch<CreateBucketValues>;
 }
 
 export function AdvancedBucketOptions({
+  activeAwsAccounts = [],
   defaultRegion,
+  errors,
+  onAwsAccountChange,
+  selectedAwsAccountId,
   setValue,
   watch,
-  errors,
 }: AdvancedBucketOptionsProps) {
   const [corsInput, setCorsInput] = useState("");
   const corsOrigins = watch("corsOrigins") ?? [];
@@ -341,6 +353,32 @@ export function AdvancedBucketOptions({
               </p>
             )}
           </div>
+          {activeAwsAccounts.length > 0 && onAwsAccountChange && (
+            <div className="space-y-2">
+              <Label>AWS Account</Label>
+              <Select
+                onValueChange={onAwsAccountChange}
+                value={selectedAwsAccountId ?? ""}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Buckt-managed (default)" />
+                </SelectTrigger>
+                <SelectContent align="start" alignItemWithTrigger={false}>
+                  <SelectItem value="">Buckt-managed (default)</SelectItem>
+                  {activeAwsAccounts.map((account) => (
+                    <SelectItem key={account.id} value={account.id}>
+                      {account.label || account.awsAccountId}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-muted-foreground text-xs">
+                {selectedAwsAccountId
+                  ? "Bucket will be created in your AWS account"
+                  : "Bucket will be created in Buckt's infrastructure"}
+              </p>
+            </div>
+          )}
         </Accordion.Panel>
       </Accordion.Item>
     </Accordion.Root>
