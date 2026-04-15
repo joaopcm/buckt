@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, Copy, ExternalLink } from "lucide-react";
+import { Check, Copy, ExternalLink, Info } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -46,6 +46,7 @@ export function ConnectAwsForm({ orgId }: { orgId: string }) {
   const [accountId, setAccountId] = useState<string | null>(null);
   const [externalId, setExternalId] = useState("");
   const [label, setLabel] = useState("");
+  const [consoleOpened, setConsoleOpened] = useState(false);
 
   const connectMutation = trpc.awsAccounts.connect.useMutation({
     onSuccess: (data) => {
@@ -174,6 +175,29 @@ export function ConnectAwsForm({ orgId }: { orgId: string }) {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
+            <div className="flex gap-3 rounded-md border border-blue-500/20 bg-blue-500/5 p-3">
+              <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
+              <div className="text-blue-200/80 text-xs">
+                <p className="font-medium text-blue-300">
+                  What happens when you open the console:
+                </p>
+                <ol className="mt-1.5 list-inside list-decimal space-y-1">
+                  <li>
+                    A CloudFormation "Quick Create" page opens with pre-filled
+                    parameters
+                  </li>
+                  <li>
+                    Scroll down, check the acknowledgment checkbox, and click
+                    "Create stack"
+                  </li>
+                  <li>Wait for the stack status to show "CREATE_COMPLETE"</li>
+                  <li>
+                    Go to the Outputs tab and copy the <strong>RoleArn</strong>{" "}
+                    value
+                  </li>
+                </ol>
+              </div>
+            </div>
             <div className="space-y-2">
               <Label>External ID</Label>
               <div className="flex gap-2">
@@ -193,15 +217,20 @@ export function ConnectAwsForm({ orgId }: { orgId: string }) {
             </div>
             <Button
               className="w-full"
-              onClick={() =>
-                window.open(buildQuickCreateUrl(externalId), "_blank")
-              }
-              variant="outline"
+              onClick={() => {
+                window.open(buildQuickCreateUrl(externalId), "_blank");
+                setConsoleOpened(true);
+              }}
+              variant={consoleOpened ? "outline" : "default"}
             >
               <ExternalLink className="mr-1.5 h-4 w-4" />
               Open CloudFormation Console
             </Button>
-            <Button className="w-full" onClick={() => setStep("role-arn")}>
+            <Button
+              className="w-full"
+              onClick={() => setStep("role-arn")}
+              variant={consoleOpened ? "default" : "outline"}
+            >
               I&apos;ve deployed the stack
             </Button>
           </div>
