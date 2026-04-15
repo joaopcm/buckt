@@ -22,7 +22,7 @@ import { env } from "@/env";
 import { trpc } from "@/lib/trpc/client";
 
 function buildQuickCreateUrl(externalId: string) {
-  const templateUrl = env.NEXT_PUBLIC_CF_TEMPLATE_URL;
+  const templateUrl = env.NEXT_PUBLIC_CF_TEMPLATE_URL ?? "";
   const accountId = env.NEXT_PUBLIC_BUCKT_AWS_ACCOUNT_ID ?? "";
   const params = new URLSearchParams({
     templateURL: templateUrl,
