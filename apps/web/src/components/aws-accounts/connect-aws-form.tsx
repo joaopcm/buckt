@@ -201,7 +201,7 @@ export function ConnectAwsForm({ orgId }: { orgId: string }) {
             <div className="space-y-2">
               <Label>External ID</Label>
               <CopyText
-                className="rounded-md border px-3 py-2"
+                className="border px-3 py-2"
                 value={externalId}
               />
             </div>
