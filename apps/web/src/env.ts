@@ -30,7 +30,7 @@ export const env = createEnv({
     NEXT_PUBLIC_POSTHOG_KEY: z.string().min(1).optional(),
     NEXT_PUBLIC_POSTHOG_HOST: z.url().optional(),
     NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
-    NEXT_PUBLIC_CF_TEMPLATE_URL: z.url(),
+    NEXT_PUBLIC_CF_TEMPLATE_URL: z.url().optional(),
     NEXT_PUBLIC_BUCKT_AWS_ACCOUNT_ID: z.string().min(1).optional(),
   },
   experimental__runtimeEnv: {
