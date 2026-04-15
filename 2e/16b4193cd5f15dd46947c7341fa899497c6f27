@@ -1,0 +1,29 @@
+apps/web/src/lib/trpc/routers/aws-validate.ts
+  a3274198a21368b8 1-60
+apps/web/src/lib/trpc/routers/bucket-import.ts
+  a3274198a21368b8 1-69
+apps/web/src/lib/trpc/routers/cloudfront-import.ts
+  a3274198a21368b8 1-54
+apps/web/src/lib/trpc/routers/aws-accounts.ts
+  a3274198a21368b8 174,257,306,310,314
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "2e16b4193cd5f15dd46947c7341fa899497c6f27",
+  "prompts": {
+    "a3274198a21368b8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "396475a8-9e52-4321-800c-303b8999795f",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 188,
+      "total_deletions": 5,
+      "accepted_lines": 188,
+      "overriden_lines": 0
+    }
+  }
+}
