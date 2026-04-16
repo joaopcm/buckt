@@ -1,7 +1,11 @@
 "use server";
 
 import { AssumeRoleCommand, STSClient } from "@aws-sdk/client-sts";
-import type { AwsCredentialIdentity } from "@smithy/types";
+interface AwsCredentialIdentity {
+  accessKeyId: string;
+  secretAccessKey: string;
+  sessionToken?: string;
+}
 
 const stsClient = new STSClient({
   region: "us-east-1",

@@ -364,7 +364,7 @@ export function AdvancedBucketOptions({
                     label: a.label || a.awsAccountId,
                   })),
                 ]}
-                onValueChange={onAwsAccountChange}
+                onValueChange={(v) => onAwsAccountChange?.(v ?? "")}
                 value={selectedAwsAccountId ?? ""}
               >
                 <SelectTrigger className="w-full">

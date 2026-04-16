@@ -7,7 +7,11 @@ import {
   GetPublicAccessBlockCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
-import type { AwsCredentialIdentity } from "@smithy/types";
+interface AwsCredentialIdentity {
+  accessKeyId: string;
+  secretAccessKey: string;
+  sessionToken?: string;
+}
 
 export async function getBucketRegion(
   bucketName: string,

@@ -4,7 +4,11 @@ import {
   CloudFrontClient,
   ListDistributionsCommand,
 } from "@aws-sdk/client-cloudfront";
-import type { AwsCredentialIdentity } from "@smithy/types";
+interface AwsCredentialIdentity {
+  accessKeyId: string;
+  secretAccessKey: string;
+  sessionToken?: string;
+}
 
 export async function findDistributionForBucket(
   s3BucketName: string,
