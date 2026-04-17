@@ -1,0 +1,72 @@
+apps/api/src/routes/aws-accounts/get.ts
+  e83d4622a952daba 21-22
+apps/web/src/env.ts
+  d2fc545f876a1e3e 35,45
+packages/db/src/schema/aws-accounts.ts
+  d2fc545f876a1e3e 28
+apps/web/src/lib/trpc/routers/aws-accounts.ts
+  d2fc545f876a1e3e 113-115,123
+  e83d4622a952daba 14-21,62,86,158,199
+packages/shared/cloudformation/buckt-managed-acm-events.yaml
+  d2fc545f876a1e3e 1-76
+apps/web/src/components/aws-accounts/connect-aws-form.tsx
+  e83d4622a952daba 36
+  d2fc545f876a1e3e 24,27,33-34,52,60,198-201
+apps/api/src/trigger/provision-bucket.ts
+  d2fc545f876a1e3e 2,7,12-20,75,84-85,90,95,97,100-114,128,134
+  e83d4622a952daba 115-127,129-133,135-156
+apps/api/src/routes/webhooks/acm.ts
+  d2fc545f876a1e3e 1-7,9-11,13-29,40,54-58,61-66,69-70,72-98,107-112
+  e83d4622a952daba 8,12,30-33,35-39,41,43-50,52,71,99-106
+packages/db/src/schema/buckets.ts
+  d2fc545f876a1e3e 57
+apps/api/src/routes/aws-accounts/update.ts
+  e83d4622a952daba 33-34
+apps/api/src/env.ts
+  d2fc545f876a1e3e 17
+apps/api/README.md
+  d2fc545f876a1e3e 59,64-65
+apps/api/src/routes/aws-accounts/validate.ts
+  e83d4622a952daba 39-40
+apps/api/src/routes/aws-accounts/list.ts
+  e83d4622a952daba 41-46
+apps/api/src/routes/aws-accounts/connect.ts
+  d2fc545f876a1e3e 23-25,33
+apps/api/src/app.ts
+  d2fc545f876a1e3e 35,189-190
+packages/shared/cloudformation/buckt-byoa-role.yaml
+  d2fc545f876a1e3e 2,12-18,61-115
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "1318e342739db5ada101d2827842afb694563566",
+  "prompts": {
+    "d2fc545f876a1e3e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "38101651-3853-4265-9f2c-6635e7613c4d",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 598,
+      "total_deletions": 23,
+      "accepted_lines": 414,
+      "overriden_lines": 0
+    },
+    "e83d4622a952daba": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d1c611c7-0932-47ca-96b2-a508ad59d988",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 1175,
+      "total_deletions": 1365,
+      "accepted_lines": 98,
+      "overriden_lines": 0
+    }
+  }
+}
