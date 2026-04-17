@@ -1,0 +1,25 @@
+apps/web/src/lib/trpc/routers/bucket-aws-settings.ts
+  69c1eb27b4c79bd7 23,61,88,122
+apps/web/src/lib/trpc/routers/buckets.ts
+  69c1eb27b4c79bd7 19-25,339,608,615-617,619,624,630,638-651,653-654,656,660,662,668,677
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "448f5e9b845d0b886a46d57d8915487738466145",
+  "prompts": {
+    "69c1eb27b4c79bd7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4b173369-3586-4992-91bd-6b1f38129967",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 40,
+      "total_deletions": 42,
+      "accepted_lines": 40,
+      "overriden_lines": 0
+    }
+  }
+}
