@@ -9,7 +9,7 @@ import {
 const DOMAIN_REGEX = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/;
 
 describe("generateManagedSubdomain", () => {
-  it("produces a hostname under buckt.dev", () => {
+  it("produces a hostname under cdn.buckt.dev", () => {
     const hostname = generateManagedSubdomain();
     expect(hostname.endsWith(`.${MANAGED_DOMAIN_SUFFIX}`)).toBe(true);
   });
@@ -31,16 +31,20 @@ describe("generateManagedSubdomain", () => {
 });
 
 describe("isManagedHostname", () => {
-  it("is true for buckt.dev subdomains", () => {
-    expect(isManagedHostname("velunambor.buckt.dev")).toBe(true);
+  it("is true for cdn.buckt.dev subdomains", () => {
+    expect(isManagedHostname("velunambor.cdn.buckt.dev")).toBe(true);
   });
 
   it("is false for unrelated hostnames", () => {
     expect(isManagedHostname("cdn.example.com")).toBe(false);
   });
 
-  it("is false for the apex buckt.dev", () => {
-    expect(isManagedHostname("buckt.dev")).toBe(false);
+  it("is false for the apex cdn.buckt.dev", () => {
+    expect(isManagedHostname("cdn.buckt.dev")).toBe(false);
+  });
+
+  it("is false for buckt.dev subdomains outside the managed subzone", () => {
+    expect(isManagedHostname("mail.buckt.dev")).toBe(false);
   });
 });
 
