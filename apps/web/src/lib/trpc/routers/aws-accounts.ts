@@ -229,6 +229,7 @@ export const awsAccountsRouter = router({
         id: z.string(),
         cursor: z.string().optional(),
         limit: z.number().int().positive().max(100).default(20),
+        search: z.string().optional(),
       })
     )
     .query(async ({ ctx, input }) => {
@@ -268,6 +269,15 @@ export const awsAccountsRouter = router({
         creationDate: b.CreationDate?.toISOString() ?? "",
       }));
 
+      if (input.search) {
+        const term = input.search.toLowerCase();
+        allBuckets = allBuckets.filter((b) =>
+          b.name.toLowerCase().includes(term)
+        );
+      }
+
+      const total = allBuckets.length;
+
       if (input.cursor) {
         const idx = allBuckets.findIndex((b) => b.name === input.cursor);
         if (idx >= 0) {
@@ -281,7 +291,7 @@ export const awsAccountsRouter = router({
       return {
         items,
         nextCursor: hasMore ? (items.at(-1)?.name ?? null) : null,
-        total: (result.Buckets ?? []).length,
+        total,
       };
     }),
 

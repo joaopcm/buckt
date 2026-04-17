@@ -60,14 +60,47 @@ import { FileUpload } from "./file-upload";
 const TRAILING_SLASH = /\/$/;
 const DEFAULT_LIMIT = 50;
 
+function encodeKey(key: string) {
+  return key.split("/").map(encodeURIComponent).join("/");
+}
+
+function buildFileUrl({
+  bucketName,
+  customDomain,
+  key,
+  region,
+  visibility,
+}: {
+  bucketName: string;
+  customDomain: string;
+  key: string;
+  region: string;
+  visibility: "public" | "private";
+}): string | null {
+  const encodedKey = encodeKey(key);
+  if (customDomain) {
+    return `https://${customDomain}/${encodedKey}`;
+  }
+  if (visibility === "public" && bucketName && region) {
+    return `https://${bucketName}.s3.${region}.amazonaws.com/${encodedKey}`;
+  }
+  return null;
+}
+
 export function FileBrowser({
   orgId,
   bucketId,
+  bucketName,
   customDomain,
+  region,
+  visibility,
 }: {
   orgId: string;
   bucketId: string;
+  bucketName: string;
   customDomain: string;
+  region: string;
+  visibility: "public" | "private";
 }) {
   const [prefix, setPrefix] = useQueryState(
     "fp",
@@ -207,11 +240,14 @@ export function FileBrowser({
                 {files.map((file) => (
                   <FileRow
                     bucketId={bucketId}
+                    bucketName={bucketName}
                     customDomain={customDomain}
                     file={file}
                     key={file.key}
                     onDelete={invalidateFiles}
                     orgId={orgId}
+                    region={region}
+                    visibility={visibility}
                   />
                 ))}
               </TableBody>
@@ -599,18 +635,30 @@ function FolderRow({
 function FileRow({
   orgId,
   bucketId,
+  bucketName,
   customDomain,
   file,
   onDelete,
+  region,
+  visibility,
 }: {
   orgId: string;
   bucketId: string;
+  bucketName: string;
   customDomain: string;
   file: { key: string; size: number; lastModified: string };
   onDelete: () => void;
+  region: string;
+  visibility: "public" | "private";
 }) {
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const url = `https://${customDomain}/${file.key}`;
+  const url = buildFileUrl({
+    bucketName,
+    customDomain,
+    key: file.key,
+    region,
+    visibility,
+  });
   const fileName = file.key.split("/").pop() ?? file.key;
 
   const deleteFile = trpc.files.delete.useMutation({
@@ -648,7 +696,11 @@ function FileRow({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" side="bottom">
             <DropdownMenuItem
+              disabled={!url}
               onClick={() => {
+                if (!url) {
+                  return;
+                }
                 navigator.clipboard.writeText(url);
                 toast.success("URL copied");
               }}

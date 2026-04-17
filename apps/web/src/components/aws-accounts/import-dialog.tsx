@@ -1,18 +1,21 @@
 "use client";
 
-import { Download, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { Loader2, Search } from "lucide-react";
+import { parseAsString, useQueryState } from "nuqs";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
+import { DateDisplay } from "@/components/date-display";
+import { Pagination } from "@/components/pagination";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -20,7 +23,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useCursorPagination } from "@/hooks/use-cursor-pagination";
+import { useDebounce } from "@/hooks/use-debounce";
 import { trpc } from "@/lib/trpc/client";
 
 export function ImportBucketsDialog({
@@ -33,10 +45,16 @@ export function ImportBucketsDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const [selectedAccountId, setSelectedAccountId] = useState<string>("");
-  const [selectedBuckets, setSelectedBuckets] = useState<Set<string>>(
-    new Set()
+  const [imported, setImported] = useState<Set<string>>(new Set());
+  const [search, setSearch] = useQueryState(
+    "import-q",
+    parseAsString.withDefault("")
   );
-  const [cursor, setCursor] = useState<string | undefined>();
+  const debouncedSearch = useDebounce(search, 300);
+  const pagination = useCursorPagination({
+    cursorKey: "import-cursor",
+    limitKey: "import-limit",
+  });
 
   const { data: accounts } = trpc.awsAccounts.list.useQuery({
     orgId,
@@ -48,153 +66,226 @@ export function ImportBucketsDialog({
 
   const { data: s3Buckets, isPending: bucketsLoading } =
     trpc.awsAccounts.listS3Buckets.useQuery(
-      { orgId, id: selectedAccountId, limit: 20, cursor },
+      {
+        orgId,
+        id: selectedAccountId,
+        limit: pagination.limit,
+        cursor: pagination.cursor,
+        search: debouncedSearch || undefined,
+      },
       { enabled: !!selectedAccountId }
     );
+
+  const prevSearchRef = useRef(debouncedSearch);
+  if (prevSearchRef.current !== debouncedSearch) {
+    prevSearchRef.current = debouncedSearch;
+    pagination.resetPagination();
+  }
 
   const utils = trpc.useUtils();
 
   const importMutation = trpc.awsAccounts.importBuckets.useMutation({
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       toast.success(`Imported ${data.length} bucket(s)`);
       utils.buckets.list.invalidate();
-      onOpenChange(false);
-      setSelectedBuckets(new Set());
-      setSelectedAccountId("");
+      setImported((prev) => {
+        const next = new Set(prev);
+        for (const name of variables.bucketNames) {
+          next.add(name);
+        }
+        return next;
+      });
     },
     onError: (err) => toast.error(err.message),
   });
 
-  function toggleBucket(name: string) {
-    setSelectedBuckets((prev) => {
-      const next = new Set(prev);
-      if (next.has(name)) {
-        next.delete(name);
-      } else {
-        next.add(name);
-      }
-      return next;
-    });
+  const pendingBucket = importMutation.isPending
+    ? importMutation.variables?.bucketNames[0]
+    : null;
+
+  function handleOpenChange(nextOpen: boolean) {
+    if (!nextOpen) {
+      setSelectedAccountId("");
+      setImported(new Set());
+      setSearch(null);
+      pagination.resetPagination();
+    }
+    onOpenChange(nextOpen);
   }
 
+  const start = pagination.pageIndex * pagination.limit + 1;
+  const end = Math.min(
+    start + (s3Buckets?.items.length ?? 0) - 1,
+    s3Buckets?.total ?? 0
+  );
+
   return (
-    <Dialog onOpenChange={onOpenChange} open={open}>
-      <DialogContent className="sm:max-w-lg">
+    <Dialog onOpenChange={handleOpenChange} open={open}>
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Import Buckets</DialogTitle>
+          <DialogTitle>Import buckets</DialogTitle>
           <DialogDescription>
-            Select an AWS account and choose buckets to import
+            Select an AWS account and import existing S3 buckets
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          <Select
-            onValueChange={(v) => {
-              setSelectedAccountId(v ?? "");
-              setSelectedBuckets(new Set());
-              setCursor(undefined);
-            }}
-            value={selectedAccountId}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select AWS account" />
-            </SelectTrigger>
-            <SelectContent>
-              {activeAccounts.map((account) => (
-                <SelectItem key={account.id} value={account.id}>
-                  {account.label || account.awsAccountId}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>AWS Account</Label>
+            <Select
+              items={activeAccounts.map((a) => ({
+                value: a.id,
+                label: a.label || a.awsAccountId,
+              }))}
+              onValueChange={(v) => {
+                setSelectedAccountId(v ?? "");
+                setSearch(null);
+                pagination.resetPagination();
+              }}
+              value={selectedAccountId}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select AWS account" />
+              </SelectTrigger>
+              <SelectContent align="start" alignItemWithTrigger={false}>
+                {activeAccounts.map((account) => (
+                  <SelectItem key={account.id} value={account.id}>
+                    {account.label || account.awsAccountId}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-          {selectedAccountId && bucketsLoading && (
-            <div className="space-y-2">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-            </div>
-          )}
-
-          {selectedAccountId && s3Buckets && (
+          {selectedAccountId && (
             <>
-              {s3Buckets.items.length === 0 ? (
-                <p className="text-muted-foreground text-sm">
-                  No buckets found in this account
-                </p>
-              ) : (
-                <div className="max-h-64 space-y-1 overflow-y-auto">
-                  {s3Buckets.items.map((bucket) => (
-                    <button
-                      className="flex w-full cursor-pointer items-center gap-3 rounded-md border p-3 text-left hover:bg-accent"
-                      key={bucket.name}
-                      onClick={() => toggleBucket(bucket.name)}
-                      type="button"
-                    >
-                      <Checkbox
-                        checked={selectedBuckets.has(bucket.name)}
-                        onCheckedChange={() => toggleBucket(bucket.name)}
-                      />
-                      <div className="flex-1">
-                        <p className="font-medium text-sm">{bucket.name}</p>
-                        <p className="text-muted-foreground text-xs">
-                          Created{" "}
-                          {new Date(bucket.creationDate).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </button>
-                  ))}
+              <div className="relative">
+                <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  className="pl-8"
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search buckets..."
+                  value={search}
+                />
+              </div>
+
+              {bucketsLoading && (
+                <div className="space-y-3">
+                  <div className="h-12 animate-pulse bg-muted" />
+                  <div className="h-12 animate-pulse bg-muted" />
+                  <div className="h-12 animate-pulse bg-muted" />
                 </div>
               )}
 
-              {s3Buckets.nextCursor && (
-                <Button
-                  className="w-full"
-                  onClick={() => setCursor(s3Buckets.nextCursor ?? undefined)}
-                  size="sm"
-                  variant="outline"
-                >
-                  Load more
-                </Button>
+              {!bucketsLoading && s3Buckets?.items.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <h2 className="font-medium text-sm">
+                    {debouncedSearch ? "No buckets found" : "No buckets"}
+                  </h2>
+                  <p className="mt-1 text-muted-foreground text-xs">
+                    {debouncedSearch
+                      ? "Try a different search term"
+                      : "This account has no S3 buckets"}
+                  </p>
+                </div>
               )}
 
-              <p className="text-muted-foreground text-xs">
-                {s3Buckets.total} bucket(s) total &middot;{" "}
-                {selectedBuckets.size} selected
-              </p>
+              {!bucketsLoading && s3Buckets && s3Buckets.items.length > 0 && (
+                <>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Created</TableHead>
+                        <TableHead className="w-24" />
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {s3Buckets.items.map((bucket) => (
+                        <TableRow key={bucket.name}>
+                          <TableCell className="font-medium">
+                            {bucket.name}
+                          </TableCell>
+                          <TableCell>
+                            <DateDisplay
+                              className="text-muted-foreground text-xs"
+                              date={bucket.creationDate}
+                            />
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <ImportRowButton
+                              disabled={importMutation.isPending}
+                              isImported={imported.has(bucket.name)}
+                              isPending={pendingBucket === bucket.name}
+                              onImport={() =>
+                                importMutation.mutate({
+                                  orgId,
+                                  id: selectedAccountId,
+                                  bucketNames: [bucket.name],
+                                })
+                              }
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+
+                  <Pagination
+                    end={end}
+                    hasNextPage={!!s3Buckets.nextCursor}
+                    hasPreviousPage={pagination.hasPreviousPage}
+                    limit={pagination.limit}
+                    onLimitChange={pagination.setLimit}
+                    onNextPage={() =>
+                      s3Buckets.nextCursor &&
+                      pagination.nextPage(s3Buckets.nextCursor)
+                    }
+                    onPreviousPage={pagination.previousPage}
+                    start={start}
+                    total={s3Buckets.total}
+                  />
+                </>
+              )}
             </>
           )}
         </div>
-
-        <DialogFooter>
-          <Button onClick={() => onOpenChange(false)} variant="outline">
-            Cancel
-          </Button>
-          <Button
-            disabled={selectedBuckets.size === 0 || importMutation.isPending}
-            onClick={() =>
-              importMutation.mutate({
-                orgId,
-                id: selectedAccountId,
-                bucketNames: [...selectedBuckets],
-              })
-            }
-          >
-            {importMutation.isPending ? (
-              <>
-                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                Importing...
-              </>
-            ) : (
-              <>
-                <Download className="mr-1.5 h-4 w-4" />
-                Import{" "}
-                {selectedBuckets.size > 0 ? `(${selectedBuckets.size})` : ""}
-              </>
-            )}
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function ImportRowButton({
+  disabled,
+  isImported,
+  isPending,
+  onImport,
+}: {
+  disabled: boolean;
+  isImported: boolean;
+  isPending: boolean;
+  onImport: () => void;
+}) {
+  if (isPending) {
+    return (
+      <Button disabled size="sm" variant="outline">
+        <Loader2 className="mr-1.5 size-3.5 animate-spin" />
+        Importing
+      </Button>
+    );
+  }
+
+  if (isImported) {
+    return (
+      <Button disabled size="sm" variant="outline">
+        Imported
+      </Button>
+    );
+  }
+
+  return (
+    <Button disabled={disabled} onClick={onImport} size="sm" variant="outline">
+      Import
+    </Button>
   );
 }

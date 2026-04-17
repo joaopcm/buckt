@@ -125,10 +125,14 @@ export function BucketTable({ orgId }: { orgId: string }) {
                     </Link>
                   </TableCell>
                   <TableCell>
-                    <CopyText
-                      className="text-muted-foreground"
-                      value={bucket.customDomain}
-                    />
+                    {bucket.customDomain ? (
+                      <CopyText
+                        className="text-muted-foreground"
+                        value={bucket.customDomain}
+                      />
+                    ) : (
+                      <span className="text-muted-foreground text-xs">—</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     <StatusBadge status={bucket.status} />

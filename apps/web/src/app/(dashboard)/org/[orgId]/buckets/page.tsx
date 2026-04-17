@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BucketTable } from "@/components/buckets/bucket-table";
+import { ImportBucketsButton } from "@/components/buckets/import-buckets-button";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = { title: "Buckets" };
@@ -21,9 +22,12 @@ export default async function BucketsPage({
             Manage your branded S3 buckets
           </p>
         </div>
-        <Link href={`/org/${orgId}/buckets/new`}>
-          <Button>New bucket</Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <ImportBucketsButton orgId={orgId} />
+          <Link href={`/org/${orgId}/buckets/new`}>
+            <Button>New bucket</Button>
+          </Link>
+        </div>
       </div>
 
       <BucketTable orgId={orgId} />
