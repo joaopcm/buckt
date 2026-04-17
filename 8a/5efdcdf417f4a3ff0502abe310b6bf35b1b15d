@@ -1,0 +1,38 @@
+packages/shared/src/subdomain.spec.ts
+  e558207aafc8f3ec 12,34-35,42-43
+packages/shared/src/subdomain.ts
+  e558207aafc8f3ec 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "8a5efdcdf417f4a3ff0502abe310b6bf35b1b15d",
+  "prompts": {
+    "7a266757e464872d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "33832e94-f88f-4fae-ab09-9e1d0fc99535",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 13,
+      "overriden_lines": 0
+    },
+    "e558207aafc8f3ec": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "98a70e72-1f93-4589-9500-8393d422441f",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 6,
+      "total_deletions": 6,
+      "accepted_lines": 137,
+      "overriden_lines": 0
+    }
+  }
+}
