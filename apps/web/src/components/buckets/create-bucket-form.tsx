@@ -8,6 +8,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -100,6 +101,14 @@ export function CreateBucketForm({ orgId }: { orgId: string }) {
   const utils = trpc.useUtils();
   const defaultRegion = getClosestRegion();
 
+  const { data: awsAccountsData } = trpc.awsAccounts.list.useQuery({
+    orgId,
+    limit: 50,
+  });
+  const activeAccounts =
+    awsAccountsData?.items.filter((a) => a.status === "active") ?? [];
+  const [selectedAwsAccount, setSelectedAwsAccount] = useState<string>("");
+
   const {
     register,
     handleSubmit,
@@ -142,6 +151,7 @@ export function CreateBucketForm({ orgId }: { orgId: string }) {
     createBucket.mutate({
       ...values,
       orgId,
+      awsAccountId: selectedAwsAccount || undefined,
       domainConnectProvider: dcCheck.data?.supported
         ? dcCheck.data.providerHost
         : undefined,
@@ -198,8 +208,11 @@ export function CreateBucketForm({ orgId }: { orgId: string }) {
           </div>
 
           <AdvancedBucketOptions
+            activeAwsAccounts={activeAccounts}
             defaultRegion={defaultRegion}
             errors={errors}
+            onAwsAccountChange={setSelectedAwsAccount}
+            selectedAwsAccountId={selectedAwsAccount}
             setValue={setValue}
             watch={watch}
           />

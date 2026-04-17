@@ -1,8 +1,9 @@
-import { buckets, subscription } from "@buckt/db";
+import { awsAccounts, buckets, subscription } from "@buckt/db";
 import { DnsInstructionsEmail } from "@buckt/emails";
 import {
   createBucketSchema,
   forwardInstructionsSchema,
+  managedSettingsSchema,
   PLAN_LIMITS,
   type PlanName,
 } from "@buckt/shared";
@@ -162,9 +163,50 @@ export const bucketsRouter = router({
         });
       }
 
+      if (input.awsAccountId) {
+        if (plan === "free") {
+          throw new TRPCError({
+            code: "PAYMENT_REQUIRED",
+            message: "BYOA requires a paid plan. Upgrade to enable.",
+          });
+        }
+        const [account] = await ctx.db
+          .select({ id: awsAccounts.id, status: awsAccounts.status })
+          .from(awsAccounts)
+          .where(
+            and(
+              eq(awsAccounts.id, input.awsAccountId),
+              eq(awsAccounts.orgId, ctx.orgId)
+            )
+          )
+          .limit(1);
+        if (!account) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "AWS account not found",
+          });
+        }
+        if (account.status !== "active") {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "AWS account is not active",
+          });
+        }
+      }
+
       const slug = input.customDomain.replace(/\./g, "-");
       const s3BucketName =
         `buckt-${ctx.orgId.slice(0, 8)}-${slug}`.toLowerCase();
+
+      const managedSettings = input.awsAccountId
+        ? {
+            visibility: true,
+            cache: true,
+            cors: true,
+            lifecycle: true,
+            optimization: true,
+          }
+        : {};
 
       const [bucket] = await ctx.db
         .insert(buckets)
@@ -181,6 +223,8 @@ export const bucketsRouter = router({
           lifecycleTtlDays: input.lifecycleTtlDays,
           optimizationMode: input.optimizationMode,
           domainConnectProvider: input.domainConnectProvider,
+          awsAccountId: input.awsAccountId ?? null,
+          managedSettings,
           status: "pending",
         })
         .returning();
@@ -286,6 +330,40 @@ export const bucketsRouter = router({
       const [updated] = await ctx.db
         .update(buckets)
         .set(updates)
+        .where(eq(buckets.id, id))
+        .returning();
+
+      return updated;
+    }),
+
+  updateManagedSettings: orgProcedure
+    .input(z.object({ id: z.string() }).merge(managedSettingsSchema))
+    .mutation(async ({ ctx, input }) => {
+      const [bucket] = await ctx.db
+        .select()
+        .from(buckets)
+        .where(and(eq(buckets.id, input.id), eq(buckets.orgId, ctx.orgId)))
+        .limit(1);
+
+      if (!bucket) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Bucket not found",
+        });
+      }
+
+      if (!bucket.isImported) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Only imported buckets have managed settings",
+        });
+      }
+
+      const { id, ...settings } = input;
+
+      const [updated] = await ctx.db
+        .update(buckets)
+        .set({ managedSettings: settings })
         .where(eq(buckets.id, id))
         .returning();
 

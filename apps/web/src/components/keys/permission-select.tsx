@@ -20,6 +20,14 @@ const PERMISSION_GROUPS = [
     permissions: ["files:read", "files:write", "files:delete"],
   },
   { label: "Keys", permissions: ["keys:read", "keys:write"] },
+  {
+    label: "AWS Accounts",
+    permissions: [
+      "aws-accounts:read",
+      "aws-accounts:write",
+      "aws-accounts:delete",
+    ],
+  },
 ] as const;
 
 const ALL_PERMISSIONS = PERMISSION_GROUPS.flatMap((g) => g.permissions);
