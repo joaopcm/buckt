@@ -1,0 +1,27 @@
+apps/web/src/lib/shortcuts/global-shortcuts.tsx
+  662ffe2ee1231b83 18
+apps/web/src/lib/shortcuts/registry.spec.ts
+  662ffe2ee1231b83 19
+apps/web/src/lib/shortcuts/registry.ts
+  662ffe2ee1231b83 43-48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "def609f9597b0268f0ac09f3d6e4bb293b11a858",
+  "prompts": {
+    "662ffe2ee1231b83": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3cc59661-50fc-4206-b1a5-1fca5e71985f",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 9,
+      "total_deletions": 262,
+      "accepted_lines": 9,
+      "overriden_lines": 0
+    }
+  }
+}
