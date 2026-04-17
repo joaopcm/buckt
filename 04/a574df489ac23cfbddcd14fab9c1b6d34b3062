@@ -1,0 +1,36 @@
+turbo.json
+  e83d4622a952daba 44-45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "04a574df489ac23cfbddcd14fab9c1b6d34b3062",
+  "prompts": {
+    "d2fc545f876a1e3e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "38101651-3853-4265-9f2c-6635e7613c4d",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 130,
+      "overriden_lines": 0
+    },
+    "e83d4622a952daba": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d1c611c7-0932-47ca-96b2-a508ad59d988",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 2,
+      "total_deletions": 1,
+      "accepted_lines": 2,
+      "overriden_lines": 0
+    }
+  }
+}
