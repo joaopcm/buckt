@@ -1,6 +1,6 @@
 import { awsAccounts, buckets } from "@buckt/db";
 import { createBucketSchema } from "@buckt/shared";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, ne, sql } from "drizzle-orm";
 import type { Context } from "hono";
 import { db } from "../../lib/db";
 import { provisionBucket } from "../../trigger/provision-bucket";
@@ -54,7 +54,7 @@ export async function createBucket(c: Context) {
   const [{ count }] = await db
     .select({ count: sql<number>`count(*)::int` })
     .from(buckets)
-    .where(eq(buckets.orgId, orgId));
+    .where(and(eq(buckets.orgId, orgId), ne(buckets.status, "deleting")));
 
   if (count >= planLimits.maxBuckets) {
     return error(

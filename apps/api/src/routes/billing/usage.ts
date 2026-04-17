@@ -1,5 +1,5 @@
 import { buckets } from "@buckt/db";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, ne, sql } from "drizzle-orm";
 import type { Context } from "hono";
 import { db } from "../../lib/db";
 import { success } from "../../utils/response";
@@ -19,7 +19,7 @@ export async function getUsage(c: Context) {
       totalBandwidth: sql<number>`coalesce(sum(${buckets.bandwidthUsedBytes}), 0)::bigint`,
     })
     .from(buckets)
-    .where(eq(buckets.orgId, orgId));
+    .where(and(eq(buckets.orgId, orgId), ne(buckets.status, "deleting")));
 
   return success(c, {
     bucketCount: {

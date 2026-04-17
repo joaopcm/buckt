@@ -16,7 +16,7 @@ import {
 } from "@buckt/shared";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, ne, sql } from "drizzle-orm";
 import { z } from "zod";
 import { s3 } from "@/lib/s3";
 import { orgProcedure, router } from "../init";
@@ -132,7 +132,9 @@ export const filesRouter = router({
       const orgBuckets = await ctx.db
         .select({ storageUsedBytes: buckets.storageUsedBytes })
         .from(buckets)
-        .where(eq(buckets.orgId, ctx.orgId));
+        .where(
+          and(eq(buckets.orgId, ctx.orgId), ne(buckets.status, "deleting"))
+        );
       const totalStorage = orgBuckets.reduce(
         (sum, b) => sum + (b.storageUsedBytes ?? 0),
         0

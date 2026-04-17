@@ -1,5 +1,8 @@
+import { buckets } from "@buckt/db";
+import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
 import app from "../../app";
+import { db } from "../../lib/db";
 import {
   cleanDb,
   createActiveBucket,
@@ -47,5 +50,34 @@ describe("GET /api/billing/usage", () => {
   it("rejects without auth", async () => {
     const res = await app.request("/v1/billing/usage");
     expect(res.status).toBe(401);
+  });
+
+  it("excludes buckets with status=deleting from usage", async () => {
+    const active = await createActiveBucket(apiKey, {
+      customDomain: "active.test.com",
+    });
+    await db
+      .update(buckets)
+      .set({ storageUsedBytes: 1000, bandwidthUsedBytes: 500 })
+      .where(eq(buckets.id, active.id));
+
+    const deleting = await createActiveBucket(apiKey, {
+      customDomain: "deleting.test.com",
+    });
+    await db
+      .update(buckets)
+      .set({
+        status: "deleting",
+        storageUsedBytes: 9999,
+        bandwidthUsedBytes: 8888,
+      })
+      .where(eq(buckets.id, deleting.id));
+
+    const res = await getUsage();
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data.bucketCount.used).toBe(1);
+    expect(json.data.storage.usedBytes).toBe(1000);
+    expect(json.data.bandwidth.usedBytes).toBe(500);
   });
 });

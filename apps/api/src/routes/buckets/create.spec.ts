@@ -1,4 +1,5 @@
-import { awsAccounts } from "@buckt/db";
+import { awsAccounts, buckets } from "@buckt/db";
+import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
 import app from "../../app";
 import { db } from "../../lib/db";
@@ -81,6 +82,21 @@ describe("POST /api/buckets", () => {
     expect(res.status).toBe(402);
     const json = await res.json();
     expect(json.error.message).toContain("Plan limit reached");
+  });
+
+  it("does not count deleting buckets toward plan limit", async () => {
+    const first = await req({
+      name: "First",
+      customDomain: "first.test.com",
+    });
+    const firstJson = await first.json();
+    await db
+      .update(buckets)
+      .set({ status: "deleting" })
+      .where(eq(buckets.id, firstJson.data.id));
+
+    const res = await req({ name: "Second", customDomain: "second.test.com" });
+    expect(res.status).toBe(201);
   });
 
   it("creates a bucket with custom region", async () => {
