@@ -20,6 +20,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDebounce } from "@/hooks/use-debounce";
 import { trpc } from "@/lib/trpc/client";
+import { cn } from "@/utils/utils";
+
+const REGENERATE_DELAY_MS = 200;
 
 const TIMEZONE_REGION_MAP: Record<string, string> = {
   "America/New_York": "us-east-1",
@@ -114,6 +117,28 @@ export function CreateBucketForm({ orgId }: { orgId: string }) {
   const [managedSubdomain, setManagedSubdomain] = useState(() =>
     generateManagedSubdomain()
   );
+  const [isRegenerating, setIsRegenerating] = useState(false);
+
+  function regenerateManagedSubdomain() {
+    if (isRegenerating) {
+      return;
+    }
+    setIsRegenerating(true);
+    setTimeout(() => {
+      setManagedSubdomain(generateManagedSubdomain());
+      setIsRegenerating(false);
+    }, REGENERATE_DELAY_MS);
+  }
+
+  function switchToCustom() {
+    setDomainMode("custom");
+  }
+
+  function switchToManaged() {
+    setDomainMode("managed");
+    setValue("customDomain", "");
+    setSelectedAwsAccount("");
+  }
 
   const {
     register,
@@ -202,74 +227,78 @@ export function CreateBucketForm({ orgId }: { orgId: string }) {
             )}
           </div>
 
-          {domainMode === "managed" ? (
-            <div className="space-y-2">
-              <Label>Domain</Label>
-              <div className="flex h-8 items-center gap-2 border border-input bg-muted/30 px-2.5 py-1">
-                <span className="flex-1 truncate font-mono text-xs">
-                  {managedSubdomain}
-                </span>
+          <div className="space-y-2">
+            <div className="flex h-5 items-center justify-between">
+              <Label htmlFor="customDomain">Domain</Label>
+              <button
+                className="text-muted-foreground text-xs underline underline-offset-2 hover:text-foreground"
+                onClick={
+                  domainMode === "managed" ? switchToCustom : switchToManaged
+                }
+                type="button"
+              >
+                {domainMode === "managed"
+                  ? "Use a custom domain →"
+                  : "← Use a free buckt.dev URL"}
+              </button>
+            </div>
+            {domainMode === "managed" ? (
+              <div className="relative">
+                <Input
+                  className="pr-8 font-mono"
+                  readOnly
+                  value={managedSubdomain}
+                />
                 <button
                   aria-label="Generate a new subdomain"
-                  className="text-muted-foreground hover:text-foreground"
-                  onClick={() =>
-                    setManagedSubdomain(generateManagedSubdomain())
-                  }
+                  className="absolute top-1/2 right-1.5 flex size-5 -translate-y-1/2 items-center justify-center text-muted-foreground hover:text-foreground disabled:cursor-not-allowed disabled:text-foreground"
+                  disabled={isRegenerating}
+                  onClick={regenerateManagedSubdomain}
                   type="button"
                 >
-                  <RefreshCw className="size-3" />
+                  <RefreshCw
+                    className={cn("size-3", isRegenerating && "animate-spin")}
+                  />
                 </button>
               </div>
-              <p className="text-muted-foreground text-xs">
-                Free URL — start immediately.{" "}
-                <button
-                  className="underline underline-offset-2 hover:text-foreground"
-                  onClick={() => setDomainMode("custom")}
-                  type="button"
-                >
-                  Use a custom domain →
-                </button>
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="customDomain">Custom domain</Label>
-                <button
-                  className="text-muted-foreground text-xs underline underline-offset-2 hover:text-foreground"
-                  onClick={() => {
-                    setDomainMode("managed");
-                    setValue("customDomain", "");
-                    setSelectedAwsAccount("");
-                  }}
-                  type="button"
-                >
-                  ← Use a free buckt.dev URL
-                </button>
-              </div>
+            ) : (
               <Input
                 id="customDomain"
                 placeholder="cdn.example.com"
                 {...register("customDomain")}
               />
-              {errors.customDomain && (
-                <p className="text-destructive text-xs">
-                  {errors.customDomain.message}
-                </p>
-              )}
-              {isValidDomain && dcCheck.isFetching && (
+            )}
+            {domainMode === "managed" && (
+              <p className="text-muted-foreground text-xs">
+                Free URL — start immediately.
+              </p>
+            )}
+            {domainMode === "custom" && errors.customDomain && (
+              <p className="text-destructive text-xs">
+                {errors.customDomain.message}
+              </p>
+            )}
+            {domainMode === "custom" &&
+              !errors.customDomain &&
+              isValidDomain &&
+              dcCheck.isFetching && (
                 <p className="flex items-center gap-1.5 text-muted-foreground text-xs">
                   <Loader2 className="size-3 animate-spin" />
                   Checking DNS provider...
                 </p>
               )}
-              {isValidDomain && dcCheck.data?.supported && (
+            {domainMode === "custom" &&
+              !errors.customDomain &&
+              isValidDomain &&
+              dcCheck.data?.supported && (
                 <p className="flex items-center gap-1.5 text-green-600 text-xs">
                   <Check className="size-3" />
                   {dcCheck.data.providerName} supports automatic DNS setup
                 </p>
               )}
-              {!(
+            {domainMode === "custom" &&
+              !errors.customDomain &&
+              !(
                 (isValidDomain && dcCheck.data?.supported) ||
                 dcCheck.isFetching
               ) && (
@@ -277,8 +306,7 @@ export function CreateBucketForm({ orgId }: { orgId: string }) {
                   The domain where your files will be served
                 </p>
               )}
-            </div>
-          )}
+          </div>
 
           <AdvancedBucketOptions
             activeAwsAccounts={activeAccounts}
