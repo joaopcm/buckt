@@ -1,0 +1,76 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "One-time bootstrap: forwards ACM Certificate Available events in Buckt's own AWS account to the Buckt API webhook. Deploy in us-east-1."
+
+Parameters:
+  BucktApiUrl:
+    Type: String
+    Description: "Buckt API base URL (e.g. https://api.buckt.dev)"
+  BucktWebhookSecret:
+    Type: String
+    Description: "Shared secret matching the API's ACM_WEBHOOK_SECRET env var"
+    NoEcho: true
+
+Resources:
+  BucktAcmConnection:
+    Type: AWS::Events::Connection
+    Properties:
+      Name: BucktAcmConnection
+      AuthorizationType: API_KEY
+      AuthParameters:
+        ApiKeyAuthParameters:
+          ApiKeyName: X-Buckt-Webhook-Secret
+          ApiKeyValue: !Ref BucktWebhookSecret
+
+  BucktAcmApiDestination:
+    Type: AWS::Events::ApiDestination
+    Properties:
+      Name: BucktAcmApiDestination
+      ConnectionArn: !GetAtt BucktAcmConnection.Arn
+      HttpMethod: POST
+      InvocationEndpoint: !Sub "${BucktApiUrl}/webhooks/acm"
+
+  BucktAcmEventInvokeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: InvokeApiDestination
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: "events:InvokeApiDestination"
+                Resource: !GetAtt BucktAcmApiDestination.Arn
+
+  BucktAcmAvailableRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: BucktAcmCertificateAvailable
+      Description: "Forward ACM Certificate Available events to Buckt"
+      EventPattern:
+        source:
+          - aws.acm
+        detail-type:
+          - "ACM Certificate Available"
+        detail:
+          Action:
+            - ISSUANCE
+      State: ENABLED
+      Targets:
+        - Id: BucktApiDestination
+          Arn: !GetAtt BucktAcmApiDestination.Arn
+          RoleArn: !GetAtt BucktAcmEventInvokeRole.Arn
+
+Outputs:
+  RuleArn:
+    Description: "ARN of the EventBridge rule"
+    Value: !GetAtt BucktAcmAvailableRule.Arn
+  ApiDestinationArn:
+    Description: "ARN of the API destination"
+    Value: !GetAtt BucktAcmApiDestination.Arn

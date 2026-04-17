@@ -14,6 +14,7 @@ export const env = createEnv({
     CLOUDFRONT_LOG_PREFIX: z.string().optional().default("cf-logs/"),
     REDIS_URL: z.string().min(1),
     TRIGGER_SECRET_KEY: z.string().min(1),
+    ACM_WEBHOOK_SECRET: z.string().min(32),
     SENTRY_DSN: z.string().url().optional(),
     AXIOM_TOKEN: z.string().optional(),
     AXIOM_DATASET: z.string().optional().default("buckt-api"),

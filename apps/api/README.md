@@ -56,12 +56,13 @@ Trigger.dev v4 tasks in `src/trigger/`:
 
 | Task | Schedule | Description |
 |---|---|---|
-| `provision-bucket` | on-demand | Creates S3 bucket, website config, CORS, lifecycle rules, ACM certificate |
+| `provision-bucket` | on-demand | Creates S3 bucket, requests ACM cert, parks on a waitpoint token, resumes on ACM event, creates CloudFront distribution |
 | `destroy-bucket` | on-demand | Disables/deletes CloudFront, deletes ACM cert, empties and deletes S3 bucket |
 | `optimize-file` | on-demand | Downloads image from S3, compresses with Sharp, re-uploads if smaller |
 | `aggregate-storage` | daily 02:00 UTC | Reads CloudWatch `BucketSizeBytes` metric, updates DB, reports to Stripe |
 | `aggregate-bandwidth` | daily 03:00 UTC | Parses CloudFront access logs from S3, updates DB, reports to Stripe |
-| `check-cert-validation` | every 5 min | Checks pending ACM certs, creates CloudFront distribution when issued, marks failed after 72h |
+
+ACM cert issuance is event-driven: AWS EventBridge posts `ACM Certificate Available` to `POST /webhooks/acm`, which completes the provision task's waitpoint. Waitpoint times out at 24h → bucket flipped to `failed`.
 
 ## AWS Setup
 

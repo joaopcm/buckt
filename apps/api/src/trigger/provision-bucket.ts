@@ -1,12 +1,22 @@
 import { buckets, createDb } from "@buckt/db";
-import { logger, task } from "@trigger.dev/sdk/v3";
+import { logger, task, wait } from "@trigger.dev/sdk/v3";
 import { eq } from "drizzle-orm";
 import { requestCertificate } from "../lib/aws/acm";
 import { setBucketCors, setBucketLifecycle } from "../lib/aws/bucket-settings";
 import { resolveCredentials } from "../lib/aws/client-factory";
+import { createDistribution } from "../lib/aws/cloudfront";
 import { createBucketResources } from "../lib/aws/s3";
 
 const db = createDb(process.env.DATABASE_PUBLIC_URL ?? "");
+
+const ACM_WAIT_TIMEOUT = "24h";
+
+interface DnsRecord {
+  applied?: boolean;
+  name: string;
+  type: string;
+  value: string;
+}
 
 export const provisionBucket = task({
   id: "provision-bucket",
@@ -62,7 +72,7 @@ export const provisionBucket = task({
       credentials
     );
 
-    const dnsRecords = [
+    const dnsRecords: DnsRecord[] = [
       ...validationRecords,
       {
         name: bucket.customDomain,
@@ -71,19 +81,78 @@ export const provisionBucket = task({
       },
     ];
 
+    const token = await wait.createToken({ timeout: ACM_WAIT_TIMEOUT });
+
     await db
       .update(buckets)
       .set({
         acmCertArn: certArn,
+        acmWaitTokenId: token.id,
         dnsRecords,
       })
       .where(eq(buckets.id, bucketId));
 
-    logger.info("Provisioning started, waiting for cert validation", {
+    logger.info("Waiting for ACM certificate to be issued", {
       certArn,
-      websiteEndpoint,
+      tokenId: token.id,
     });
 
-    return { certArn, websiteEndpoint, dnsRecords };
+    const result = await wait.forToken<{ ok: true }>(token.id);
+
+    if (!result.ok) {
+      logger.warn("ACM wait token timed out, marking bucket failed", {
+        bucketId,
+        certArn,
+      });
+      await db
+        .update(buckets)
+        .set({ status: "failed" })
+        .where(eq(buckets.id, bucketId));
+      return;
+    }
+
+    logger.info("Creating CloudFront distribution", { certArn });
+    try {
+      const { distributionId, distributionDomain } = await createDistribution({
+        domain: bucket.customDomain,
+        s3WebsiteEndpoint: websiteEndpoint,
+        certArn,
+        logBucket: bucket.awsAccountId
+          ? undefined
+          : process.env.CLOUDFRONT_LOG_BUCKET,
+        logPrefix: bucket.awsAccountId
+          ? undefined
+          : process.env.CLOUDFRONT_LOG_PREFIX,
+        credentials,
+      });
+
+      const finalDnsRecords = dnsRecords.map((r) =>
+        r.value === "pending-cloudfront-distribution"
+          ? { ...r, value: distributionDomain }
+          : r
+      );
+
+      await db
+        .update(buckets)
+        .set({
+          status: "active",
+          cloudfrontDistributionId: distributionId,
+          dnsRecords: finalDnsRecords,
+        })
+        .where(eq(buckets.id, bucketId));
+
+      logger.info("Bucket activated", { bucketId, distributionId });
+    } catch (err) {
+      logger.error("Failed to finalize bucket after cert issuance", {
+        bucketId,
+        certArn,
+        err,
+      });
+      await db
+        .update(buckets)
+        .set({ status: "failed" })
+        .where(eq(buckets.id, bucketId));
+      throw err;
+    }
   },
 });
