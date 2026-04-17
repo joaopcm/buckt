@@ -1,0 +1,37 @@
+apps/web/src/components/aws-accounts/import-dialog.tsx
+  69c1eb27b4c79bd7 3-5,7-8,17-18,26-35,48-51,53-57,69-75,79-84,88,91-97,102-113,116-121,123-124,126,128,132-158,160,162-176,180-190,193-249,257-291
+apps/web/src/components/buckets/bucket-settings.tsx
+  69c1eb27b4c79bd7 3,8,77-78,86-87,90-93,99-153
+apps/web/src/components/buckets/managed-setting-guard.tsx
+  69c1eb27b4c79bd7 3-5,7-8,11-15,17-19,22,24-43,46,49-50,55-56,59-65,68-69,74-90,92-103,105-117
+apps/web/src/components/buckets/bucket-detail.tsx
+  69c1eb27b4c79bd7 3,153-154
+apps/web/src/components/buckets/import-buckets-button.tsx
+  69c1eb27b4c79bd7 1-18
+apps/web/src/components/buckets/bucket-table.tsx
+  69c1eb27b4c79bd7 128-135
+apps/web/src/app/(dashboard)/org/[orgId]/buckets/page.tsx
+  69c1eb27b4c79bd7 4,25-30
+apps/web/src/lib/trpc/routers/aws-accounts.ts
+  69c1eb27b4c79bd7 232,272-280,294
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "3ab2b2662ad4a949a29980d7ef79a1de81409121",
+  "prompts": {
+    "69c1eb27b4c79bd7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4b173369-3586-4992-91bd-6b1f38129967",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 557,
+      "total_deletions": 348,
+      "accepted_lines": 446,
+      "overriden_lines": 0
+    }
+  }
+}
