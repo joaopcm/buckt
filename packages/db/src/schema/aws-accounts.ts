@@ -25,6 +25,7 @@ export const awsAccounts = pgTable(
     awsAccountId: text("aws_account_id").notNull(),
     roleArn: text("role_arn").default("").notNull(),
     externalId: text("external_id").notNull(),
+    acmWebhookSecret: text("acm_webhook_secret"),
     stackId: text("stack_id"),
     label: text("label"),
     status: awsAccountStatusEnum("status").default("pending").notNull(),

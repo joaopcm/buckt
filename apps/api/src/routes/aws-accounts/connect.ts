@@ -20,6 +20,9 @@ export async function connectAwsAccount(c: Context) {
 
   const externalId = crypto.randomUUID();
   const pendingAccountId = `pending-${crypto.randomUUID().slice(0, 8)}`;
+  const acmWebhookSecret = crypto
+    .getRandomValues(new Uint8Array(32))
+    .reduce((s, b) => s + b.toString(16).padStart(2, "0"), "");
 
   const [account] = await db
     .insert(awsAccounts)
@@ -27,6 +30,7 @@ export async function connectAwsAccount(c: Context) {
       orgId,
       awsAccountId: pendingAccountId,
       externalId,
+      acmWebhookSecret,
       label: parsed.data.label,
       status: "pending",
     })

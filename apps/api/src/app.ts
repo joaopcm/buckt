@@ -32,6 +32,7 @@ import { uploadFile } from "./routes/files/upload";
 import { createKey } from "./routes/keys/create";
 import { deleteKey } from "./routes/keys/delete";
 import { listKeys } from "./routes/keys/list";
+import { acmWebhook } from "./routes/webhooks/acm";
 import { requestId } from "./utils/request-id";
 
 initLogger({ env: { service: "buckt-api" } });
@@ -184,5 +185,7 @@ app.get("/v1/billing/subscription", requireAuth(), rateLimit, getSubscription);
 app.post("/v1/keys", requireAuth("keys:write"), rateLimit, createKey);
 app.get("/v1/keys", requireAuth("keys:read"), rateLimit, listKeys);
 app.delete("/v1/keys/:id", requireAuth("keys:write"), rateLimit, deleteKey);
+
+app.post("/webhooks/acm", acmWebhook);
 
 export default app;
