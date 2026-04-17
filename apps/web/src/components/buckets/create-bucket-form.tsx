@@ -205,8 +205,8 @@ export function CreateBucketForm({ orgId }: { orgId: string }) {
           {domainMode === "managed" ? (
             <div className="space-y-2">
               <Label>Domain</Label>
-              <div className="flex items-center gap-2 border border-input bg-muted/30 px-3 py-2">
-                <span className="flex-1 truncate font-mono text-sm">
+              <div className="flex h-8 items-center gap-2 border border-input bg-muted/30 px-2.5 py-1">
+                <span className="flex-1 truncate font-mono text-xs">
                   {managedSubdomain}
                 </span>
                 <button
@@ -217,7 +217,7 @@ export function CreateBucketForm({ orgId }: { orgId: string }) {
                   }
                   type="button"
                 >
-                  <RefreshCw className="size-3.5" />
+                  <RefreshCw className="size-3" />
                 </button>
               </div>
               <p className="text-muted-foreground text-xs">
