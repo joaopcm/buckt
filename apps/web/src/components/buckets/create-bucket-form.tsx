@@ -251,7 +251,7 @@ export function CreateBucketForm({ orgId }: { orgId: string }) {
                 />
                 <button
                   aria-label="Generate a new subdomain"
-                  className="absolute top-1/2 right-1.5 flex size-5 -translate-y-1/2 items-center justify-center text-muted-foreground hover:text-foreground disabled:cursor-not-allowed disabled:text-foreground"
+                  className="absolute top-1/2 right-1.5 flex size-5 -translate-y-1/2 cursor-pointer items-center justify-center text-muted-foreground hover:text-foreground disabled:cursor-not-allowed disabled:text-foreground"
                   disabled={isRegenerating}
                   onClick={regenerateManagedSubdomain}
                   type="button"
