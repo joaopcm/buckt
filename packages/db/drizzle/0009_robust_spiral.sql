@@ -1,0 +1,1 @@
+ALTER TABLE "buckets" ADD COLUMN "is_managed_domain" boolean DEFAULT false NOT NULL;

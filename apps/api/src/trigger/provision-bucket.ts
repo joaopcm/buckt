@@ -1,6 +1,7 @@
 import { buckets, createDb } from "@buckt/db";
 import { logger, task } from "@trigger.dev/sdk/v3";
 import { eq } from "drizzle-orm";
+import { env } from "../env";
 import { requestCertificate } from "../lib/aws/acm";
 import { setBucketCors, setBucketLifecycle } from "../lib/aws/bucket-settings";
 import { resolveCredentials } from "../lib/aws/client-factory";
@@ -56,20 +57,42 @@ export const provisionBucket = task({
       );
     }
 
-    logger.info("Requesting ACM certificate", { domain: bucket.customDomain });
-    const { certArn, validationRecords } = await requestCertificate(
-      bucket.customDomain,
-      credentials
-    );
+    let certArn: string;
+    let dnsRecords: Array<{ name: string; type: string; value: string }>;
 
-    const dnsRecords = [
-      ...validationRecords,
-      {
-        name: bucket.customDomain,
-        type: "CNAME",
-        value: "pending-cloudfront-distribution",
-      },
-    ];
+    if (bucket.isManagedDomain) {
+      if (!env.MANAGED_DOMAIN_CERT_ARN) {
+        throw new Error(
+          "MANAGED_DOMAIN_CERT_ARN is not configured; cannot provision managed-domain buckets"
+        );
+      }
+      certArn = env.MANAGED_DOMAIN_CERT_ARN;
+      dnsRecords = [
+        {
+          name: bucket.customDomain,
+          type: "A",
+          value: "pending-cloudfront-distribution",
+        },
+      ];
+      logger.info("Using shared wildcard cert for managed domain", {
+        domain: bucket.customDomain,
+        certArn,
+      });
+    } else {
+      logger.info("Requesting ACM certificate", {
+        domain: bucket.customDomain,
+      });
+      const result = await requestCertificate(bucket.customDomain, credentials);
+      certArn = result.certArn;
+      dnsRecords = [
+        ...result.validationRecords,
+        {
+          name: bucket.customDomain,
+          type: "CNAME",
+          value: "pending-cloudfront-distribution",
+        },
+      ];
+    }
 
     await db
       .update(buckets)

@@ -74,6 +74,7 @@ export const buckets = pgTable(
     domainConnectProvider: text("domain_connect_provider"),
     awsAccountId: text("aws_account_id"),
     isImported: boolean("is_imported").default(false).notNull(),
+    isManagedDomain: boolean("is_managed_domain").default(false).notNull(),
     managedSettings: jsonb("managed_settings").default({}).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")

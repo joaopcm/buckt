@@ -24,6 +24,8 @@ export const env = createEnv({
     AXIOM_DATASET: z.string().optional().default("buckt-web"),
     DOMAIN_CONNECT_SIGNING_PRIVATE_KEY: z.string().min(1).optional(),
     DOMAIN_CONNECT_PROVIDER_ID: z.string().default("buckt.dev"),
+    MANAGED_DOMAIN_CERT_ARN: z.string().min(1).optional(),
+    MANAGED_DOMAIN_HOSTED_ZONE_ID: z.string().min(1).optional(),
   },
   client: {
     NEXT_PUBLIC_BETTER_AUTH_URL: z.url(),

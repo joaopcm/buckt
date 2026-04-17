@@ -3,6 +3,7 @@ import { DnsInstructionsEmail } from "@buckt/emails";
 import {
   createBucketSchema,
   forwardInstructionsSchema,
+  generateManagedSubdomain,
   type ManagedSettings,
   managedSettingsSchema,
   PLAN_LIMITS,
@@ -161,51 +162,10 @@ export const bucketsRouter = router({
         });
       }
 
-      const [existing] = await ctx.db
-        .select({ id: buckets.id })
-        .from(buckets)
-        .where(eq(buckets.customDomain, input.customDomain))
-        .limit(1);
+      const customDomain = await resolveCustomDomain(ctx.db, input);
+      await validateAwsAccount(ctx.db, ctx.orgId, plan, input);
 
-      if (existing) {
-        throw new TRPCError({
-          code: "CONFLICT",
-          message: "Domain already in use",
-        });
-      }
-
-      if (input.awsAccountId) {
-        if (plan === "free") {
-          throw new TRPCError({
-            code: "PAYMENT_REQUIRED",
-            message: "BYOA requires a paid plan. Upgrade to enable.",
-          });
-        }
-        const [account] = await ctx.db
-          .select({ id: awsAccounts.id, status: awsAccounts.status })
-          .from(awsAccounts)
-          .where(
-            and(
-              eq(awsAccounts.id, input.awsAccountId),
-              eq(awsAccounts.orgId, ctx.orgId)
-            )
-          )
-          .limit(1);
-        if (!account) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "AWS account not found",
-          });
-        }
-        if (account.status !== "active") {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "AWS account is not active",
-          });
-        }
-      }
-
-      const slug = input.customDomain.replace(/\./g, "-");
+      const slug = customDomain.replace(/\./g, "-");
       const s3BucketName =
         `buckt-${ctx.orgId.slice(0, 8)}-${slug}`.toLowerCase();
 
@@ -226,15 +186,18 @@ export const bucketsRouter = router({
           name: input.name,
           slug,
           s3BucketName,
-          customDomain: input.customDomain,
+          customDomain,
           region: input.region,
           visibility: input.visibility,
           cachePreset: input.cachePreset,
           corsOrigins: input.corsOrigins,
           lifecycleTtlDays: input.lifecycleTtlDays,
           optimizationMode: input.optimizationMode,
-          domainConnectProvider: input.domainConnectProvider,
+          domainConnectProvider: input.isManagedDomain
+            ? null
+            : input.domainConnectProvider,
           awsAccountId: input.awsAccountId ?? null,
+          isManagedDomain: input.isManagedDomain,
           managedSettings,
           status: "pending",
         })
@@ -596,6 +559,101 @@ export const bucketsRouter = router({
       return { sent };
     }),
 });
+
+const MANAGED_SUBDOMAIN_MAX_ATTEMPTS = 5;
+
+async function allocateManagedSubdomain(db: Context["db"]): Promise<string> {
+  for (let attempt = 0; attempt < MANAGED_SUBDOMAIN_MAX_ATTEMPTS; attempt++) {
+    const candidate = generateManagedSubdomain();
+    const [existing] = await db
+      .select({ id: buckets.id })
+      .from(buckets)
+      .where(eq(buckets.customDomain, candidate))
+      .limit(1);
+    if (!existing) {
+      return candidate;
+    }
+  }
+  throw new TRPCError({
+    code: "INTERNAL_SERVER_ERROR",
+    message: "Could not allocate a subdomain, please try again",
+  });
+}
+
+interface CreateBucketInput {
+  awsAccountId?: string;
+  customDomain?: string;
+  isManagedDomain: boolean;
+}
+
+async function resolveCustomDomain(
+  db: Context["db"],
+  input: CreateBucketInput
+): Promise<string> {
+  if (input.isManagedDomain) {
+    return allocateManagedSubdomain(db);
+  }
+  if (!input.customDomain) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "customDomain is required",
+    });
+  }
+  const [existing] = await db
+    .select({ id: buckets.id })
+    .from(buckets)
+    .where(eq(buckets.customDomain, input.customDomain))
+    .limit(1);
+  if (existing) {
+    throw new TRPCError({
+      code: "CONFLICT",
+      message: "Domain already in use",
+    });
+  }
+  return input.customDomain;
+}
+
+async function validateAwsAccount(
+  db: Context["db"],
+  orgId: string,
+  plan: PlanName,
+  input: CreateBucketInput
+) {
+  if (!input.awsAccountId) {
+    return;
+  }
+  if (input.isManagedDomain) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "BYOA requires a custom domain",
+    });
+  }
+  if (plan === "free") {
+    throw new TRPCError({
+      code: "PAYMENT_REQUIRED",
+      message: "BYOA requires a paid plan. Upgrade to enable.",
+    });
+  }
+  const [account] = await db
+    .select({ id: awsAccounts.id, status: awsAccounts.status })
+    .from(awsAccounts)
+    .where(
+      and(eq(awsAccounts.id, input.awsAccountId), eq(awsAccounts.orgId, orgId))
+    )
+    .limit(1);
+  if (!account) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "AWS account not found",
+    });
+  }
+  if (account.status !== "active") {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "AWS account is not active",
+    });
+  }
+}
 
 type BucketRow = typeof buckets.$inferSelect;
 

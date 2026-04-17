@@ -3,12 +3,13 @@
 import {
   ALLOWED_REGIONS,
   type AllowedRegion,
+  generateManagedSubdomain,
   OPTIMIZATION_MODES,
 } from "@buckt/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -77,11 +78,12 @@ const createBucketSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
   customDomain: z
     .string()
-    .min(1, "Domain is required")
     .regex(
       /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/,
       "Invalid domain format (e.g. cdn.example.com)"
-    ),
+    )
+    .optional()
+    .or(z.literal("")),
   region: z.enum(ALLOWED_REGIONS).default("us-east-1"),
   visibility: z.enum(["public", "private"]).default("public"),
   cachePreset: z
@@ -108,6 +110,10 @@ export function CreateBucketForm({ orgId }: { orgId: string }) {
   const activeAccounts =
     awsAccountsData?.items.filter((a) => a.status === "active") ?? [];
   const [selectedAwsAccount, setSelectedAwsAccount] = useState<string>("");
+  const [domainMode, setDomainMode] = useState<"managed" | "custom">("managed");
+  const [managedSubdomain, setManagedSubdomain] = useState(() =>
+    generateManagedSubdomain()
+  );
 
   const {
     register,
@@ -124,8 +130,15 @@ export function CreateBucketForm({ orgId }: { orgId: string }) {
       corsOrigins: [],
       lifecycleTtlDays: null,
       optimizationMode: "none",
+      customDomain: "",
     },
   });
+
+  useEffect(() => {
+    if (selectedAwsAccount && domainMode === "managed") {
+      setDomainMode("custom");
+    }
+  }, [selectedAwsAccount, domainMode]);
 
   const domainValue = watch("customDomain") ?? "";
   const debouncedDomain = useDebounce(domainValue, 500);
@@ -133,7 +146,7 @@ export function CreateBucketForm({ orgId }: { orgId: string }) {
 
   const dcCheck = trpc.domainConnect.check.useQuery(
     { domain: debouncedDomain },
-    { enabled: isValidDomain }
+    { enabled: domainMode === "custom" && isValidDomain }
   );
 
   const createBucket = trpc.buckets.create.useMutation({
@@ -148,13 +161,28 @@ export function CreateBucketForm({ orgId }: { orgId: string }) {
   });
 
   function onSubmit(values: CreateBucketValues) {
+    const isManaged = domainMode === "managed";
+
+    if (!(isManaged || values.customDomain)) {
+      toast.error("Domain is required");
+      return;
+    }
+
     createBucket.mutate({
-      ...values,
-      orgId,
-      awsAccountId: selectedAwsAccount || undefined,
-      domainConnectProvider: dcCheck.data?.supported
-        ? dcCheck.data.providerHost
-        : undefined,
+      name: values.name,
+      region: values.region,
+      visibility: values.visibility,
+      cachePreset: values.cachePreset,
+      corsOrigins: values.corsOrigins,
+      lifecycleTtlDays: values.lifecycleTtlDays,
+      optimizationMode: values.optimizationMode,
+      isManagedDomain: isManaged,
+      customDomain: isManaged ? undefined : values.customDomain,
+      awsAccountId: isManaged ? undefined : selectedAwsAccount || undefined,
+      domainConnectProvider:
+        !isManaged && dcCheck.data?.supported
+          ? dcCheck.data.providerHost
+          : undefined,
     });
   }
 
@@ -173,42 +201,88 @@ export function CreateBucketForm({ orgId }: { orgId: string }) {
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="customDomain">Custom domain</Label>
-            <Input
-              id="customDomain"
-              placeholder="cdn.example.com"
-              {...register("customDomain")}
-            />
-            {errors.customDomain && (
-              <p className="text-destructive text-xs">
-                {errors.customDomain.message}
-              </p>
-            )}
-            {isValidDomain && dcCheck.isFetching && (
-              <p className="flex items-center gap-1.5 text-muted-foreground text-xs">
-                <Loader2 className="size-3 animate-spin" />
-                Checking DNS provider...
-              </p>
-            )}
-            {isValidDomain && dcCheck.data?.supported && (
-              <p className="flex items-center gap-1.5 text-green-600 text-xs">
-                <Check className="size-3" />
-                {dcCheck.data.providerName} supports automatic DNS setup
-              </p>
-            )}
-            {!(
-              (isValidDomain && dcCheck.data?.supported) ||
-              dcCheck.isFetching
-            ) && (
+          {domainMode === "managed" ? (
+            <div className="space-y-2">
+              <Label>Domain</Label>
+              <div className="flex items-center gap-2 border border-input bg-muted/30 px-3 py-2">
+                <span className="flex-1 truncate font-mono text-sm">
+                  {managedSubdomain}
+                </span>
+                <button
+                  aria-label="Generate a new subdomain"
+                  className="text-muted-foreground hover:text-foreground"
+                  onClick={() =>
+                    setManagedSubdomain(generateManagedSubdomain())
+                  }
+                  type="button"
+                >
+                  <RefreshCw className="size-3.5" />
+                </button>
+              </div>
               <p className="text-muted-foreground text-xs">
-                The domain where your files will be served
+                Free URL — start immediately.{" "}
+                <button
+                  className="underline underline-offset-2 hover:text-foreground"
+                  onClick={() => setDomainMode("custom")}
+                  type="button"
+                >
+                  Use a custom domain →
+                </button>
               </p>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="customDomain">Custom domain</Label>
+                <button
+                  className="text-muted-foreground text-xs underline underline-offset-2 hover:text-foreground"
+                  onClick={() => {
+                    setDomainMode("managed");
+                    setValue("customDomain", "");
+                    setSelectedAwsAccount("");
+                  }}
+                  type="button"
+                >
+                  ← Use a free buckt.dev URL
+                </button>
+              </div>
+              <Input
+                id="customDomain"
+                placeholder="cdn.example.com"
+                {...register("customDomain")}
+              />
+              {errors.customDomain && (
+                <p className="text-destructive text-xs">
+                  {errors.customDomain.message}
+                </p>
+              )}
+              {isValidDomain && dcCheck.isFetching && (
+                <p className="flex items-center gap-1.5 text-muted-foreground text-xs">
+                  <Loader2 className="size-3 animate-spin" />
+                  Checking DNS provider...
+                </p>
+              )}
+              {isValidDomain && dcCheck.data?.supported && (
+                <p className="flex items-center gap-1.5 text-green-600 text-xs">
+                  <Check className="size-3" />
+                  {dcCheck.data.providerName} supports automatic DNS setup
+                </p>
+              )}
+              {!(
+                (isValidDomain && dcCheck.data?.supported) ||
+                dcCheck.isFetching
+              ) && (
+                <p className="text-muted-foreground text-xs">
+                  The domain where your files will be served
+                </p>
+              )}
+            </div>
+          )}
 
           <AdvancedBucketOptions
             activeAwsAccounts={activeAccounts}
+            awsAccountDisabled={domainMode === "managed"}
+            awsAccountDisabledReason="Custom domain required for BYOA"
             defaultRegion={defaultRegion}
             errors={errors}
             onAwsAccountChange={setSelectedAwsAccount}

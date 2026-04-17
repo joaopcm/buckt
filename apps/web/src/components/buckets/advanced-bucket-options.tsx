@@ -73,6 +73,8 @@ interface AwsAccount {
 
 interface AdvancedBucketOptionsProps {
   activeAwsAccounts?: AwsAccount[];
+  awsAccountDisabled?: boolean;
+  awsAccountDisabledReason?: string;
   defaultRegion: string;
   errors: FieldErrors<CreateBucketValues>;
   onAwsAccountChange?: (value: string) => void;
@@ -81,8 +83,24 @@ interface AdvancedBucketOptionsProps {
   watch: UseFormWatch<CreateBucketValues>;
 }
 
+function awsAccountHint(
+  disabled: boolean,
+  disabledReason: string | undefined,
+  selectedId: string | undefined
+): string {
+  if (disabled) {
+    return disabledReason ?? "";
+  }
+  if (selectedId) {
+    return "Bucket will be created in your AWS account";
+  }
+  return "Bucket will be created in Buckt's infrastructure";
+}
+
 export function AdvancedBucketOptions({
   activeAwsAccounts = [],
+  awsAccountDisabled = false,
+  awsAccountDisabledReason,
   defaultRegion,
   errors,
   onAwsAccountChange,
@@ -357,6 +375,7 @@ export function AdvancedBucketOptions({
             <div className="space-y-2">
               <Label>AWS Account</Label>
               <Select
+                disabled={awsAccountDisabled}
                 items={[
                   { value: "", label: "Buckt-managed (default)" },
                   ...activeAwsAccounts.map((a) => ({
@@ -367,7 +386,12 @@ export function AdvancedBucketOptions({
                 onValueChange={(v) => onAwsAccountChange?.(v ?? "")}
                 value={selectedAwsAccountId ?? ""}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger
+                  className="w-full"
+                  title={
+                    awsAccountDisabled ? awsAccountDisabledReason : undefined
+                  }
+                >
                   <SelectValue placeholder="Buckt-managed (default)" />
                 </SelectTrigger>
                 <SelectContent align="start" alignItemWithTrigger={false}>
@@ -380,9 +404,11 @@ export function AdvancedBucketOptions({
                 </SelectContent>
               </Select>
               <p className="text-muted-foreground text-xs">
-                {selectedAwsAccountId
-                  ? "Bucket will be created in your AWS account"
-                  : "Bucket will be created in Buckt's infrastructure"}
+                {awsAccountHint(
+                  awsAccountDisabled,
+                  awsAccountDisabledReason,
+                  selectedAwsAccountId
+                )}
               </p>
             </div>
           )}

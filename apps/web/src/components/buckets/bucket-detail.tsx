@@ -79,6 +79,7 @@ export function BucketDetail({
 
   const hasDomainConnect = !!bucket.domainConnectProvider;
   const cnameVerified = cnameVerification.data?.verified ?? false;
+  const isManagedDomain = bucket.isManagedDomain;
 
   return (
     <div className="space-y-8">
@@ -88,55 +89,64 @@ export function BucketDetail({
             <h1 className="font-bold text-2xl tracking-tight">{bucket.name}</h1>
             <StatusBadge status={bucket.status} />
           </div>
-          <p className="font-mono text-muted-foreground text-sm">
-            {bucket.customDomain}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="font-mono text-muted-foreground text-sm">
+              {bucket.customDomain}
+            </p>
+            {isManagedDomain && (
+              <span className="border border-input px-1.5 py-0.5 text-[10px] text-muted-foreground uppercase tracking-wide">
+                Free URL · buckt.dev
+              </span>
+            )}
+          </div>
         </div>
         <BucketActions bucket={bucket} orgId={orgId} />
       </div>
 
-      {(bucket.status === "provisioning" || bucket.status === "pending") && (
-        <>
-          {hasDomainConnect && <DomainConnectBanner />}
-          <ProvisioningSteps
-            bucketId={bucketId}
-            domain={bucket.customDomain}
-            hasDomainConnect={hasDomainConnect}
-            orgId={orgId}
-            records={bucket.dnsRecords}
-          />
-        </>
-      )}
+      {(bucket.status === "provisioning" || bucket.status === "pending") &&
+        !isManagedDomain && (
+          <>
+            {hasDomainConnect && <DomainConnectBanner />}
+            <ProvisioningSteps
+              bucketId={bucketId}
+              domain={bucket.customDomain}
+              hasDomainConnect={hasDomainConnect}
+              orgId={orgId}
+              records={bucket.dnsRecords}
+            />
+          </>
+        )}
 
       {bucket.status === "active" && (
         <>
-          {(() => {
-            const dnsRecords = (
-              Array.isArray(bucket.dnsRecords) ? bucket.dnsRecords : []
-            ) as Array<{
-              name: string;
-              type: string;
-              value: string;
-              applied?: boolean;
-            }>;
-            const pendingCname = dnsRecords.find(
-              (r) =>
-                r.type === "CNAME" &&
-                r.name === bucket.customDomain &&
-                !r.applied
-            );
-            if (!pendingCname || cnameVerified) {
-              return null;
-            }
-            return (
-              <PendingCnameBanner
-                bucketId={bucketId}
-                cnameRecord={pendingCname}
-                hasDomainConnect={hasDomainConnect}
-                orgId={orgId}
-              />
-            );
-          })()}
+          {!isManagedDomain &&
+            (() => {
+              const dnsRecords = (
+                Array.isArray(bucket.dnsRecords) ? bucket.dnsRecords : []
+              ) as Array<{
+                name: string;
+                type: string;
+                value: string;
+                applied?: boolean;
+              }>;
+              const pendingCname = dnsRecords.find(
+                (r) =>
+                  r.type === "CNAME" &&
+                  r.name === bucket.customDomain &&
+                  !r.applied
+              );
+              if (!pendingCname || cnameVerified) {
+                return null;
+              }
+              return (
+                <PendingCnameBanner
+                  bucketId={bucketId}
+                  cnameRecord={pendingCname}
+                  hasDomainConnect={hasDomainConnect}
+                  orgId={orgId}
+                />
+              );
+            })()}
           <BucketUsage
             bandwidthUsedBytes={bucket.bandwidthUsedBytes}
             storageUsedBytes={bucket.storageUsedBytes}
@@ -152,7 +162,7 @@ export function BucketDetail({
           <BucketSettings
             bucket={bucket}
             disabled={!isAdmin}
-            dnsRecords={bucket.dnsRecords}
+            dnsRecords={isManagedDomain ? undefined : bucket.dnsRecords}
             isImported={bucket.isImported}
             managedSettings={(bucket.managedSettings ?? {}) as ManagedSettings}
             orgId={orgId}
