@@ -15,6 +15,8 @@ import { auth } from "@/lib/auth";
 import { resend } from "@/lib/resend";
 import { orgProcedure, router } from "../init";
 
+const TRAILING_DOT = /\.$/;
+
 export const bucketsRouter = router({
   list: orgProcedure
     .input(
@@ -482,9 +484,10 @@ export const bucketsRouter = router({
       try {
         const { resolveCname } = await import("node:dns/promises");
         const results = await resolveCname(bucket.customDomain);
-        const matches = results.some(
-          (r) => r === cnameRecord.value || r === `${cnameRecord.value}.`
-        );
+        const normalize = (value: string) =>
+          value.toLowerCase().replace(TRAILING_DOT, "");
+        const expected = normalize(cnameRecord.value);
+        const matches = results.some((r) => normalize(r) === expected);
 
         if (matches) {
           const updated = records.map((r) =>
