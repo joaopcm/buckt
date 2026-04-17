@@ -40,6 +40,13 @@ export const shortcuts: ShortcutDefinition[] = [
     scope: "global",
   },
   {
+    id: "nav.aws-accounts",
+    keys: "g>a",
+    label: "Go to AWS Accounts",
+    category: "navigation",
+    scope: "global",
+  },
+  {
     id: "nav.settings",
     keys: "g>s",
     label: "Go to Settings",
