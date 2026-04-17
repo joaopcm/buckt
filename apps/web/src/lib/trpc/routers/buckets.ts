@@ -11,7 +11,7 @@ import {
 } from "@buckt/shared";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
-import { and, count, desc, eq, ilike, lt, sum } from "drizzle-orm";
+import { and, count, desc, eq, ilike, lt, ne, sum } from "drizzle-orm";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { resend } from "@/lib/resend";
@@ -153,7 +153,9 @@ export const bucketsRouter = router({
       const [{ bucketCount }] = await ctx.db
         .select({ bucketCount: count() })
         .from(buckets)
-        .where(eq(buckets.orgId, ctx.orgId));
+        .where(
+          and(eq(buckets.orgId, ctx.orgId), ne(buckets.status, "deleting"))
+        );
 
       if (bucketCount >= limits.maxBuckets) {
         throw new TRPCError({
