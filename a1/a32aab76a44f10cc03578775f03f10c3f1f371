@@ -1,0 +1,90 @@
+.github/workflows/test.yml
+  e558207aafc8f3ec 44
+apps/api/src/routes/files/upload.ts
+  e558207aafc8f3ec 5,13,21-60,86-95,130-132,135,146,148,154,165-169,171,174,181
+apps/web/src/lib/trpc/routers/buckets.ts
+  e558207aafc8f3ec 281-309
+apps/api/src/routes/aws-accounts/list.ts
+  e558207aafc8f3ec 41-46
+apps/api/src/routes/aws-accounts/get.ts
+  e558207aafc8f3ec 21-22
+apps/web/src/lib/trpc/routers/files.ts
+  e558207aafc8f3ec 8,10,22-23,25-52,86-87,148-149,267-268,325-326,396-397,442
+apps/api/src/routes/buckets/update.spec.ts
+  e558207aafc8f3ec 1-2,5,10,20-23,190-257
+apps/api/src/routes/aws-accounts/update.ts
+  e558207aafc8f3ec 33-34
+apps/api/src/trigger/provision-bucket.ts
+  e558207aafc8f3ec 2,8-9,14-22,36-46,83,86,98-102,107-109,111,118,120-147,150-163,174-211
+packages/db/drizzle/0009_add_acm_event_cols.sql
+  e558207aafc8f3ec 1-2
+packages/shared/cloudformation/buckt-byoa-role.yaml
+  e558207aafc8f3ec 2,12-18,61-115
+packages/shared/cloudformation/buckt-managed-acm-events.yaml
+  e558207aafc8f3ec 1-76
+apps/api/src/routes/buckets/update.ts
+  e558207aafc8f3ec 2,11,16-75,107-112,115-116,122-124,126-129,133
+packages/db/src/schema/aws-accounts.ts
+  e558207aafc8f3ec 28
+apps/api/src/routes/aws-accounts/validate.ts
+  e558207aafc8f3ec 39-40
+apps/api/src/trigger/optimize-file.ts
+  e558207aafc8f3ec 7,13,15,82,93-94,101,129,135
+apps/web/src/lib/s3.ts
+  e558207aafc8f3ec 4-31
+apps/web/src/components/buckets/bucket-settings.tsx
+  e558207aafc8f3ec 113,119-124,129,135-140,265,270,298-303,476,481,508-510
+apps/web/src/env.ts
+  e558207aafc8f3ec 37,47
+apps/api/src/env.ts
+  e558207aafc8f3ec 19
+packages/db/src/schema/buckets.ts
+  e558207aafc8f3ec 57
+apps/web/src/lib/trpc/routers/aws-accounts.ts
+  e558207aafc8f3ec 14-21,62,86,113-115,123,158,199
+apps/api/src/routes/webhooks/acm.ts
+  e558207aafc8f3ec 1-18,21-25,27-28,30-33,35-37,40-50,54-59,61-66,69-72,74-80,82-83,86-95,98-106,109-112
+apps/api/src/routes/aws-accounts/connect.ts
+  e558207aafc8f3ec 23-25,33
+packages/db/drizzle/0010_cold_apocalypse.sql
+  e558207aafc8f3ec 1
+apps/web/src/components/aws-accounts/connect-aws-form.tsx
+  e558207aafc8f3ec 24,27,33-34,36,52,60,198-201
+apps/api/src/app.ts
+  e558207aafc8f3ec 35,189
+turbo.json
+  e558207aafc8f3ec 44-45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "a1a32aab76a44f10cc03578775f03f10c3f1f371",
+  "prompts": {
+    "7a266757e464872d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "33832e94-f88f-4fae-ab09-9e1d0fc99535",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 13,
+      "overriden_lines": 0
+    },
+    "e558207aafc8f3ec": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "98a70e72-1f93-4589-9500-8393d422441f",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 1540,
+      "total_deletions": 922,
+      "accepted_lines": 864,
+      "overriden_lines": 6
+    }
+  }
+}
