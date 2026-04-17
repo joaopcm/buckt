@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Circle, Loader2, Zap } from "lucide-react";
+import { Check, Circle, Info, Loader2, Zap } from "lucide-react";
 import { ApplyButton } from "@/components/buckets/apply-button";
 import { ForwardInstructionsPopover } from "@/components/buckets/forward-instructions-popover";
 import { CopyText } from "@/components/copy-text";
@@ -159,6 +159,24 @@ export function ProvisioningSteps({
                   },
                 ]}
               />
+              {hasDomainConnect && (
+                <Card className="bg-blue-500/10 ring-blue-500/20">
+                  <CardHeader>
+                    <div className="flex items-center gap-2">
+                      <Info className="size-4 text-blue-600" />
+                      <CardTitle className="text-sm">
+                        Add the CAA record manually
+                      </CardTitle>
+                    </div>
+                    <CardDescription className="text-xs">
+                      Domain Connect doesn't support CAA records, so "Apply
+                      automatically" only sets the CNAME. Add the CAA record
+                      above to your DNS provider by hand — without it, Amazon
+                      can't issue your SSL certificate.
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              )}
               <div className="flex items-center gap-2">
                 {hasDomainConnect && (
                   <ApplyButton
