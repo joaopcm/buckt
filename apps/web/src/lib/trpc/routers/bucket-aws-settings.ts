@@ -20,7 +20,7 @@ interface AwsCredentialIdentity {
 export async function setBucketPublic(
   bucketName: string,
   region: string,
-  credentials: AwsCredentialIdentity
+  credentials?: AwsCredentialIdentity
 ) {
   const client = new S3Client({ region, credentials });
 
@@ -58,7 +58,7 @@ export async function setBucketPublic(
 export async function setBucketPrivate(
   bucketName: string,
   region: string,
-  credentials: AwsCredentialIdentity
+  credentials?: AwsCredentialIdentity
 ) {
   const client = new S3Client({ region, credentials });
 
@@ -85,7 +85,7 @@ export async function setBucketCors(
   bucketName: string,
   origins: string[],
   region: string,
-  credentials: AwsCredentialIdentity
+  credentials?: AwsCredentialIdentity
 ) {
   const client = new S3Client({ region, credentials });
 
@@ -119,7 +119,7 @@ export async function setBucketLifecycle(
   bucketName: string,
   ttlDays: number | null,
   region: string,
-  credentials: AwsCredentialIdentity
+  credentials?: AwsCredentialIdentity
 ) {
   const client = new S3Client({ region, credentials });
 

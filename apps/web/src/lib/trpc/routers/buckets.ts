@@ -16,6 +16,13 @@ import { auth } from "@/lib/auth";
 import { resend } from "@/lib/resend";
 import type { Context } from "../init";
 import { orgProcedure, router } from "../init";
+import { assumeRole } from "./aws-validate";
+import {
+  setBucketCors,
+  setBucketLifecycle,
+  setBucketPrivate,
+  setBucketPublic,
+} from "./bucket-aws-settings";
 
 const TRAILING_DOT = /\.$/;
 
@@ -329,9 +336,7 @@ export const bucketsRouter = router({
         }
       }
 
-      if (bucket.isImported && bucket.awsAccountId) {
-        await applyImportedBucketChanges(ctx, bucket, input);
-      }
+      await applyBucketSettingsToAws(ctx, bucket, input);
 
       const { id, ...updates } = input;
 
@@ -600,30 +605,29 @@ interface UpdateSettingsInput {
   visibility?: "public" | "private";
 }
 
-async function applyImportedBucketChanges(
+async function applyBucketSettingsToAws(
   ctx: Context,
   bucket: BucketRow,
   input: UpdateSettingsInput
 ) {
-  if (!bucket.awsAccountId) {
-    return;
-  }
-
   const managed = (bucket.managedSettings ?? {}) as ManagedSettings;
 
+  const isSettingActive = (key: "visibility" | "cors" | "lifecycle") =>
+    bucket.isImported ? managed[key] === true : true;
+
   const visibilityChanged =
-    managed.visibility === true &&
+    isSettingActive("visibility") &&
     input.visibility !== undefined &&
     input.visibility !== bucket.visibility;
 
   const corsChanged =
-    managed.cors === true &&
+    isSettingActive("cors") &&
     input.corsOrigins !== undefined &&
     JSON.stringify([...input.corsOrigins].sort()) !==
       JSON.stringify([...bucket.corsOrigins].sort());
 
   const lifecycleChanged =
-    managed.lifecycle === true &&
+    isSettingActive("lifecycle") &&
     input.lifecycleTtlDays !== undefined &&
     input.lifecycleTtlDays !== bucket.lifecycleTtlDays;
 
@@ -631,43 +635,37 @@ async function applyImportedBucketChanges(
     return;
   }
 
-  const [awsAccount] = await ctx.db
-    .select()
-    .from(awsAccounts)
-    .where(eq(awsAccounts.id, bucket.awsAccountId))
-    .limit(1);
+  let credentials: Awaited<ReturnType<typeof assumeRole>> | undefined;
+  if (bucket.isImported && bucket.awsAccountId) {
+    const [awsAccount] = await ctx.db
+      .select()
+      .from(awsAccounts)
+      .where(eq(awsAccounts.id, bucket.awsAccountId))
+      .limit(1);
 
-  if (!awsAccount) {
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: "AWS account for this bucket not found",
-    });
+    if (!awsAccount) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "AWS account for this bucket not found",
+      });
+    }
+
+    credentials = await assumeRole(awsAccount.roleArn, awsAccount.externalId);
   }
 
-  const { assumeRole } = await import("@/lib/trpc/routers/aws-validate");
-  const credentials = await assumeRole(
-    awsAccount.roleArn,
-    awsAccount.externalId
-  );
-
-  const {
-    setBucketCors,
-    setBucketLifecycle,
-    setBucketPrivate,
-    setBucketPublic,
-  } = await import("@/lib/trpc/routers/bucket-aws-settings");
+  const awsBucketName = bucket.isImported ? bucket.name : bucket.s3BucketName;
 
   if (visibilityChanged) {
     if (input.visibility === "public") {
-      await setBucketPublic(bucket.name, bucket.region, credentials);
+      await setBucketPublic(awsBucketName, bucket.region, credentials);
     } else {
-      await setBucketPrivate(bucket.name, bucket.region, credentials);
+      await setBucketPrivate(awsBucketName, bucket.region, credentials);
     }
   }
 
   if (corsChanged && input.corsOrigins) {
     await setBucketCors(
-      bucket.name,
+      awsBucketName,
       input.corsOrigins,
       bucket.region,
       credentials
@@ -676,7 +674,7 @@ async function applyImportedBucketChanges(
 
   if (lifecycleChanged && input.lifecycleTtlDays !== undefined) {
     await setBucketLifecycle(
-      bucket.name,
+      awsBucketName,
       input.lifecycleTtlDays,
       bucket.region,
       credentials
