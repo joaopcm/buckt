@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "Creates an IAM role for Buckt to manage resources in your AWS account"
+Description: "Creates an IAM role + EventBridge forwarding so Buckt can manage resources in your AWS account"
 
 Parameters:
   BucktAccountId:
@@ -8,6 +8,13 @@ Parameters:
   ExternalId:
     Type: String
     Description: "Unique secret for cross-account trust (do not modify)"
+    NoEcho: true
+  BucktApiUrl:
+    Type: String
+    Description: "Buckt API base URL for ACM event forwarding (do not modify)"
+  BucktWebhookSecret:
+    Type: String
+    Description: "Unique secret authenticating ACM events sent to Buckt (do not modify)"
     NoEcho: true
 
 Resources:
@@ -50,6 +57,62 @@ Resources:
                   - "cloudwatch:GetMetricStatistics"
                   - "cloudwatch:ListMetrics"
                 Resource: "*"
+
+  BucktAcmConnection:
+    Type: AWS::Events::Connection
+    Properties:
+      Name: BucktAcmConnection
+      AuthorizationType: API_KEY
+      AuthParameters:
+        ApiKeyAuthParameters:
+          ApiKeyName: X-Buckt-Webhook-Secret
+          ApiKeyValue: !Ref BucktWebhookSecret
+
+  BucktAcmApiDestination:
+    Type: AWS::Events::ApiDestination
+    Properties:
+      Name: BucktAcmApiDestination
+      ConnectionArn: !GetAtt BucktAcmConnection.Arn
+      HttpMethod: POST
+      InvocationEndpoint: !Sub "${BucktApiUrl}/webhooks/acm"
+
+  BucktAcmEventRoleExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: InvokeApiDestination
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: "events:InvokeApiDestination"
+                Resource: !GetAtt BucktAcmApiDestination.Arn
+
+  BucktAcmAvailableRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: BucktAcmCertificateAvailable
+      Description: "Forward ACM Certificate Available events to Buckt"
+      EventPattern:
+        source:
+          - aws.acm
+        detail-type:
+          - "ACM Certificate Available"
+        detail:
+          Action:
+            - ISSUANCE
+      State: ENABLED
+      Targets:
+        - Id: BucktApiDestination
+          Arn: !GetAtt BucktAcmApiDestination.Arn
+          RoleArn: !GetAtt BucktAcmEventRoleExecutionRole.Arn
 
 Outputs:
   RoleArn:

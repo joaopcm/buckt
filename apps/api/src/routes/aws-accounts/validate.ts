@@ -36,7 +36,8 @@ export async function validateAwsAccount(c: Context) {
       .where(eq(awsAccounts.id, id))
       .returning();
 
-    return success(c, updated);
+    const { acmWebhookSecret: _secret, ...publicAccount } = updated;
+    return success(c, publicAccount);
   }
 
   await db

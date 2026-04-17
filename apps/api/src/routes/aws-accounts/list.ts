@@ -38,8 +38,12 @@ export async function listAwsAccounts(c: Context) {
     items.pop();
   }
 
-  return success(c, items, {
-    nextCursor: hasMore ? (items.at(-1)?.id ?? null) : null,
+  const publicItems = items.map(
+    ({ acmWebhookSecret: _secret, ...rest }) => rest
+  );
+
+  return success(c, publicItems, {
+    nextCursor: hasMore ? (publicItems.at(-1)?.id ?? null) : null,
     limit,
     total,
   });

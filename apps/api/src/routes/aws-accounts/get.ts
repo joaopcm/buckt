@@ -18,5 +18,6 @@ export async function getAwsAccount(c: Context) {
     return error(c, 404, "AWS account not found");
   }
 
-  return success(c, account);
+  const { acmWebhookSecret: _secret, ...publicAccount } = account;
+  return success(c, publicAccount);
 }

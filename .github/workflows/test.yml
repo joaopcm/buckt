@@ -41,6 +41,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: test
       STRIPE_SECRET_KEY: sk_test_placeholder
       TRIGGER_SECRET_KEY: test
+      ACM_WEBHOOK_SECRET: test_acm_webhook_secret_padding_abc
 
     steps:
       - uses: actions/checkout@v4

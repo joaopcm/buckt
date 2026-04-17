@@ -1,6 +1,6 @@
 {
-  "id": "de7a80e9-f4cd-4ffe-86c9-ee2c85a8fcc9",
-  "prevId": "9bccf7c2-c097-4a3a-a41d-dac77281b7ed",
+  "id": "8cce260d-6966-49dc-8ee6-8c9749c7bdab",
+  "prevId": "de7a80e9-f4cd-4ffe-86c9-ee2c85a8fcc9",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -743,6 +743,13 @@
         },
         "is_imported": {
           "name": "is_imported",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "is_managed_domain": {
+          "name": "is_managed_domain",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,

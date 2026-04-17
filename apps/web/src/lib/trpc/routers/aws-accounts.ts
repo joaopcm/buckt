@@ -11,6 +11,14 @@ import { and, count, desc, eq, ilike, lt } from "drizzle-orm";
 import { z } from "zod";
 import { adminProcedure, orgProcedure, router } from "../init";
 
+type AwsAccountRow = typeof awsAccounts.$inferSelect;
+type PublicAwsAccount = Omit<AwsAccountRow, "acmWebhookSecret">;
+
+function stripWebhookSecret(row: AwsAccountRow): PublicAwsAccount {
+  const { acmWebhookSecret: _secret, ...rest } = row;
+  return rest;
+}
+
 export const awsAccountsRouter = router({
   list: orgProcedure
     .input(
@@ -51,7 +59,7 @@ export const awsAccountsRouter = router({
       }
 
       return {
-        items,
+        items: items.map(stripWebhookSecret),
         nextCursor: hasMore ? (items.at(-1)?.id ?? null) : null,
         total,
       };
@@ -75,7 +83,7 @@ export const awsAccountsRouter = router({
         });
       }
 
-      return account;
+      return stripWebhookSecret(account);
     }),
 
   connect: adminProcedure
@@ -102,6 +110,9 @@ export const awsAccountsRouter = router({
 
       const externalId = crypto.randomUUID();
       const pendingAccountId = `pending-${crypto.randomUUID().slice(0, 8)}`;
+      const acmWebhookSecret = crypto
+        .getRandomValues(new Uint8Array(32))
+        .reduce((s, b) => s + b.toString(16).padStart(2, "0"), "");
 
       const [account] = await ctx.db
         .insert(awsAccounts)
@@ -109,6 +120,7 @@ export const awsAccountsRouter = router({
           orgId: ctx.orgId,
           awsAccountId: pendingAccountId,
           externalId,
+          acmWebhookSecret,
           label: input.label,
           status: "pending",
         })
@@ -143,7 +155,7 @@ export const awsAccountsRouter = router({
         .where(eq(awsAccounts.id, id))
         .returning();
 
-      return updated;
+      return stripWebhookSecret(updated);
     }),
 
   validate: adminProcedure
@@ -184,7 +196,7 @@ export const awsAccountsRouter = router({
           })
           .where(eq(awsAccounts.id, input.id))
           .returning();
-        return updated;
+        return stripWebhookSecret(updated);
       }
 
       await ctx.db

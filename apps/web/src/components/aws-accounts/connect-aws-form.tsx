@@ -21,16 +21,19 @@ import { Label } from "@/components/ui/label";
 import { env } from "@/env";
 import { trpc } from "@/lib/trpc/client";
 
-function buildQuickCreateUrl(externalId: string) {
+function buildQuickCreateUrl(externalId: string, webhookSecret: string) {
   const templateUrl = env.NEXT_PUBLIC_CF_TEMPLATE_URL ?? "";
   const accountId = env.NEXT_PUBLIC_BUCKT_AWS_ACCOUNT_ID ?? "";
+  const apiUrl = env.NEXT_PUBLIC_BUCKT_API_URL ?? "";
   const params = new URLSearchParams({
     templateURL: templateUrl,
     stackName: "BucktAccess",
     param_BucktAccountId: accountId,
     param_ExternalId: externalId,
+    param_BucktApiUrl: apiUrl,
+    param_BucktWebhookSecret: webhookSecret,
   });
-  return `https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?${params.toString()}`;
+  return `https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?${params.toString()}`;
 }
 
 const roleArnSchema = z.object({
@@ -46,6 +49,7 @@ export function ConnectAwsForm({ orgId }: { orgId: string }) {
   const [step, setStep] = useState<Step>("label");
   const [accountId, setAccountId] = useState<string | null>(null);
   const [externalId, setExternalId] = useState("");
+  const [acmWebhookSecret, setAcmWebhookSecret] = useState("");
   const [label, setLabel] = useState("");
   const [consoleOpened, setConsoleOpened] = useState(false);
 
@@ -53,6 +57,7 @@ export function ConnectAwsForm({ orgId }: { orgId: string }) {
     onSuccess: (data) => {
       setAccountId(data.id);
       setExternalId(data.externalId);
+      setAcmWebhookSecret(data.acmWebhookSecret ?? "");
       setStep("cloudformation");
     },
     onError: (err) => toast.error(err.message),
@@ -190,7 +195,10 @@ export function ConnectAwsForm({ orgId }: { orgId: string }) {
             <Button
               className="w-full"
               onClick={() => {
-                window.open(buildQuickCreateUrl(externalId), "_blank");
+                window.open(
+                  buildQuickCreateUrl(externalId, acmWebhookSecret),
+                  "_blank"
+                );
                 setConsoleOpened(true);
               }}
               variant={consoleOpened ? "outline" : "default"}

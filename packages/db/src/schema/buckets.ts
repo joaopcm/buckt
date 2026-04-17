@@ -54,6 +54,7 @@ export const buckets = pgTable(
     customDomain: text("custom_domain").notNull(),
     cloudfrontDistributionId: text("cloudfront_distribution_id"),
     acmCertArn: text("acm_cert_arn"),
+    acmWaitTokenId: text("acm_wait_token_id"),
     status: bucketStatusEnum("status").default("pending").notNull(),
     dnsRecords: jsonb("dns_records"),
     provisioningJobId: text("provisioning_job_id"),

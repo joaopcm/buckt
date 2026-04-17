@@ -41,7 +41,8 @@
         "AWS_REGION",
         "TRIGGER_SECRET_KEY",
         "STRIPE_SECRET_KEY",
-        "REDIS_URL"
+        "REDIS_URL",
+        "ACM_WEBHOOK_SECRET"
       ]
     },
     "db:generate": {

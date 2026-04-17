@@ -110,24 +110,34 @@ export function BucketSettings({
       <ManagedSettingGuard
         bucketId={bucket.id}
         currentSettings={managedSettings}
-        description="Cache-Control headers applied at the CDN won't change. Enable to let Buckt apply cache presets for you."
+        description="Existing files keep their current Cache-Control. Enable to apply the preset to new uploads via Buckt."
         managed={isManaged("cache")}
         orgId={orgId}
         settingKey="cache"
         settingLabel="Caching"
       >
-        <CachingCard bucket={bucket} disabled={disabled} orgId={orgId} />
+        <CachingCard
+          bucket={bucket}
+          disabled={disabled}
+          isImported={isImported}
+          orgId={orgId}
+        />
       </ManagedSettingGuard>
       <ManagedSettingGuard
         bucketId={bucket.id}
         currentSettings={managedSettings}
-        description="Images are served as-is. Enable to let Buckt compress uploads based on the selected mode."
+        description="Existing images are unchanged. Enable to compress new uploads via Buckt using the selected mode."
         managed={isManaged("optimization")}
         orgId={orgId}
         settingKey="optimization"
         settingLabel="Optimization"
       >
-        <OptimizationCard bucket={bucket} disabled={disabled} orgId={orgId} />
+        <OptimizationCard
+          bucket={bucket}
+          disabled={disabled}
+          isImported={isImported}
+          orgId={orgId}
+        />
       </ManagedSettingGuard>
       <ManagedSettingGuard
         bucketId={bucket.id}
@@ -252,10 +262,12 @@ function VisibilityCard({
 function CachingCard({
   bucket,
   disabled,
+  isImported,
   orgId,
 }: {
   bucket: BucketSettingsProps["bucket"];
   disabled?: boolean;
+  isImported?: boolean;
   orgId: string;
 }) {
   const [preset, setPreset] = useState<CachePresetValue>(
@@ -283,6 +295,12 @@ function CachingCard({
     <Card>
       <CardHeader>
         <CardTitle className="text-base">Caching</CardTitle>
+        {isImported && (
+          <CardDescription>
+            Applied as Cache-Control on files uploaded via Buckt. Existing
+            objects are not modified.
+          </CardDescription>
+        )}
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="space-y-2">
@@ -455,10 +473,12 @@ function CorsCard({
 function OptimizationCard({
   bucket,
   disabled,
+  isImported,
   orgId,
 }: {
   bucket: BucketSettingsProps["bucket"];
   disabled?: boolean;
+  isImported?: boolean;
   orgId: string;
 }) {
   const [mode, setMode] = useState(bucket.optimizationMode);
@@ -485,7 +505,9 @@ function OptimizationCard({
       <CardHeader>
         <CardTitle className="text-base">Optimization</CardTitle>
         <CardDescription>
-          Automatically compress images uploaded to this bucket
+          {isImported
+            ? "Compresses images uploaded via Buckt. Existing objects are not modified."
+            : "Automatically compress images uploaded to this bucket"}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">

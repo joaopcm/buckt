@@ -1,5 +1,5 @@
 import { buckets } from "@buckt/db";
-import { updateBucketSchema } from "@buckt/shared";
+import { type ManagedSettings, updateBucketSchema } from "@buckt/shared";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
 import {
@@ -8,9 +8,70 @@ import {
   setBucketPrivate,
   setBucketPublic,
 } from "../../lib/aws/bucket-settings";
+import { resolveCredentials } from "../../lib/aws/client-factory";
 import { db } from "../../lib/db";
 import { isBucketInScope } from "../../utils/bucket-scope";
 import { error, success } from "../../utils/response";
+
+const UPDATE_TO_MANAGED_KEY = {
+  visibility: "visibility",
+  cachePreset: "cache",
+  cacheControlOverride: "cache",
+  corsOrigins: "cors",
+  lifecycleTtlDays: "lifecycle",
+  optimizationMode: "optimization",
+} as const satisfies Record<string, keyof ManagedSettings>;
+
+type Updates = ReturnType<typeof updateBucketSchema.parse>;
+
+function findUnmanagedKey(
+  managed: ManagedSettings,
+  updates: Updates
+): keyof ManagedSettings | null {
+  for (const field of Object.keys(updates) as (keyof Updates)[]) {
+    const managedKey = UPDATE_TO_MANAGED_KEY[
+      field as keyof typeof UPDATE_TO_MANAGED_KEY
+    ] as keyof ManagedSettings | undefined;
+    if (managedKey && managed[managedKey] !== true) {
+      return managedKey;
+    }
+  }
+  return null;
+}
+
+async function syncBucketSettingsToAws(
+  bucket: typeof buckets.$inferSelect,
+  updates: Updates
+) {
+  const credentials = await resolveCredentials(bucket.awsAccountId);
+
+  if (
+    updates.visibility !== undefined &&
+    updates.visibility !== bucket.visibility
+  ) {
+    const setter =
+      updates.visibility === "private" ? setBucketPrivate : setBucketPublic;
+    await setter(bucket.s3BucketName, bucket.region, credentials);
+  }
+
+  if (updates.corsOrigins !== undefined) {
+    await setBucketCors(
+      bucket.s3BucketName,
+      updates.corsOrigins,
+      bucket.region,
+      credentials
+    );
+  }
+
+  if (updates.lifecycleTtlDays !== undefined) {
+    await setBucketLifecycle(
+      bucket.s3BucketName,
+      updates.lifecycleTtlDays,
+      bucket.region,
+      credentials
+    );
+  }
+}
 
 export async function updateBucket(c: Context) {
   const orgId = c.get("orgId") as string;
@@ -43,46 +104,33 @@ export async function updateBucket(c: Context) {
     return success(c, bucket);
   }
 
-  if (
-    updates.optimizationMode !== undefined &&
-    updates.optimizationMode !== "none"
-  ) {
-    const plan = c.get("plan") as string;
-    if (plan === "free") {
+  if (bucket.isImported) {
+    const unmanaged = findUnmanagedKey(
+      (bucket.managedSettings ?? {}) as ManagedSettings,
+      updates
+    );
+    if (unmanaged) {
       return error(
         c,
-        402,
-        "Optimization requires a paid plan. Upgrade to enable."
+        403,
+        `This setting is not managed by Buckt for this bucket. Enable ${unmanaged} management first.`
       );
     }
   }
 
   if (
-    updates.visibility !== undefined &&
-    updates.visibility !== bucket.visibility
+    updates.optimizationMode !== undefined &&
+    updates.optimizationMode !== "none" &&
+    c.get("plan") === "free"
   ) {
-    if (updates.visibility === "private") {
-      await setBucketPrivate(bucket.s3BucketName, bucket.region);
-    } else {
-      await setBucketPublic(bucket.s3BucketName, bucket.region);
-    }
-  }
-
-  if (updates.corsOrigins !== undefined) {
-    await setBucketCors(
-      bucket.s3BucketName,
-      updates.corsOrigins,
-      bucket.region
+    return error(
+      c,
+      402,
+      "Optimization requires a paid plan. Upgrade to enable."
     );
   }
 
-  if (updates.lifecycleTtlDays !== undefined) {
-    await setBucketLifecycle(
-      bucket.s3BucketName,
-      updates.lifecycleTtlDays,
-      bucket.region
-    );
-  }
+  await syncBucketSettingsToAws(bucket, updates);
 
   const [updated] = await db
     .update(buckets)
