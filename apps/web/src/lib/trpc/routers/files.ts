@@ -5,8 +5,9 @@ import {
   HeadObjectCommand,
   ListObjectsV2Command,
   PutObjectCommand,
+  type S3Client,
 } from "@aws-sdk/client-s3";
-import { buckets, subscription } from "@buckt/db";
+import { awsAccounts, buckets, subscription } from "@buckt/db";
 import {
   CACHE_PRESET_MAP,
   MIN_OPTIMIZATION_BYTES,
@@ -18,8 +19,37 @@ import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
 import { and, eq, ne, sql } from "drizzle-orm";
 import { z } from "zod";
-import { s3 } from "@/lib/s3";
+import { getS3Client } from "@/lib/s3";
+import type { Context } from "../init";
 import { orgProcedure, router } from "../init";
+import { assumeRole } from "./aws-validate";
+
+type BucketRow = typeof buckets.$inferSelect;
+
+async function getBucketClient(
+  ctx: Context,
+  bucket: BucketRow
+): Promise<S3Client> {
+  let credentials: Awaited<ReturnType<typeof assumeRole>> | undefined;
+  if (bucket.awsAccountId) {
+    const [awsAccount] = await ctx.db
+      .select()
+      .from(awsAccounts)
+      .where(eq(awsAccounts.id, bucket.awsAccountId))
+      .limit(1);
+
+    if (!awsAccount) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "AWS account for this bucket not found",
+      });
+    }
+
+    credentials = await assumeRole(awsAccount.roleArn, awsAccount.externalId);
+  }
+
+  return getS3Client(bucket.region, credentials);
+}
 
 export const filesRouter = router({
   list: orgProcedure
@@ -52,6 +82,8 @@ export const filesRouter = router({
           message: "Bucket is not active",
         });
       }
+
+      const s3 = await getBucketClient(ctx, bucket);
 
       const result = await s3.send(
         new ListObjectsV2Command({
@@ -112,6 +144,8 @@ export const filesRouter = router({
           message: "Bucket is not active",
         });
       }
+
+      const s3 = await getBucketClient(ctx, bucket);
 
       const body = Buffer.from(input.data, "base64");
 
@@ -230,6 +264,8 @@ export const filesRouter = router({
         });
       }
 
+      const s3 = await getBucketClient(ctx, bucket);
+
       let size = 0;
       try {
         const head = await s3.send(
@@ -285,6 +321,8 @@ export const filesRouter = router({
           message: "Bucket is not active",
         });
       }
+
+      const s3 = await getBucketClient(ctx, bucket);
 
       let continuationToken: string | undefined;
       let deleted = 0;
@@ -355,6 +393,8 @@ export const filesRouter = router({
         });
       }
 
+      const s3 = await getBucketClient(ctx, bucket);
+
       const folderKey = input.key.endsWith("/") ? input.key : `${input.key}/`;
 
       await s3.send(
@@ -398,6 +438,8 @@ export const filesRouter = router({
           message: "Bucket is not active",
         });
       }
+
+      const s3 = await getBucketClient(ctx, bucket);
 
       const oldPrefix = input.oldPrefix.endsWith("/")
         ? input.oldPrefix
