@@ -17,14 +17,20 @@ export async function createBucketResources(
 ) {
   const client = getS3Client(region, credentials);
 
-  await client.send(
-    new CreateBucketCommand({
-      Bucket: bucketName,
-      ...(region !== "us-east-1" && {
-        CreateBucketConfiguration: { LocationConstraint: region },
-      }),
-    })
-  );
+  try {
+    await client.send(
+      new CreateBucketCommand({
+        Bucket: bucketName,
+        ...(region !== "us-east-1" && {
+          CreateBucketConfiguration: { LocationConstraint: region },
+        }),
+      })
+    );
+  } catch (err) {
+    if (!(err instanceof Error && err.name === "BucketAlreadyOwnedByYou")) {
+      throw err;
+    }
+  }
 
   await client.send(
     new PutBucketWebsiteCommand({
