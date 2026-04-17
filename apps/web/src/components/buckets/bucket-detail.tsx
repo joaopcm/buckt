@@ -143,8 +143,11 @@ export function BucketDetail({
           />
           <FileBrowser
             bucketId={bucket.id}
+            bucketName={bucket.name}
             customDomain={bucket.customDomain}
             orgId={orgId}
+            region={bucket.region}
+            visibility={bucket.visibility}
           />
           <BucketSettings
             bucket={bucket}

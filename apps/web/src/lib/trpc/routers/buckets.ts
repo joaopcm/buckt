@@ -3,6 +3,7 @@ import { DnsInstructionsEmail } from "@buckt/emails";
 import {
   createBucketSchema,
   forwardInstructionsSchema,
+  type ManagedSettings,
   managedSettingsSchema,
   PLAN_LIMITS,
   type PlanName,
@@ -13,6 +14,7 @@ import { and, count, desc, eq, ilike, lt, sum } from "drizzle-orm";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { resend } from "@/lib/resend";
+import type { Context } from "../init";
 import { orgProcedure, router } from "../init";
 
 const TRAILING_DOT = /\.$/;
@@ -327,6 +329,10 @@ export const bucketsRouter = router({
         }
       }
 
+      if (bucket.isImported && bucket.awsAccountId) {
+        await applyImportedBucketChanges(ctx, bucket, input);
+      }
+
       const { id, ...updates } = input;
 
       const [updated] = await ctx.db
@@ -585,3 +591,95 @@ export const bucketsRouter = router({
       return { sent };
     }),
 });
+
+type BucketRow = typeof buckets.$inferSelect;
+
+interface UpdateSettingsInput {
+  corsOrigins?: string[];
+  lifecycleTtlDays?: number | null;
+  visibility?: "public" | "private";
+}
+
+async function applyImportedBucketChanges(
+  ctx: Context,
+  bucket: BucketRow,
+  input: UpdateSettingsInput
+) {
+  if (!bucket.awsAccountId) {
+    return;
+  }
+
+  const managed = (bucket.managedSettings ?? {}) as ManagedSettings;
+
+  const visibilityChanged =
+    managed.visibility === true &&
+    input.visibility !== undefined &&
+    input.visibility !== bucket.visibility;
+
+  const corsChanged =
+    managed.cors === true &&
+    input.corsOrigins !== undefined &&
+    JSON.stringify([...input.corsOrigins].sort()) !==
+      JSON.stringify([...bucket.corsOrigins].sort());
+
+  const lifecycleChanged =
+    managed.lifecycle === true &&
+    input.lifecycleTtlDays !== undefined &&
+    input.lifecycleTtlDays !== bucket.lifecycleTtlDays;
+
+  if (!(visibilityChanged || corsChanged || lifecycleChanged)) {
+    return;
+  }
+
+  const [awsAccount] = await ctx.db
+    .select()
+    .from(awsAccounts)
+    .where(eq(awsAccounts.id, bucket.awsAccountId))
+    .limit(1);
+
+  if (!awsAccount) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "AWS account for this bucket not found",
+    });
+  }
+
+  const { assumeRole } = await import("@/lib/trpc/routers/aws-validate");
+  const credentials = await assumeRole(
+    awsAccount.roleArn,
+    awsAccount.externalId
+  );
+
+  const {
+    setBucketCors,
+    setBucketLifecycle,
+    setBucketPrivate,
+    setBucketPublic,
+  } = await import("@/lib/trpc/routers/bucket-aws-settings");
+
+  if (visibilityChanged) {
+    if (input.visibility === "public") {
+      await setBucketPublic(bucket.name, bucket.region, credentials);
+    } else {
+      await setBucketPrivate(bucket.name, bucket.region, credentials);
+    }
+  }
+
+  if (corsChanged && input.corsOrigins) {
+    await setBucketCors(
+      bucket.name,
+      input.corsOrigins,
+      bucket.region,
+      credentials
+    );
+  }
+
+  if (lifecycleChanged && input.lifecycleTtlDays !== undefined) {
+    await setBucketLifecycle(
+      bucket.name,
+      input.lifecycleTtlDays,
+      bucket.region,
+      credentials
+    );
+  }
+}
