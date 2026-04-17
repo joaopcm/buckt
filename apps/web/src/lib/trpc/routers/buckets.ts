@@ -315,6 +315,36 @@ export const bucketsRouter = router({
         });
       }
 
+      if (bucket.isImported) {
+        const managed = (bucket.managedSettings ?? {}) as ManagedSettings;
+        const gates: {
+          key: keyof ManagedSettings;
+          provided: boolean;
+        }[] = [
+          { key: "visibility", provided: input.visibility !== undefined },
+          {
+            key: "cache",
+            provided:
+              input.cachePreset !== undefined ||
+              input.cacheControlOverride !== undefined,
+          },
+          { key: "cors", provided: input.corsOrigins !== undefined },
+          { key: "lifecycle", provided: input.lifecycleTtlDays !== undefined },
+          {
+            key: "optimization",
+            provided: input.optimizationMode !== undefined,
+          },
+        ];
+        for (const { key, provided } of gates) {
+          if (provided && managed[key] !== true) {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message: `This setting is not managed by Buckt for this bucket. Enable ${key} management first.`,
+            });
+          }
+        }
+      }
+
       if (input.optimizationMode && input.optimizationMode !== "none") {
         const [sub] = await ctx.db
           .select({ plan: subscription.plan })

@@ -1,9 +1,13 @@
+import { awsAccounts, buckets } from "@buckt/db";
+import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import app from "../../app";
+import { db } from "../../lib/db";
 import {
   cleanDb,
   createActiveBucket,
   createTestApiKey,
+  TEST_ORG_ID,
 } from "../../utils/test-helpers";
 
 vi.mock("../../lib/aws/bucket-settings", () => ({
@@ -11,6 +15,10 @@ vi.mock("../../lib/aws/bucket-settings", () => ({
   setBucketPrivate: vi.fn().mockResolvedValue(undefined),
   setBucketCors: vi.fn().mockResolvedValue(undefined),
   setBucketLifecycle: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock("../../lib/aws/client-factory", () => ({
+  resolveCredentials: vi.fn().mockResolvedValue(undefined),
 }));
 
 describe("PATCH /v1/buckets/:id", () => {
@@ -178,5 +186,74 @@ describe("PATCH /v1/buckets/:id", () => {
     });
     const res = await req(bucket.id, { name: "New Name" }, scopedKey);
     expect(res.status).toBe(404);
+  });
+
+  describe("imported bucket managedSettings enforcement", () => {
+    async function createImportedBucket(managed: Record<string, boolean>) {
+      const [account] = await db
+        .insert(awsAccounts)
+        .values({
+          orgId: TEST_ORG_ID,
+          awsAccountId: "123456789012",
+          roleArn: "arn:aws:iam::123456789012:role/test",
+          externalId: "ext-id",
+          status: "active",
+        })
+        .returning();
+
+      const [bucket] = await db
+        .insert(buckets)
+        .values({
+          orgId: TEST_ORG_ID,
+          name: "imported",
+          slug: "imported-bucket",
+          s3BucketName: "imported-bucket",
+          customDomain: "imported.test.com",
+          awsAccountId: account.id,
+          isImported: true,
+          managedSettings: managed,
+          status: "active",
+        })
+        .returning();
+
+      return bucket;
+    }
+
+    it("rejects cache preset change when cache is unmanaged", async () => {
+      const bucket = await createImportedBucket({ cache: false });
+      const res = await req(bucket.id, { cachePreset: "aggressive" });
+      expect(res.status).toBe(403);
+    });
+
+    it("rejects optimization mode change when optimization is unmanaged", async () => {
+      const bucket = await createImportedBucket({ optimization: false });
+      const res = await req(bucket.id, { optimizationMode: "balanced" });
+      expect(res.status).toBe(403);
+    });
+
+    it("rejects cacheControlOverride change when cache is unmanaged", async () => {
+      const bucket = await createImportedBucket({ cache: false });
+      const res = await req(bucket.id, {
+        cacheControlOverride: "public, max-age=60",
+      });
+      expect(res.status).toBe(403);
+    });
+
+    it("allows cache preset change when cache is managed", async () => {
+      const bucket = await createImportedBucket({ cache: true });
+      const res = await req(bucket.id, { cachePreset: "aggressive" });
+      expect(res.status).toBe(200);
+      const [updated] = await db
+        .select()
+        .from(buckets)
+        .where(eq(buckets.id, bucket.id));
+      expect(updated.cachePreset).toBe("aggressive");
+    });
+
+    it("allows name change on imported bucket (not gated)", async () => {
+      const bucket = await createImportedBucket({ cache: false });
+      const res = await req(bucket.id, { name: "Renamed" });
+      expect(res.status).toBe(200);
+    });
   });
 });

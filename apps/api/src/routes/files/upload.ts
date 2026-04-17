@@ -2,6 +2,7 @@ import { HeadObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { buckets } from "@buckt/db";
 import {
   CACHE_PRESET_MAP,
+  type ManagedSettings,
   MIN_OPTIMIZATION_BYTES,
   OPTIMIZABLE_CONTENT_TYPES,
   OPTIMIZATION_MODES,
@@ -9,12 +10,53 @@ import {
 import { tasks } from "@trigger.dev/sdk/v3";
 import { and, eq, sql } from "drizzle-orm";
 import type { Context } from "hono";
+import { resolveCredentials } from "../../lib/aws/client-factory";
 import { db } from "../../lib/db";
 import { getS3Client } from "../../lib/s3";
 import { isBucketInScope } from "../../utils/bucket-scope";
 import { error, success } from "../../utils/response";
 
 const FILE_PATH_RE = /^.*?\/files\//;
+
+type Bucket = typeof buckets.$inferSelect;
+
+function resolveCacheControl(
+  c: Context,
+  bucket: Bucket,
+  managed: ManagedSettings
+): string | undefined {
+  if (bucket.isImported && managed.cache !== true) {
+    return c.req.header("Cache-Control");
+  }
+  return (
+    bucket.cacheControlOverride ??
+    CACHE_PRESET_MAP[bucket.cachePreset as keyof typeof CACHE_PRESET_MAP] ??
+    CACHE_PRESET_MAP.standard
+  );
+}
+
+function resolveOptimizationMode(
+  bucket: Bucket,
+  managed: ManagedSettings,
+  headerMode: string | undefined
+): string {
+  if (bucket.isImported && managed.optimization !== true) {
+    return headerMode ?? "none";
+  }
+  return headerMode ?? bucket.optimizationMode;
+}
+
+function shouldOptimize(
+  mode: string,
+  contentType: string,
+  size: number
+): boolean {
+  return (
+    mode !== "none" &&
+    OPTIMIZABLE_CONTENT_TYPES.has(contentType) &&
+    size >= MIN_OPTIMIZATION_BYTES
+  );
+}
 
 export async function uploadFile(c: Context) {
   const orgId = c.get("orgId");
@@ -41,15 +83,16 @@ export async function uploadFile(c: Context) {
     );
   }
 
-  if (optimizationHeader && optimizationHeader !== "none") {
-    const plan = c.get("plan") as string;
-    if (plan === "free") {
-      return error(
-        c,
-        402,
-        "Optimization requires a paid plan. Upgrade to enable."
-      );
-    }
+  if (
+    optimizationHeader &&
+    optimizationHeader !== "none" &&
+    c.get("plan") === "free"
+  ) {
+    return error(
+      c,
+      402,
+      "Optimization requires a paid plan. Upgrade to enable."
+    );
   }
 
   const [bucket] = await db
@@ -84,9 +127,12 @@ export async function uploadFile(c: Context) {
     return error(c, 402, "Storage limit exceeded. Upgrade your plan.");
   }
 
+  const credentials = await resolveCredentials(bucket.awsAccountId);
+  const managed = (bucket.managedSettings ?? {}) as ManagedSettings;
+
   let existingSize = 0;
   try {
-    const head = await getS3Client(bucket.region).send(
+    const head = await getS3Client(bucket.region, credentials).send(
       new HeadObjectCommand({
         Bucket: bucket.s3BucketName,
         Key: filePath,
@@ -97,18 +143,15 @@ export async function uploadFile(c: Context) {
     // file doesn't exist yet
   }
 
-  const cacheControl =
-    bucket.cacheControlOverride ??
-    CACHE_PRESET_MAP[bucket.cachePreset as keyof typeof CACHE_PRESET_MAP] ??
-    CACHE_PRESET_MAP.standard;
+  const cacheControl = resolveCacheControl(c, bucket, managed);
 
-  await getS3Client(bucket.region).send(
+  await getS3Client(bucket.region, credentials).send(
     new PutObjectCommand({
       Bucket: bucket.s3BucketName,
       Key: filePath,
       Body: Buffer.from(body),
       ContentType: contentType,
-      CacheControl: cacheControl,
+      ...(cacheControl !== undefined && { CacheControl: cacheControl }),
     })
   );
 
@@ -119,22 +162,23 @@ export async function uploadFile(c: Context) {
     })
     .where(eq(buckets.id, bucketId));
 
-  const effectiveMode = optimizationHeader ?? bucket.optimizationMode;
+  const effectiveMode = resolveOptimizationMode(
+    bucket,
+    managed,
+    optimizationHeader
+  );
 
-  if (
-    effectiveMode !== "none" &&
-    OPTIMIZABLE_CONTENT_TYPES.has(contentType) &&
-    size >= MIN_OPTIMIZATION_BYTES
-  ) {
+  if (shouldOptimize(effectiveMode, contentType, size)) {
     await tasks.trigger("optimize-file", {
       bucketId: bucket.id,
+      awsAccountId: bucket.awsAccountId,
       s3BucketName: bucket.s3BucketName,
       region: bucket.region,
       fileKey: filePath,
       contentType,
       originalSize: size,
       mode: effectiveMode,
-      cacheControl,
+      cacheControl: cacheControl ?? null,
     });
   }
 

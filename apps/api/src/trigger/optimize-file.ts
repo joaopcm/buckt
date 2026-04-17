@@ -4,13 +4,15 @@ import type { OptimizationMode } from "@buckt/shared";
 import { logger, task } from "@trigger.dev/sdk/v3";
 import { eq, sql } from "drizzle-orm";
 import sharp from "sharp";
+import { resolveCredentials } from "../lib/aws/client-factory";
 import { getS3Client } from "../lib/s3";
 
 const db = createDb(process.env.DATABASE_PUBLIC_URL ?? "");
 
 interface OptimizeFilePayload {
+  awsAccountId?: string | null;
   bucketId: string;
-  cacheControl: string;
+  cacheControl: string | null;
   contentType: string;
   fileKey: string;
   mode: Exclude<OptimizationMode, "none">;
@@ -77,6 +79,7 @@ export const optimizeFile = task({
   id: "optimize-file",
   run: async (payload: OptimizeFilePayload) => {
     const {
+      awsAccountId,
       bucketId,
       s3BucketName,
       region,
@@ -87,13 +90,15 @@ export const optimizeFile = task({
       cacheControl,
     } = payload;
 
+    const credentials = await resolveCredentials(awsAccountId, db);
+
     logger.info("Downloading file from S3", {
       s3BucketName,
       fileKey,
       originalSize,
     });
 
-    const response = await getS3Client(region).send(
+    const response = await getS3Client(region, credentials).send(
       new GetObjectCommand({ Bucket: s3BucketName, Key: fileKey })
     );
 
@@ -121,13 +126,13 @@ export const optimizeFile = task({
     }
 
     logger.info("Uploading optimized file", { optimizedSize });
-    await getS3Client(region).send(
+    await getS3Client(region, credentials).send(
       new PutObjectCommand({
         Bucket: s3BucketName,
         Key: fileKey,
         Body: optimizedBuffer,
         ContentType: contentType,
-        CacheControl: cacheControl,
+        ...(cacheControl !== null && { CacheControl: cacheControl }),
       })
     );
 
