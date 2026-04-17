@@ -1,5 +1,6 @@
 "use client";
 
+import type { ManagedSettings } from "@buckt/shared";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
@@ -149,6 +150,8 @@ export function BucketDetail({
             bucket={bucket}
             disabled={!isAdmin}
             dnsRecords={bucket.dnsRecords}
+            isImported={bucket.isImported}
+            managedSettings={(bucket.managedSettings ?? {}) as ManagedSettings}
             orgId={orgId}
           />
         </>

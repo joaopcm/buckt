@@ -1,9 +1,11 @@
 "use client";
 
+import type { ManagedSettings } from "@buckt/shared";
 import { X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { DnsRecords } from "@/components/buckets/dns-records";
+import { ManagedSettingGuard } from "@/components/buckets/managed-setting-guard";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -72,6 +74,8 @@ interface BucketSettingsProps {
   };
   disabled?: boolean;
   dnsRecords?: unknown;
+  isImported?: boolean;
+  managedSettings?: ManagedSettings;
   orgId: string;
 }
 
@@ -79,18 +83,74 @@ export function BucketSettings({
   bucket,
   disabled,
   dnsRecords,
+  isImported = false,
+  managedSettings = {},
   orgId,
 }: BucketSettingsProps) {
+  function isManaged(key: keyof ManagedSettings) {
+    return !isImported || (managedSettings[key] ?? false);
+  }
+
   return (
     <div className="space-y-6">
       <h2 className="font-semibold text-lg">Settings</h2>
       <RegionCard bucket={bucket} />
       <DnsRecords records={dnsRecords} />
-      <VisibilityCard bucket={bucket} disabled={disabled} orgId={orgId} />
-      <CachingCard bucket={bucket} disabled={disabled} orgId={orgId} />
-      <OptimizationCard bucket={bucket} disabled={disabled} orgId={orgId} />
-      <CorsCard bucket={bucket} disabled={disabled} orgId={orgId} />
-      <LifecycleCard bucket={bucket} disabled={disabled} orgId={orgId} />
+      <ManagedSettingGuard
+        bucketId={bucket.id}
+        currentSettings={managedSettings}
+        description="Public/private access configured on AWS won't sync. Enable to let Buckt control bucket access policies."
+        managed={isManaged("visibility")}
+        orgId={orgId}
+        settingKey="visibility"
+        settingLabel="Visibility"
+      >
+        <VisibilityCard bucket={bucket} disabled={disabled} orgId={orgId} />
+      </ManagedSettingGuard>
+      <ManagedSettingGuard
+        bucketId={bucket.id}
+        currentSettings={managedSettings}
+        description="Cache-Control headers applied at the CDN won't change. Enable to let Buckt apply cache presets for you."
+        managed={isManaged("cache")}
+        orgId={orgId}
+        settingKey="cache"
+        settingLabel="Caching"
+      >
+        <CachingCard bucket={bucket} disabled={disabled} orgId={orgId} />
+      </ManagedSettingGuard>
+      <ManagedSettingGuard
+        bucketId={bucket.id}
+        currentSettings={managedSettings}
+        description="Images are served as-is. Enable to let Buckt compress uploads based on the selected mode."
+        managed={isManaged("optimization")}
+        orgId={orgId}
+        settingKey="optimization"
+        settingLabel="Optimization"
+      >
+        <OptimizationCard bucket={bucket} disabled={disabled} orgId={orgId} />
+      </ManagedSettingGuard>
+      <ManagedSettingGuard
+        bucketId={bucket.id}
+        currentSettings={managedSettings}
+        description="CORS rules set on AWS won't sync. Enable to let Buckt manage the allowed origins."
+        managed={isManaged("cors")}
+        orgId={orgId}
+        settingKey="cors"
+        settingLabel="CORS"
+      >
+        <CorsCard bucket={bucket} disabled={disabled} orgId={orgId} />
+      </ManagedSettingGuard>
+      <ManagedSettingGuard
+        bucketId={bucket.id}
+        currentSettings={managedSettings}
+        description="Object lifecycle rules on the bucket won't sync. Enable to let Buckt manage automatic deletion."
+        managed={isManaged("lifecycle")}
+        orgId={orgId}
+        settingKey="lifecycle"
+        settingLabel="Lifecycle"
+      >
+        <LifecycleCard bucket={bucket} disabled={disabled} orgId={orgId} />
+      </ManagedSettingGuard>
     </div>
   );
 }
