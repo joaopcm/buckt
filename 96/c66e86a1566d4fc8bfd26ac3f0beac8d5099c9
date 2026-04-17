@@ -1,0 +1,31 @@
+apps/web/src/lib/trpc/routers/buckets.ts
+  69c1eb27b4c79bd7 6,17,332-335,594-685
+apps/web/src/components/buckets/bucket-detail.tsx
+  69c1eb27b4c79bd7 146,149-150
+apps/web/src/components/buckets/file-browser.tsx
+  69c1eb27b4c79bd7 63-89,93,95-96,100,102-103,243,249-250,638,642-643,647,651-652,655-661,699,701-703
+apps/web/src/lib/trpc/routers/bucket-aws-settings.ts
+  69c1eb27b4c79bd7 1-152
+apps/api/src/lib/aws/bucket-settings.ts
+  69c1eb27b4c79bd7 4,62-67
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "96c66e86a1566d4fc8bfd26ac3f0beac8d5099c9",
+  "prompts": {
+    "69c1eb27b4c79bd7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4b173369-3586-4992-91bd-6b1f38129967",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "João Melo",
+      "messages": [],
+      "total_additions": 355,
+      "total_deletions": 53,
+      "accepted_lines": 322,
+      "overriden_lines": 0
+    }
+  }
+}
