@@ -7,3 +7,4 @@ export * from "./schemas/forward-instructions";
 export * from "./schemas/keys";
 export * from "./schemas/org";
 export * from "./schemas/user";
+export * from "./subdomain";

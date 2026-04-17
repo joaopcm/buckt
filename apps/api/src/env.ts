@@ -12,6 +12,8 @@ export const env = createEnv({
     STRIPE_METERED_BANDWIDTH_PRICE_ID: z.string().min(1).optional(),
     CLOUDFRONT_LOG_BUCKET: z.string().optional(),
     CLOUDFRONT_LOG_PREFIX: z.string().optional().default("cf-logs/"),
+    MANAGED_DOMAIN_CERT_ARN: z.string().min(1).optional(),
+    MANAGED_DOMAIN_HOSTED_ZONE_ID: z.string().min(1).optional(),
     REDIS_URL: z.string().min(1),
     TRIGGER_SECRET_KEY: z.string().min(1),
     ACM_WEBHOOK_SECRET: z.string().min(32),

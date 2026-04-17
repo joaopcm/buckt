@@ -1,10 +1,98 @@
 import { awsAccounts, buckets } from "@buckt/db";
-import { createBucketSchema } from "@buckt/shared";
+import { createBucketSchema, generateManagedSubdomain } from "@buckt/shared";
 import { and, eq, ne, sql } from "drizzle-orm";
 import type { Context } from "hono";
 import { db } from "../../lib/db";
 import { provisionBucket } from "../../trigger/provision-bucket";
 import { error } from "../../utils/response";
+
+const MANAGED_SUBDOMAIN_MAX_ATTEMPTS = 5;
+
+interface DomainInput {
+  awsAccountId?: string;
+  customDomain?: string;
+  isManagedDomain: boolean;
+}
+
+interface ErrorResult {
+  message: string;
+  status: 400 | 402 | 404 | 409 | 500;
+}
+
+async function allocateManagedSubdomain(): Promise<string | null> {
+  for (let attempt = 0; attempt < MANAGED_SUBDOMAIN_MAX_ATTEMPTS; attempt++) {
+    const candidate = generateManagedSubdomain();
+    const [existing] = await db
+      .select({ id: buckets.id })
+      .from(buckets)
+      .where(eq(buckets.customDomain, candidate))
+      .limit(1);
+    if (!existing) {
+      return candidate;
+    }
+  }
+  return null;
+}
+
+async function validateAwsAccount(
+  input: DomainInput,
+  orgId: string,
+  plan: string
+): Promise<ErrorResult | null> {
+  if (!input.awsAccountId) {
+    return null;
+  }
+  if (input.isManagedDomain) {
+    return { status: 400, message: "BYOA requires a custom domain" };
+  }
+  if (plan === "free") {
+    return {
+      status: 402,
+      message: "BYOA requires a paid plan. Upgrade to enable.",
+    };
+  }
+  const [account] = await db
+    .select({ id: awsAccounts.id, status: awsAccounts.status })
+    .from(awsAccounts)
+    .where(
+      and(eq(awsAccounts.id, input.awsAccountId), eq(awsAccounts.orgId, orgId))
+    )
+    .limit(1);
+  if (!account) {
+    return { status: 404, message: "AWS account not found" };
+  }
+  if (account.status !== "active") {
+    return { status: 400, message: "AWS account is not active" };
+  }
+  return null;
+}
+
+async function resolveDomain(
+  input: DomainInput
+): Promise<{ domain: string } | ErrorResult> {
+  if (input.isManagedDomain) {
+    const allocated = await allocateManagedSubdomain();
+    if (!allocated) {
+      return {
+        status: 500,
+        message: "Could not allocate a subdomain, please try again",
+      };
+    }
+    return { domain: allocated };
+  }
+  if (!input.customDomain) {
+    return { status: 400, message: "customDomain is required" };
+  }
+  const [existing] = await db
+    .select({ id: buckets.id })
+    .from(buckets)
+    .where(eq(buckets.customDomain, input.customDomain))
+    .limit(1);
+  if (existing) {
+    return { status: 409, message: "Domain already in use" };
+  }
+  return { domain: input.customDomain };
+}
 
 export async function createBucket(c: Context) {
   const body = await c.req.json();
@@ -13,43 +101,14 @@ export async function createBucket(c: Context) {
     return error(c, 400, parsed.error.issues[0].message);
   }
 
-  const {
-    name,
-    customDomain,
-    region,
-    visibility,
-    cachePreset,
-    corsOrigins,
-    lifecycleTtlDays,
-    optimizationMode,
-    domainConnectProvider,
-    awsAccountId,
-  } = parsed.data;
   const orgId = c.get("orgId");
   const planLimits = c.get("planLimits");
+  const plan = c.get("plan") as string;
 
-  if (awsAccountId) {
-    const plan = c.get("plan") as string;
-    if (plan === "free") {
-      return error(c, 402, "BYOA requires a paid plan. Upgrade to enable.");
-    }
-    const [account] = await db
-      .select({ id: awsAccounts.id, status: awsAccounts.status })
-      .from(awsAccounts)
-      .where(
-        and(eq(awsAccounts.id, awsAccountId), eq(awsAccounts.orgId, orgId))
-      )
-      .limit(1);
-    if (!account) {
-      return error(c, 404, "AWS account not found");
-    }
-    if (account.status !== "active") {
-      return error(c, 400, "AWS account is not active");
-    }
+  const awsError = await validateAwsAccount(parsed.data, orgId, plan);
+  if (awsError) {
+    return error(c, awsError.status, awsError.message);
   }
-
-  const slug = customDomain.replace(/\./g, "-");
-  const s3BucketName = `buckt-${orgId.slice(0, 8)}-${slug}`.toLowerCase();
 
   const [{ count }] = await db
     .select({ count: sql<number>`count(*)::int` })
@@ -64,26 +123,39 @@ export async function createBucket(c: Context) {
     );
   }
 
-  const [existing] = await db
-    .select({ id: buckets.id })
-    .from(buckets)
-    .where(eq(buckets.customDomain, customDomain))
-    .limit(1);
+  const domainResult = await resolveDomain(parsed.data);
+  if ("status" in domainResult) {
+    return error(c, domainResult.status, domainResult.message);
+  }
+  const resolvedDomain = domainResult.domain;
 
-  if (existing) {
-    return error(c, 409, "Domain already in use");
+  const {
+    name,
+    isManagedDomain,
+    region,
+    visibility,
+    cachePreset,
+    corsOrigins,
+    lifecycleTtlDays,
+    optimizationMode,
+    domainConnectProvider,
+    awsAccountId,
+  } = parsed.data;
+
+  if (
+    optimizationMode !== undefined &&
+    optimizationMode !== "none" &&
+    plan === "free"
+  ) {
+    return error(
+      c,
+      402,
+      "Optimization requires a paid plan. Upgrade to enable."
+    );
   }
 
-  if (optimizationMode !== undefined && optimizationMode !== "none") {
-    const plan = c.get("plan") as string;
-    if (plan === "free") {
-      return error(
-        c,
-        402,
-        "Optimization requires a paid plan. Upgrade to enable."
-      );
-    }
-  }
+  const slug = resolvedDomain.replace(/\./g, "-");
+  const s3BucketName = `buckt-${orgId.slice(0, 8)}-${slug}`.toLowerCase();
 
   const managedSettings = awsAccountId
     ? {
@@ -102,15 +174,16 @@ export async function createBucket(c: Context) {
       name,
       slug,
       s3BucketName,
-      customDomain,
+      customDomain: resolvedDomain,
       region,
       visibility,
       cachePreset,
       corsOrigins,
       lifecycleTtlDays,
       optimizationMode,
-      domainConnectProvider,
+      domainConnectProvider: isManagedDomain ? null : domainConnectProvider,
       awsAccountId: awsAccountId ?? null,
+      isManagedDomain,
       managedSettings,
       status: "pending",
     })
