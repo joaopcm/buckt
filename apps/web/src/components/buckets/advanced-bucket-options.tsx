@@ -83,6 +83,8 @@ interface AdvancedBucketOptionsProps {
   watch: UseFormWatch<CreateBucketValues>;
 }
 
+const NO_AWS_ACCOUNTS_REASON = "Connect an AWS account to enable BYOA";
+
 function awsAccountHint(
   disabled: boolean,
   disabledReason: string | undefined,
@@ -111,6 +113,15 @@ export function AdvancedBucketOptions({
   const [corsInput, setCorsInput] = useState("");
   const corsOrigins = watch("corsOrigins") ?? [];
   const lifecycleTtlDays = watch("lifecycleTtlDays");
+
+  const hasNoAwsAccounts = activeAwsAccounts.length === 0;
+  const effectiveAwsAccountDisabled = awsAccountDisabled || hasNoAwsAccounts;
+  let effectiveAwsAccountDisabledReason: string | undefined;
+  if (awsAccountDisabled) {
+    effectiveAwsAccountDisabledReason = awsAccountDisabledReason;
+  } else if (hasNoAwsAccounts) {
+    effectiveAwsAccountDisabledReason = NO_AWS_ACCOUNTS_REASON;
+  }
 
   function addCorsOrigin() {
     const trimmed = corsInput.trim();
@@ -371,11 +382,11 @@ export function AdvancedBucketOptions({
               </p>
             )}
           </div>
-          {activeAwsAccounts.length > 0 && onAwsAccountChange && (
+          {onAwsAccountChange && (
             <div className="space-y-2">
               <Label>AWS Account</Label>
               <Select
-                disabled={awsAccountDisabled}
+                disabled={effectiveAwsAccountDisabled}
                 items={[
                   { value: "", label: "Buckt-managed (default)" },
                   ...activeAwsAccounts.map((a) => ({
@@ -389,7 +400,9 @@ export function AdvancedBucketOptions({
                 <SelectTrigger
                   className="w-full"
                   title={
-                    awsAccountDisabled ? awsAccountDisabledReason : undefined
+                    effectiveAwsAccountDisabled
+                      ? effectiveAwsAccountDisabledReason
+                      : undefined
                   }
                 >
                   <SelectValue placeholder="Buckt-managed (default)" />
@@ -405,8 +418,8 @@ export function AdvancedBucketOptions({
               </Select>
               <p className="text-muted-foreground text-xs">
                 {awsAccountHint(
-                  awsAccountDisabled,
-                  awsAccountDisabledReason,
+                  effectiveAwsAccountDisabled,
+                  effectiveAwsAccountDisabledReason,
                   selectedAwsAccountId
                 )}
               </p>
