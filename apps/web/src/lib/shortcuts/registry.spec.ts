@@ -16,6 +16,7 @@ describe("shortcuts registry", () => {
     expect(navIds).toContain("nav.dashboard");
     expect(navIds).toContain("nav.buckets");
     expect(navIds).toContain("nav.keys");
+    expect(navIds).toContain("nav.aws-accounts");
     expect(navIds).toContain("nav.settings");
     expect(navIds).toContain("nav.billing");
     expect(navIds).toContain("nav.profile");

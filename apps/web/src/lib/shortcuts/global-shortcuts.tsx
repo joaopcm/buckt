@@ -15,6 +15,7 @@ export function GlobalShortcuts() {
   useShortcut("nav.dashboard", () => navigate("/dashboard"));
   useShortcut("nav.buckets", () => navigate("/buckets"));
   useShortcut("nav.keys", () => navigate("/keys"));
+  useShortcut("nav.aws-accounts", () => navigate("/aws-accounts"));
   useShortcut("nav.settings", () => navigate("/settings"));
   useShortcut("nav.billing", () => navigate("/billing"));
   useShortcut("nav.profile", () => navigate("/profile"));
