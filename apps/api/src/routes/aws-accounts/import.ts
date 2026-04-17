@@ -5,7 +5,7 @@ import {
   PLAN_LIMITS,
   type PlanName,
 } from "@buckt/shared";
-import { and, count, eq } from "drizzle-orm";
+import { and, count, eq, ne } from "drizzle-orm";
 import type { Context } from "hono";
 import {
   getBucketRegion,
@@ -52,7 +52,7 @@ export async function importBuckets(c: Context) {
   const [{ bucketCount }] = await db
     .select({ bucketCount: count() })
     .from(buckets)
-    .where(eq(buckets.orgId, orgId));
+    .where(and(eq(buckets.orgId, orgId), ne(buckets.status, "deleting")));
 
   if (bucketCount + parsed.data.bucketNames.length > limits.maxBuckets) {
     return error(

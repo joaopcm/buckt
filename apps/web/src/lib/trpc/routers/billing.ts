@@ -1,6 +1,6 @@
 import { buckets, subscription } from "@buckt/db";
 import { PLAN_LIMITS, type PlanName } from "@buckt/shared";
-import { and, count, eq, sum } from "drizzle-orm";
+import { and, count, eq, ne, sum } from "drizzle-orm";
 import { orgProcedure, router } from "../init";
 
 export const billingRouter = router({
@@ -48,7 +48,7 @@ export const billingRouter = router({
         totalBandwidth: sum(buckets.bandwidthUsedBytes),
       })
       .from(buckets)
-      .where(eq(buckets.orgId, ctx.orgId));
+      .where(and(eq(buckets.orgId, ctx.orgId), ne(buckets.status, "deleting")));
 
     return {
       buckets: {
