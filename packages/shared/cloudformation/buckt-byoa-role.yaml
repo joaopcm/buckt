@@ -61,7 +61,6 @@ Resources:
   BucktAcmConnection:
     Type: AWS::Events::Connection
     Properties:
-      Name: BucktAcmConnection
       AuthorizationType: API_KEY
       AuthParameters:
         ApiKeyAuthParameters:
@@ -71,7 +70,6 @@ Resources:
   BucktAcmApiDestination:
     Type: AWS::Events::ApiDestination
     Properties:
-      Name: BucktAcmApiDestination
       ConnectionArn: !GetAtt BucktAcmConnection.Arn
       HttpMethod: POST
       InvocationEndpoint: !Sub "${BucktApiUrl}/webhooks/acm"
@@ -98,7 +96,6 @@ Resources:
   BucktAcmAvailableRule:
     Type: AWS::Events::Rule
     Properties:
-      Name: BucktAcmCertificateAvailable
       Description: "Forward ACM Certificate Available events to Buckt"
       EventPattern:
         source:
