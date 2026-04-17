@@ -4,6 +4,7 @@ import {
   CloudFrontClient,
   ListDistributionsCommand,
 } from "@aws-sdk/client-cloudfront";
+
 interface AwsCredentialIdentity {
   accessKeyId: string;
   secretAccessKey: string;

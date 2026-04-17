@@ -1,6 +1,7 @@
 "use server";
 
 import { AssumeRoleCommand, STSClient } from "@aws-sdk/client-sts";
+
 interface AwsCredentialIdentity {
   accessKeyId: string;
   secretAccessKey: string;

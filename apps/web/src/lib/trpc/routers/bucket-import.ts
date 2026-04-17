@@ -7,6 +7,7 @@ import {
   GetPublicAccessBlockCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
+
 interface AwsCredentialIdentity {
   accessKeyId: string;
   secretAccessKey: string;
