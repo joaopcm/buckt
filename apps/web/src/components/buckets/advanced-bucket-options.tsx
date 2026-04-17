@@ -24,7 +24,7 @@ import { REGIONS } from "@/utils/regions";
 interface CreateBucketValues {
   cachePreset: "no-cache" | "short" | "standard" | "aggressive" | "immutable";
   corsOrigins: string[];
-  customDomain: string;
+  customDomain?: string;
   lifecycleTtlDays: number | null;
   name: string;
   optimizationMode: "none" | "light" | "balanced" | "maximum";

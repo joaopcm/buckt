@@ -169,6 +169,7 @@ export function CreateBucketForm({ orgId }: { orgId: string }) {
     }
 
     createBucket.mutate({
+      orgId,
       name: values.name,
       region: values.region,
       visibility: values.visibility,
